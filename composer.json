@@ -1,0 +1,12 @@
+{
+    "name": "haeflimi/turicane_tfts",
+    "type": "concrete5-package",
+    "require": {
+        "php": ">=5.3.3",
+        "composer/installers": "~1.0.7"
+    },
+    "minimum-stability": "dev",
+    "support": {
+        "source": "https://bitbucket.org/tuborg84/turicane_tfts"
+    }
+}

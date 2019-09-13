@@ -1,0 +1,6 @@
+<?xml version="1.0"?>
+<concrete5-cif version="1.0">
+    <blocktypes>
+        <blocktype handle="seat_map_2" package="seat_map_2"/>
+    </blocktypes>
+</concrete5-cif>
