@@ -1,15 +1,9 @@
 <?php
-/**
- * Block Boilerplate Controller File.
- *
- * @author   Oliver Green <oliver@c5labs.com>
- * @license  See attached license file
- */
-
 namespace Concrete\Package\TuricaneTfts\Block\ResultList;
 
 use SimpleXMLElement;
 use Concrete\Core\Block\BlockController;
+use Concrete\Core\Package\Package;
 
 defined('C5_EXECUTE') or die('Access Denied.');
 
@@ -225,13 +219,51 @@ class Controller extends BlockController
     /* @endsection advanced */
 
     /**
+     * Controller constructor.
+     * @param null $obj
+     */
+    public function __construct($obj = null)
+    {
+        parent::__construct($obj);
+
+        // Get the Connection to the right MySQL Database. configured in /application/config/database.php
+        $this->db = \Database::connection('turicane_tfts');
+        // Create a Query Builder Instance using our new Connection
+        $this->qb = $this->db->createQueryBuilder();
+        // The EntityManager is used to work with Doctrine Entities
+        $pkg = Package::getByHandle('turicane_tfts');
+        //$orm = \Core::make(\Concrete\Core\Support\Facade\DatabaseORM::getFacadeAccessor());
+        $this->em = $this->db->getEntityManager();
+    }
+
+    /**
      * Runs when the blocks view template is rendered.
      * 
      * @return void
      */
     public function view()
     {
-        //
+         // Instantiate our Custom TFTS Class
+        $tfts = new \TuricaneTfts\Tfts();
+
+        // Then use it to retrieve Data
+        $result = $tfts->getUserRankingSQL($user = 'Freezer', $event = 'Turicane 17');
+
+        $result2 = $tfts->getUserRankingQueryBuilder($user = 'Buddha', $event = 'Turicane 17');
+
+        $result3 = $tfts->getData();
+
+        // everything we want to pass along to the Block View Layer must be set like this:
+        $this->set('result',$result);
+        $this->set('result2',$result2);
+        $this->set('result3',$result3);
+    }
+
+    /**
+     * We can use Action Methods to process AJAX Calls and Form submits within our block
+     */
+    public function action_addPoints(){
+
     }
 
     /**
