@@ -32,12 +32,11 @@ $fh = Core::make('helper/form');
             <form action="<?=$this->action('addPoints')?>" method="POST">
                 <?=$fh->number('points')?>
             </form>
-
         </div>
     </div>
     <div class="row">
-
         <div class="col">
+            <h3>User Object:</h3>
             </div>
         <div class="col">
             </div>
