@@ -10,7 +10,7 @@ $fh = Core::make('helper/form')?>
 
         <div class="card">
             <div class="card-body">
-                <h3>Bsp.1 Freezer</h3>
+                <h3>Bsp.1 Freezer 3</h3>
                 <pre><code><?= var_dump($bsp1) ?></code></pre>
             </div>
         </div>
