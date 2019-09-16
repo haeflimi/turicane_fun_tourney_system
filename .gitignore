@@ -73,6 +73,6 @@ __IDE_SYMBOLS__.php
 
 /node_modules
 
-
+/nbproject
 
 .idea
