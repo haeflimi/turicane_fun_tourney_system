@@ -295,6 +295,8 @@ class Controller extends BlockController
             $lan_id = 17;
             $result = $tfts->addPointsQB($user,$lan_id,$this->post('pointsValue'));
             $tfts->addPoints(new User(1),1,$this->post('pointsValue'));
+            $this->em->persist($tfts);
+            $this->em->flush();
             $this->set('showMsg', true);
         } else {
             $result = $errors;
