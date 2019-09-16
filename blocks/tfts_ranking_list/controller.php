@@ -61,7 +61,7 @@ class Controller extends BlockController
      *
      * @var string
      */
-    protected $btTable = 'btRankingList';
+    protected $btTable = 'btTftsRankingList';
 
     /**
      * The blocks form width.
