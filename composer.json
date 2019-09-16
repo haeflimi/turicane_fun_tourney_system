@@ -1,5 +1,5 @@
 {
-    "name": "haeflimi/turicane_tfts",
+    "name": "haeflimi/turicane_fun_tourney_system",
     "type": "concrete5-package",
     "require": {
         "php": ">=5.3.3",
@@ -7,6 +7,6 @@
     },
     "minimum-stability": "dev",
     "support": {
-        "source": "https://bitbucket.org/tuborg84/turicane_tfts"
+        "source": "https://bitbucket.org/tuborg84/turicane_fun_tourney_system"
     }
 }

@@ -1,6 +1,21 @@
 <?xml version="1.0"?>
 <concrete5-cif version="1.0">
     <blocktypes>
-        <blocktype handle="result_list" package="turicane_tfts"/>
+        <blocktype handle="tfts_ranking_list" package="turicane_fun_tourney_system"/>
+        <blocktype handle="tfts_team_manager" package="turicane_fun_tourney_system"/>
+        <blocktype handle="tfts_live_results" package="turicane_fun_tourney_system"/>
     </blocktypes>
+    <blocktypesets>
+        <blocktypeset handle="tfts" name="Turicane TFTS" package="turicane_fun_tourney_system">
+            <blocktype handle="tfts_ranking_list"/>
+            <blocktype handle="tfts_team_manager"/>
+            <blocktype handle="tfts_live_results"/>
+        </blocktypeset>
+    </blocktypesets>
+    <singlepages>
+        <page name="Games" path="/dashboard/tfts/games" filename="/dashboard/tfts/games.php" package="turicane_fun_tourney_system">
+        </page>
+        <page name="TFTS" path="/dashboard/tfts" filename="/dashboard/tfts.php" package="turicane_fun_tourney_system">
+        </page>
+    </singlepages>
 </concrete5-cif>
