@@ -230,13 +230,8 @@ class Controller extends BlockController
     public function __construct($obj = null)
     {
         parent::__construct($obj);
-
-        // Get the Connection to the right MySQL Database. configured in /application/config/database.php
-        $this->db = \Database::connection('turicane_fun_tourney_system');
-        // Create a Query Builder Instance using our new Connection
-        $this->qb = $this->db->createQueryBuilder();
-        // The EntityManager is used to work with Doctrine Entities
-        $this->em = $this->db->getEntityManager();
+        $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
+        $this->em = $app->make('Doctrine\ORM\EntityManager');
     }
 
     /**
@@ -246,8 +241,6 @@ class Controller extends BlockController
      */
     public function view()
     {
-
-
         // An example on how to use c5 Groups/ Users
         // https://documentation.concrete5.org/developers/users-groups/groups/overview
         // Complete c5 API Doc: https://documentation.concrete5.org/api/8.4.5/
@@ -267,16 +260,13 @@ class Controller extends BlockController
         // Instantiate our Custom TFTS Class
         $tfts = new \Tfts\Tfts();
         // Then use it to retrieve Data
-        $bsp1 = $tfts->getUserRankingSQL($u_freezer, $event = 'Turicane 17');
-        $bsp2 = $tfts->getUserRankingQueryBuilder($u_tuborg, $event = 'Turicane 17');
-        $bsp3 = $tfts->getUserRanking($u_buddha, $lan);
+        $bsp3 = $tfts->getUserRanking($lan);
 
         // everything we want to pass along to the Block View Layer must be set like this:
-        $this->set('bsp1',$bsp1[0]);
-        $this->set('bsp2',$bsp2[0]);
-        $this->set('bsp3',$bsp3->getPoints());
-        $this->set('bsp4_username', $bsp2[0]['user_name']);
-        $this->set('bsp4_points', $bsp2[0]['points']);
+
+        $this->set('bsp3',$bsp3);
+        //$this->set('bsp4_username', $bsp2[0]['user_name']);
+        //$this->set('bsp4_points', $bsp2[0]['points']);
         $this->set('bsp5', $u_freezer);
         // we also load and pass on the c5 Form Helper to generate form elements for us
         // https://documentation.concrete5.org/tutorials/how-to-use-the-form-widget-in-concrete5-5-7
