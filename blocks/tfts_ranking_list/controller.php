@@ -8,6 +8,7 @@ use Concrete\Core\User\Group\Group;
 use Concrete\Core\User\UserList;
 use Concrete\Core\User\User;
 use Tfts\Entity\Lan;
+use Tfts\Tfts;
 use Concrete\Core\Support\Facade\Config;
 
 defined('C5_EXECUTE') or die('Access Denied.');
@@ -241,6 +242,13 @@ class Controller extends BlockController
      */
     public function view()
     {
+        $lan = $this->em->find('Tfts\Entity\Lan', Config::get('tfts.currentLanId'));
+
+        $tfts = new Tfts();
+        $userRanking = $tfts->getUserRanking($lan);
+//        dd($userRanking);
+        
+        
         // An example on how to use c5 Groups/ Users
         // https://documentation.concrete5.org/developers/users-groups/groups/overview
         // Complete c5 API Doc: https://documentation.concrete5.org/api/8.4.5/

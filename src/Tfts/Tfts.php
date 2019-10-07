@@ -3,6 +3,7 @@
 namespace Tfts;
 
 use Concrete\Core\User\User;
+use Concrete\Core\User\Group\Group;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Doctrine\Common\Collections\Criteria;
 use Concrete\Core\Support\Facade\Database;
@@ -41,7 +42,9 @@ class Tfts {
      * @param User $user
      */
     public function joinUserPool(Game $game, User $user) {
-        
+        $registration = new Registration($game, $user);
+        $this->em->persist($registration);
+        return $registration;
     }
 
     /**
@@ -62,7 +65,7 @@ class Tfts {
      * @param User $challenged
      */
     public function challengeUser(Game $game, User $challenger, User $challenged) {
-        
+
     }
 
     /**
@@ -129,52 +132,78 @@ class Tfts {
     }
 
     /**
-     * Return Teams/ Players that are visible/ selectable on the pool overview
-     * of a certain game.
-     *
-     * @param Game $game
+     * Returns all registrations for the given game.
+     * 
+     * @param \Tfts\Game $game
+     * @return Registration a list of registrations.
      */
-    public function getPoolMembers(Game $game) {
-
+    public function getRegistrations(Game $game) {
+        return $game->getRegistrations();
     }
 
     /**
-     * Get all pending Matches and open Challanges of a certain Game
-     *
-     * @param Team $team
-     * @param Game $game
+     * @param \Tfts\Game $game
+     * @return Match a list of open matches for the given game.
      */
-    public function getPendingGameMatches(Game $game) {
-
+    public function getOpenChallenges(Game $game) {
+        // @TODO: filter open challenges
+        return $game->getMatches();
     }
 
     /**
-     * Get all finalised Matches of a certain game for display on game Page
-     *
-     * @param Game $game
+     * @param \Tfts\Game $game
+     * @return Match a list of open matches for the given game.
      */
-    public function getFinalGameMatches(Game $game) {
-
+    public function getOpenMatches(Game $game) {
+        // @TODO: filter open matches
+        return $game->getMatches();
     }
 
     /**
-     * Get all Pending Matches of a specific User and all the teams and massgames of this user for Display
-     * on LAN Dashboard
-     *
+     * @param \Tfts\Game $game
+     * @return Match a list of closed matches for the given game.
+     */
+    public function getClosedMatches(Game $game) {
+        // @TODO: filter closed matches
+        return $game->getMatches();
+    }
+
+    /**
      * @param User $user
+     * @return Match a list of open challenges for the given user.
      */
-    public function getPendingUserMatches(User $user) {
-
+    public function getOpenUserChallenges(User $user) {
+        // @TODO: get open challenges for user
+        return null;
     }
 
     /**
-     * Process the Trackmania Ranking data that that is arriving over the webhook and write it
-     * to the database, updating the raningk
-     *
+     * @param User $user
+     * @return Match a list of open matches for the given user.
+     */
+    public function getOpenUserMatches(User $user) {
+        // @TODO: get open matches for user
+        return null;
+    }
+
+    /**
+     * @param User $user
+     * @return Match a list of finished matches for the given user.
+     */
+    public function getFinishedUserMatches(User $user) {
+        // @TODO: get finished matches for user
+        return null;
+    }
+
+    /**
+     * 
      * @return JsonResponse
      */
     public function processTrackmaniaData() {
+        // "password=" + PASSWORD + "&date=" + date + "&time=" + time + "&name=" + name + "&record=" + record + "&map=" + map;
+        // @TODO: handle data
         $data = [$_REQUEST, 'Data processed!'];
         return new JsonResponse($data);
     }
+
 }
