@@ -11,12 +11,6 @@ use Doctrine\ORM\Mapping as ORM;
 class Trackmania {
 
   /**
-   * @ORM\Id
-   * @ORM\Column(type="string", length=100)
-   */
-  private $map_name;
-
-  /**
    * @ORM\Column(type="datetime", nullable=false)
    */
   private $map_datetime;
@@ -33,16 +27,16 @@ class Trackmania {
 
   /**
    * @ORM\Id
+   * @ORM\ManyToOne(targetEntity="Tfts\Entity\TrackmaniaMap")
+   * @ORM\JoinColumn(name="map_id", referencedColumnName="map_id", nullable=false)
+   */
+  private $map;
+
+  /**
+   * @ORM\Id
    * @ORM\ManyToOne(targetEntity="Concrete\Core\Entity\User\User")
    * @ORM\JoinColumn(name="user_id", referencedColumnName="uID", nullable=false)
    */
   private $user;
-
-  /**
-   * @ORM\Id
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Lan", inversedBy="trackmanias")
-   * @ORM\JoinColumn(name="lan_id", referencedColumnName="lan_id", nullable=false)
-   */
-  private $lan;
 
 }

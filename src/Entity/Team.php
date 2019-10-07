@@ -29,9 +29,15 @@ class Team {
 
   /**
    * @ORM\ManyToOne(targetEntity="Concrete\Core\Entity\User\User", inversedBy="teams")
-   * @ORM\JoinColumn(name="owner_id", referencedColumnName="uID")
+   * @ORM\JoinColumn(name="user_id", referencedColumnName="uID")
    */
-  private $owner;
+  private $user;
+
+  /**
+   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Lan", inversedBy="teams")
+   * @ORM\JoinColumn(name="lan_id", referencedColumnName="lan_id", nullable=false)
+   */
+  private $lan;
 
   /**
    * @ORM\OneToMany(targetEntity="Tfts\Entity\Registration", mappedBy="team")
@@ -42,12 +48,6 @@ class Team {
    * @ORM\OneToMany(targetEntity="Tfts\Entity\MatchTeamUser", mappedBy="team")
    */
   private $matchTeamUsers;
-
-  /**
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Lan", inversedBy="teams")
-   * @ORM\JoinColumn(name="team_lan_id", referencedColumnName="lan_id", nullable=false)
-   */
-  private $lan;
 
   /**
    * @ORM\ManyToMany(targetEntity="Concrete\Core\Entity\User\User")
