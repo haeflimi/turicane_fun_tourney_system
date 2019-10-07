@@ -28,9 +28,10 @@ class Team {
   private $team_password;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\MatchPlayer", mappedBy="team")
+   * @ORM\ManyToOne(targetEntity="Concrete\Core\Entity\User\User", inversedBy="teams")
+   * @ORM\JoinColumn(name="owner_id", referencedColumnName="uID")
    */
-  private $matchPlayers;
+  private $owner;
 
   /**
    * @ORM\OneToMany(targetEntity="Tfts\Entity\Registration", mappedBy="team")
@@ -38,13 +39,11 @@ class Team {
   private $registrations;
 
   /**
-   * @ORM\ManyToOne(targetEntity="Concrete\Core\Entity\User\User", inversedBy="teams")
-   * @ORM\JoinColumn(name="owner_id", referencedColumnName="uID")
+   * @ORM\OneToMany(targetEntity="Tfts\Entity\MatchTeamUser", mappedBy="team")
    */
-  private $user;
+  private $matchTeamUsers;
 
   /**
-   * @ORM\Id
    * @ORM\ManyToOne(targetEntity="Tfts\Entity\Lan", inversedBy="teams")
    * @ORM\JoinColumn(name="team_lan_id", referencedColumnName="lan_id", nullable=false)
    */
@@ -53,7 +52,7 @@ class Team {
   /**
    * @ORM\ManyToMany(targetEntity="Concrete\Core\Entity\User\User")
    * @ORM\JoinTable(
-   *     name="tftsTeamAllocations",
+   *     name="tftsTeamUsers",
    *     joinColumns={@ORM\JoinColumn(name="team_id", referencedColumnName="team_id", nullable=false)},
    *     inverseJoinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="uID", nullable=false)}
    * )

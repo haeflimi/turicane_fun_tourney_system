@@ -6,7 +6,10 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="tftsGames", uniqueConstraints={@ORM\UniqueConstraint(name="game_id", columns={"game_id"})})
+ * @ORM\Table(
+ *     name="tftsGames",
+ *     uniqueConstraints={@ORM\UniqueConstraint(name="game_id", columns={"game_id", "lan_id"})}
+ * )
  */
 class Game {
 
@@ -88,7 +91,6 @@ class Game {
   private $game_is_featured;
 
   /**
-   * @ORM\Id
    * @ORM\ManyToOne(targetEntity="Tfts\Entity\Lan", inversedBy="games")
    * @ORM\JoinColumn(name="lan_id", referencedColumnName="lan_id", nullable=false)
    */
