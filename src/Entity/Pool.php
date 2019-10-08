@@ -45,20 +45,15 @@ class Pool {
   private $users;
 
   /**
-   * @ORM\ManyToMany(targetEntity="Tfts\Entity\Pool")
-   * @ORM\JoinTable(
-   *     name="tftsPoolParentChild",
-   *     joinColumns={@ORM\JoinColumn(name="pool_id", referencedColumnName="parent_id", nullable=false)},
-   *     inverseJoinColumns={@ORM\JoinColumn(name="child_id", referencedColumnName="pool_id", nullable=false)}
-   * )
+   * @ORM\ManyToMany(targetEntity="Tfts\Entity\Pool", mappedBy="children")
    */
   private $parents;
 
-/**
-   * @ORM\ManyToMany(targetEntity="Tfts\Entity\Pool")
+  /**
+   * @ORM\ManyToMany(targetEntity="Tfts\Entity\Pool", inversedBy="parents")
    * @ORM\JoinTable(
    *     name="tftsPoolParentChild",
-   *     joinColumns={@ORM\JoinColumn(name="pool_id", referencedColumnName="child_id", nullable=false)},
+   *     joinColumns={@ORM\JoinColumn(name="child_id", referencedColumnName="pool_id", nullable=false)},
    *     inverseJoinColumns={@ORM\JoinColumn(name="parent_id", referencedColumnName="pool_id", nullable=false)}
    * )
    */
