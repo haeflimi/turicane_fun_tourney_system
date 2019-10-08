@@ -119,6 +119,7 @@ class Tfts {
       return null;
     }
 
+    // @TODO: check max games against another player
     // verify both users are registered for that game
     if (is_null($this->findRegistration($game, $challenger)) || is_null($this->findRegistration($game, $challenged))) {
       // @TODO: throw exception?
@@ -239,28 +240,13 @@ class Tfts {
       return false;
     }
 
-    $is_challenger = $match->getUser1()->getUserId() == $user->getUserId();
-    $is_challenged = $match->getUser2()->getUserId() == $user->getUserId();
-
-    // verify user is challenger or challenged
-    if (!$is_challenger && !$is_challenged) {
-      // @TODO: throw exception?
+    $db_match = $this->getUserMatch($match, $user);
+    if ($db_match == null) {
       return;
     }
 
-    $repository = $this->em->getRepository('Tfts\Entity\Match');
-    $db_match = $repository->findOneBy(['match_id' => $match, ($is_challenger ? 'user1' : 'user2') => $user->getUserId()]);
-    // verify match exists
-    if (is_null($db_match)) {
-      // @TODO: throw exception?
-      return false;
-    }
-
-    // verify match is not closed
-    if (($match->isConfirmed1() && $match->isConfirmed2()) || $match->getFinishDate() != null) {
-      // @TODO: throw exception?
-      return false;
-    }
+    $is_challenger = $match->getUser1()->getUserId() == $user->getUserId();
+    $is_challenged = $match->getUser2()->getUserId() == $user->getUserId();
 
     $this->updateMatch($db_match, $is_challenger, $is_challenged, $score1, $score2);
     $this->processMatch($db_match);
@@ -281,6 +267,15 @@ class Tfts {
       // @TODO: throw exception?
       return false;
     }
+
+    $db_match = $this->getUserMatch($match, $user);
+    if ($db_match == null) {
+      return;
+    }
+
+    $this->em->remove($db_match);
+    $this->em->flush();
+    return true;
   }
 
   /**
@@ -458,6 +453,40 @@ class Tfts {
   private function userToEntity(User $user) {
     $repository = $this->em->getRepository('Concrete\Core\Entity\User\User');
     return $repository->findOneBy(['uID' => $user->getUserId()]);
+  }
+
+  /**
+   * Loads the match from the database and verifies that it exists and the user is a part of it.
+   *
+   * @param Match $match
+   * @param User $user
+   * @return Match the updated match entity from the database.
+   */
+  private function getUserMatch(Match $match, User $user) {
+    $is_challenger = $match->getUser1()->getUserId() == $user->getUserId();
+    $is_challenged = $match->getUser2()->getUserId() == $user->getUserId();
+
+    $repository = $this->em->getRepository('Tfts\Entity\Match');
+    $db_match = $repository->findOneBy(['match_id' => $match, ($is_challenger ? 'user1' : 'user2') => $user->getUserId()]);
+    // verify match exists
+    if (is_null($db_match)) {
+      // @TODO: throw exception?
+      return null;
+    }
+
+    // verify user is challenger or challenged
+    if (!$is_challenger && !$is_challenged) {
+      // @TODO: throw exception?
+      return null;
+    }
+
+    // verify match is not closed
+    if ($db_match->getFinishDate() != null) {
+      // @TODO: throw exception?
+      return null;
+    }
+
+    return $db_match;
   }
 
   /**

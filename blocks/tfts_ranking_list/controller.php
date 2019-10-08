@@ -255,22 +255,21 @@ class Controller extends BlockController {
     $tfts->joinUserPool($hearthstone, $freezer);
     $tfts->joinUserPool($hearthstone, $tuborg);
 
-//    $match1 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
-//    $tfts->withdrawUserChallenge($match1, $freezer);
-//
-//    $match2 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
-//    $tfts->declineUserChallenge($match2, $tuborg);
-//
-//    $match3 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
-//    $tfts->acceptUserChallenge($match3, $tuborg);
-//
-//    $tfts->reportResultUserMatch($match3, $freezer, 2, 1);
-//    $tfts->reportResultUserMatch($match3, $tuborg, 1, 2);
-//    $tfts->reportResultUserMatch($match3, $freezer, 1, 2);
+    $match1 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
+    $tfts->withdrawUserChallenge($match1, $freezer);
 
-    echo $tfts->getUserRank($freezer);
-    echo '<br>';
-    echo $tfts->getUserRank($tuborg);
+    $match2 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
+    $tfts->declineUserChallenge($match2, $tuborg);
+
+    $match3 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
+    $tfts->acceptUserChallenge($match3, $tuborg);
+    $tfts->cancelUserMatch($match3, $freezer);
+
+    $match4 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
+    $tfts->acceptUserChallenge($match4, $tuborg);
+    $tfts->reportResultUserMatch($match4, $freezer, 2, 1);
+    $tfts->reportResultUserMatch($match4, $tuborg, 1, 2);
+    $tfts->reportResultUserMatch($match4, $freezer, 1, 2);
   }
 
   /**
