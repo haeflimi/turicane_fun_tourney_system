@@ -2,34 +2,38 @@
 
 namespace Tfts\Entity;
 
-use Concrete\Core\User\Group\Group;
+use Concrete\Core\Entity\User\User;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
  * @ORM\Table(
  *     name="tftsRegistrations",
- *     uniqueConstraints={@ORM\UniqueConstraint(name="user_id", columns={"user_id","group_id","game_id"})}
+ *     uniqueConstraints={@ORM\UniqueConstraint(name="user", columns={"user_id","game_id"}), @ORM\UniqueConstraint(name="group", columns={"group_id","game_id"})}
  * )
  */
 class Registration {
 
   /**
    * @ORM\Id
+   * @ORM\Column(type="integer", length=10)
+   * @ORM\GeneratedValue(strategy="AUTO")
+   */
+  private $registration_id;
+
+  /**
    * @ORM\ManyToOne(targetEntity="Tfts\Entity\Game", inversedBy="registrations")
    * @ORM\JoinColumn(name="game_id", referencedColumnName="game_id", nullable=false)
    */
   private $game;
 
   /**
-   * @ORM\Id
    * @ORM\ManyToOne(targetEntity="Concrete\Core\Entity\User\User")
    * @ORM\JoinColumn(name="user_id", referencedColumnName="uID", nullable=true)
    */
   private $user;
 
   /**
-   * @ORM\Id
    * @ORM\Column(type="integer", length=10, nullable=true)
    */
   private $group_id;
@@ -39,10 +43,15 @@ class Registration {
    */
   private $rnd_number;
 
-  public function __construct(Game $game, User $user = null, Group $group = null) {
+  public function __construct(Game $game, User $user = null, int $group_id = null) {
     $this->game = $game;
     $this->user = $user;
-    $this->group_id = $group->getPermissionObjectIdentifier();
+    $this->group_id = $group_id;
+    $this->rnd_number = rand(1, 1000000);
+  }
+
+  public function getId() {
+    return $this->registration_id;
   }
 
   public function getGame() {
@@ -55,6 +64,10 @@ class Registration {
 
   public function getGroupId() {
     return $this->group_id;
+  }
+
+  public function getRandomNumber() {
+    return $this->rnd_number;
   }
 
 }

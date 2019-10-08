@@ -1,15 +1,17 @@
 <?php
+
 namespace Concrete\Package\TuricaneFunTourneySystem\Block\TftsRankingList;
 
 use SimpleXMLElement;
 use Concrete\Core\Block\BlockController;
-use Concrete\Core\Package\Package;
-use Concrete\Core\User\Group\Group;
+//use Concrete\Core\Package\Package;
+//use Concrete\Core\User\Group\Group;
 use Concrete\Core\User\UserList;
-use Concrete\Core\User\User;
-use Tfts\Entity\Lan;
+use Concrete\Core\Entity\User;
+//use Tfts\Entity\Lan;
+//use Tfts\Entity\Game;
 use Tfts\Tfts;
-use Concrete\Core\Support\Facade\Config;
+//use Concrete\Core\Support\Facade\Config;
 
 defined('C5_EXECUTE') or die('Access Denied.');
 
@@ -21,445 +23,425 @@ defined('C5_EXECUTE') or die('Access Denied.');
  * @author   Oliver Green <oliver@c5labs.com>
  * @license  See attached license file
  */
-class Controller extends BlockController
-{
-    /**
-     * The block types name.
+class Controller extends BlockController {
+
+  /**
+   * The block types name.
+   *
+   * @var string
+   */
+  protected $btName = 'TFTS Ranking List';
+
+  /**
+   * The block types description.
+   *
+   * @var string
+   */
+  protected $btDescription = 'A block boilerplate to start building from.';
+
+  /**
+   * The block types handle.
+   *
+   * @var string
+   */
+  protected $btHandle = 'tfts_ranking_list';
+
+  /**
+   * The block types default set within the 'add block' fly out panel.
+   * 
+   * Valid sets included with the core are: 
+   * basic, navigation, forms, social & multimedia.
+   *
+   * Leaving the value as null will add the block type to the 'other' set.
+   *
+   * @var string
+   */
+  protected $btDefaultSet = '';
+
+  /**
+   * The block types table name;
+   * If left as null, the blocks handle will be used to form the table name.
+   *
+   * @var string
+   */
+  protected $btTable = 'btTftsRankingList';
+
+  /**
+   * The blocks form width.
+   *
+   * @var string
+   */
+  protected $btInterfaceWidth = '400';
+
+  /**
+   * The blocks form height.
+   *
+   * @var string
+   */
+  protected $btInterfaceHeight = '400';
+
+  /* @section advanced */
+
+  /**
+   * Is this an internal block type?
+   * If set to true the block will not be shown in the 'add block' flyout panel?
+   *
+   * @var bool
+   */
+  protected $btIsInternal = false;
+
+  /**
+   * Does the block support inline addition?
+   *
+   * @var bool
+   */
+  protected $btSupportsInlineAdd = false;
+
+  /**
+   * Does the block support inline editing?
+   *
+   * @var bool
+   */
+  protected $btSupportsInlineEdit = false;
+
+  /**
+   *  If true, container classes will not be wrapped around this block type in
+   *  edit mode (if the theme in question supports a grid framework).
+   *
+   * @var bool
+   */
+  protected $btIgnorePageThemeGridFrameworkContainer = false;
+
+  /**
+   * Prevents the block from being aliased when duplicating a page or creating
+   * a page from defaults, if true the block will be duplicated instead.
+   *
+   * @var bool
+   */
+  protected $btCopyWhenPropagate = false;
+
+  /**
+   * Returns whether this block type is included in all versions. Default is
+   * false - block types are typically versioned but sometimes it makes
+   * sense not to do so.
+   *
+   * @return bool
+   */
+  protected $btIncludeAll = false;
+
+  /**
+   * Here you can defined helpers that the blocks add
+   * and edit forms require. They will be loaded automatically.
+   *
+   * @var array
+   */
+  protected $helpers = ['form'];
+
+  /**
+   * When block caching is enabled, this means that the block's database record
+   * data will also be cached.
+   *
+   * @var bool
+   */
+  protected $btCacheBlockRecord = true;
+
+  /**
+   *  When block caching is enabled, enabling this boolean means that the output
+   *  of the block will be saved and delivered without rendering the view()
+   *  function or hitting the database at all.
+   *
+   * @var bool
+   */
+  protected $btCacheBlockOutput = false;
+
+  /**
+   * When block caching is enabled and output caching is enabled for a block,
+   * this is the value in seconds that the cache will last before being refreshed.
+   * (specified in seconds).
+   *
+   * @var bool
+   */
+  protected $btCacheBlockOutputLifetime = 3600;
+
+  /**
+   * This determines whether a block will cache its output on POST. Some blocks
+   * can cache their output but must serve uncached output on POST in order to
+   * show error messages, etc.
+   *
+   * @var bool
+   */
+  protected $btCacheBlockOutputOnPost = false;
+
+  /**
+   * Determines whether a block that can cache its output will continue to cache
+   * its output even if the current user viewing it is logged in.
+   *
+   * @var bool
+   */
+  protected $btCacheBlockOutputForRegisteredUsers = false;
+
+  /**
+   * When this block is exported, any database columns found in this array will
+   * automatically be swapped for links to specific pages. Upon import they will
+   * map to the specific page found at that path, regardless of its ID.
+   *
+   * @var array
+   */
+  protected $btExportPageColumns = [];
+
+  /**
+   * When this block is exported, any database columns found in this array will
+   * automatically be swapped for links to specific files, by file name. Upon
+   * import they will map to the specific file with that filename, regardless
+   * of its file ID.
+   *
+   * @var array
+   */
+  protected $btExportFileColumns = [];
+
+  /**
+   * When this block is exported, any database columns found in this array will
+   * automatically be swapped for references to a particular page type. Upon import
+   * they will map to that specific page type ID based on the handle specified.
+   *
+   * @var array
+   */
+  protected $btExportPageTypeColumns = [];
+
+  /**
+   * When this block is exported, any database columns found in this array will
+   * automatically be swapped for a reference to a specific RSS feed object. Upon
+   * import they will map to the specific feed, regardless of its ID in the database.
+   *
+   * @var array
+   */
+  protected $btExportPageFeedColumns = [];
+
+  /**
+   * Wraps the block view in a container element with the class specified here.
+   *
+   * @var string
+   */
+  protected $btWrapperClass = '';
+
+  /* @endsection advanced */
+
+  /**
+   * Controller constructor.
+   * @param null $obj
+   */
+  public function __construct($obj = null) {
+    parent::__construct($obj);
+    $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
+    $this->em = $app->make('Doctrine\ORM\EntityManager');
+  }
+
+  /**
+   * Runs when the blocks view template is rendered.
+   *
+   * @return void
+   */
+  public function view() {
+    $userList = new UserList();
+
+    $userList->filterByUserName('Freezer');
+    $freezer = $userList->getResults()[0]->getUserObject();
+
+    $userList->filterByUserName('TuBorg');
+    $tuborg = $userList->getResults()[0]->getUserObject();
+    $hearthstone = $this->em->find('Tfts\Entity\Game', 1);
+
+    $tfts = new Tfts();
+    $tfts->joinUserPool($hearthstone, $freezer);
+    $tfts->joinUserPool($hearthstone, $tuborg);
+
+//    $match1 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
+//    $tfts->withdrawUserChallenge($match1, $freezer);
+//
+//    $match2 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
+//    $tfts->declineUserChallenge($match2, $tuborg);
+//
+//    $match3 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
+//    $tfts->acceptUserChallenge($match3, $tuborg);
+//
+//    $tfts->reportResultUserMatch($match3, $freezer, 2, 1);
+//    $tfts->reportResultUserMatch($match3, $tuborg, 1, 2);
+//    $tfts->reportResultUserMatch($match3, $freezer, 1, 2);
+
+    echo $tfts->getUserRank($freezer);
+    echo '<br>';
+    echo $tfts->getUserRank($tuborg);
+  }
+
+  /**
+   * We can use Action Methods to process AJAX Calls and Form submits within our block
+   */
+  public function action_addPoints() {
+    // if the data is valid, we process it
+    $errors = $this->validate($this->post(), 'addPoints');
+    if ($errors === true) {
+      $tfts = new \Tfts\Tfts();
+      $user = new User(1);
+      $lan_id = 17;
+      $result = $tfts->addPointsQB($user, $lan_id, $this->post('pointsValue'));
+      $tfts->addPoints(new User(1), 1, $this->post('pointsValue'));
+      $this->em->persist($tfts);
+      $this->em->flush();
+      $this->set('showMsg', true);
+    } else {
+      $result = $errors;
+      $this->set('errors', $errors);
+    };
+
+    // if it is a Ajax call we return a result as Json, if it is not it will proceed rendering the
+    // block view
+    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+      /* special ajax here */
+      die(json_encode($result));
+    } else {
+      $this->view();
+    }
+  }
+
+  /**
+   * Run when the blocks add template is rendered.
+   *
+   * @return  void
+   */
+  public function add() {
+    $this->form();
+  }
+
+  /**
+   * Run when the blocks edit template is rendered.
+   *
+   * @return void
+   */
+  public function edit() {
+    $this->form();
+  }
+
+  /**
+   * Called by the add and edit templates are rendered, as they often share logic.
+   *
+   * @return void
+   */
+  public function form() {
+    /*
+     * Set variables for your blocks view here...
      *
-     * @var string
-     */
-    protected $btName = 'TFTS Ranking List';
-
-    /**
-     * The block types description.
+     * $this->set('data', $my_data)
      *
-     * @var string
+     * The in view.php the variable $data will be available with the
+     * contents of the $my_data.
      */
-    protected $btDescription = 'A block boilerplate to start building from.';
+  }
 
-    /**
-     * The block types handle.
-     *
-     * @var string
-     */
-    protected $btHandle = 'tfts_ranking_list';
+  /**
+   * Run when the add or edit forms are submitted. This should return true if
+   * validation is successful or a Concrete\Core\Error\Error() object if it fails.
+   *
+   * @param  $data
+   * @return bool|Error
+   */
+  public function validate($data, $action = false) {
+    $errors = new \Concrete\Core\Error\Error();
 
-    /**
-     * The block types default set within the 'add block' fly out panel.
-     * 
-     * Valid sets included with the core are: 
-     * basic, navigation, forms, social & multimedia.
-     *
-     * Leaving the value as null will add the block type to the 'other' set.
-     *
-     * @var string
-     */
-    protected $btDefaultSet = '';
-
-    /**
-     * The block types table name;
-     * If left as null, the blocks handle will be used to form the table name.
-     *
-     * @var string
-     */
-    protected $btTable = 'btTftsRankingList';
-
-    /**
-     * The blocks form width.
-     *
-     * @var string
-     */
-    protected $btInterfaceWidth = '400';
-
-    /**
-     * The blocks form height.
-     *
-     * @var string
-     */
-    protected $btInterfaceHeight = '400';
-
-    /* @section advanced */
-
-    /**
-     * Is this an internal block type?
-     * If set to true the block will not be shown in the 'add block' flyout panel?
-     *
-     * @var bool
-     */
-    protected $btIsInternal = false;
-
-    /**
-     * Does the block support inline addition?
-     *
-     * @var bool
-     */
-    protected $btSupportsInlineAdd = false;
-
-    /**
-     * Does the block support inline editing?
-     *
-     * @var bool
-     */
-    protected $btSupportsInlineEdit = false;
-
-    /**
-     *  If true, container classes will not be wrapped around this block type in
-     *  edit mode (if the theme in question supports a grid framework).
-     *
-     * @var bool
-     */
-    protected $btIgnorePageThemeGridFrameworkContainer = false;
-
-    /**
-     * Prevents the block from being aliased when duplicating a page or creating
-     * a page from defaults, if true the block will be duplicated instead.
-     *
-     * @var bool
-     */
-    protected $btCopyWhenPropagate = false;
-
-    /**
-     * Returns whether this block type is included in all versions. Default is
-     * false - block types are typically versioned but sometimes it makes
-     * sense not to do so.
-     *
-     * @return bool
-     */
-    protected $btIncludeAll = false;
-
-    /**
-     * Here you can defined helpers that the blocks add 
-     * and edit forms require. They will be loaded automatically.
-     * 
-     * @var array
-     */
-    protected $helpers = ['form'];
-
-    /**
-     * When block caching is enabled, this means that the block's database record
-     * data will also be cached.
-     *
-     * @var bool
-     */
-    protected $btCacheBlockRecord = true;
-
-    /**
-     *  When block caching is enabled, enabling this boolean means that the output
-     *  of the block will be saved and delivered without rendering the view()
-     *  function or hitting the database at all.
-     *
-     * @var bool
-     */
-    protected $btCacheBlockOutput = false;
-
-    /**
-     * When block caching is enabled and output caching is enabled for a block,
-     * this is the value in seconds that the cache will last before being refreshed.
-     * (specified in seconds).
-     *
-     * @var bool
-     */
-    protected $btCacheBlockOutputLifetime = 3600;
-
-    /**
-     * This determines whether a block will cache its output on POST. Some blocks
-     * can cache their output but must serve uncached output on POST in order to
-     * show error messages, etc.
-     *
-     * @var bool
-     */
-    protected $btCacheBlockOutputOnPost = false;
-
-    /**
-     * Determines whether a block that can cache its output will continue to cache
-     * its output even if the current user viewing it is logged in.
-     *
-     * @var bool
-     */
-    protected $btCacheBlockOutputForRegisteredUsers = false;
-
-    /**
-     * When this block is exported, any database columns found in this array will
-     * automatically be swapped for links to specific pages. Upon import they will
-     * map to the specific page found at that path, regardless of its ID.
-     *
-     * @var array
-     */
-    protected $btExportPageColumns = [];
-
-    /**
-     * When this block is exported, any database columns found in this array will
-     * automatically be swapped for links to specific files, by file name. Upon
-     * import they will map to the specific file with that filename, regardless
-     * of its file ID.
-     *
-     * @var array
-     */
-    protected $btExportFileColumns = [];
-
-    /**
-     * When this block is exported, any database columns found in this array will
-     * automatically be swapped for references to a particular page type. Upon import
-     * they will map to that specific page type ID based on the handle specified.
-     *
-     * @var array
-     */
-    protected $btExportPageTypeColumns = [];
-
-    /**
-     * When this block is exported, any database columns found in this array will
-     * automatically be swapped for a reference to a specific RSS feed object. Upon
-     * import they will map to the specific feed, regardless of its ID in the database.
-     *
-     * @var array
-     */
-    protected $btExportPageFeedColumns = [];
-
-    /**
-     * Wraps the block view in a container element with the class specified here.
-     *
-     * @var string
-     */
-    protected $btWrapperClass = '';
-
-    /* @endsection advanced */
-
-    /**
-     * Controller constructor.
-     * @param null $obj
-     */
-    public function __construct($obj = null)
-    {
-        parent::__construct($obj);
-        $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
-        $this->em = $app->make('Doctrine\ORM\EntityManager');
+    // we want to use a token to validate each call in order to protect from xss and request forgery
+    $token = \Core::make("token");
+    if ($action && !$token->validate($action)) {
+      $errors->add('Invalid Request, token must be valid.');
     }
 
-    /**
-     * Runs when the blocks view template is rendered.
-     * 
-     * @return void
-     */
-    public function view()
-    {
-        $lan = $this->em->find('Tfts\Entity\Lan', Config::get('tfts.currentLanId'));
-
-        $tfts = new Tfts();
-        $userRanking = $tfts->getUserRanking($lan);
-//        dd($userRanking);
-        
-        
-        // An example on how to use c5 Groups/ Users
-        // https://documentation.concrete5.org/developers/users-groups/groups/overview
-        // Complete c5 API Doc: https://documentation.concrete5.org/api/8.4.5/
-        $g = Group::getByName('Turicane 17');
-        $tn = $g->getGroupMembers();
-
-        $ul = new UserList();
-        $ul->filterByUserName('Freezer');
-        $u_freezer = $ul->getResults()[0]->getUserObject();
-        // when we know the id it's easier of course
-        $u_tuborg = new User(1);
-        $u_buddha = new User(2);
-
-        // Use the entity Manager to get the Lan Entity
-        $lan = $this->em->find('Tfts\Entity\Lan', Config::get('tfts.currentLanId'));
-
-        // Instantiate our Custom TFTS Class
-        $tfts = new \Tfts\Tfts();
-        // Then use it to retrieve Data
-        $bsp3 = $tfts->getUserRanking($lan);
-
-        // everything we want to pass along to the Block View Layer must be set like this:
-
-        $this->set('bsp3',$bsp3);
-        //$this->set('bsp4_username', $bsp2[0]['user_name']);
-        //$this->set('bsp4_points', $bsp2[0]['points']);
-        $this->set('bsp5', $u_freezer);
-        // we also load and pass on the c5 Form Helper to generate form elements for us
-        // https://documentation.concrete5.org/tutorials/how-to-use-the-form-widget-in-concrete5-5-7
-        $this->set('fh', $this->app->make('helper/form'));
+    // validate the action addPonts
+    if ($action == 'addPoints') {
+      if (empty($data['pointsValue'])) {
+        $errors->add('No Points Value set.');
+      }
+      if (!is_numeric($data['pointsValue'])) {
+        $errors->add('Invalid Points Value');
+      }
     }
 
-    /**
-     * We can use Action Methods to process AJAX Calls and Form submits within our block
-     */
-    public function action_addPoints(){
-        // if the data is valid, we process it
-        $errors = $this->validate($this->post(),'addPoints');
-        if($errors === true){
-            $tfts = new \Tfts\Tfts();
-            $user = new User(1);
-            $lan_id = 17;
-            $result = $tfts->addPointsQB($user,$lan_id,$this->post('pointsValue'));
-            $tfts->addPoints(new User(1),1,$this->post('pointsValue'));
-            $this->em->persist($tfts);
-            $this->em->flush();
-            $this->set('showMsg', true);
-        } else {
-            $result = $errors;
-            $this->set('errors', $errors);
-        };
-
-        // if it is a Ajax call we return a result as Json, if it is not it will proceed rendering the
-        // block view
-        if(!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-            /* special ajax here */
-            die(json_encode($result));
-        } else {
-            $this->view();
-        }
+    if ($errors->has()) {
+      return $errors;
     }
 
-    /**
-     * Run when the blocks add template is rendered.
-     *
-     * @return  void
+    return true;
+  }
+
+  /**
+   * Run when the block add or edit form is submitted. The variables
+   * within the data array are mapped to columns found in the blocks table. Any
+   * post-processing of the blocks data before storage should be completed here.
+   *
+   * @param  $data
+   * @return
+   */
+  public function save($data) {
+    /*
+     * if (isset($data['name']) && '' === trim($data['name'])) {
+     *     unset($data['name']);
+     * }
      */
-    public function add()
-    {
-        $this->form();
-    }
 
-    /**
-     * Run when the blocks edit template is rendered.
-     *
-     * @return void
-     */
-    public function edit()
-    {
-        $this->form();
-    }
+    parent::save($data);
+  }
 
-    /**
-     * Called by the add and edit templates are rendered, as they often share logic.
-     *
-     * @return void
-     */
-    public function form()
-    {
-        /*
-         * Set variables for your blocks view here...
-         *
-         * $this->set('data', $my_data)
-         *
-         * The in view.php the variable $data will be available with the
-         * contents of the $my_data.
-         */
-    }
+  /**
+   * This happens automatically in Concrete5 when versioning blocks and pages.
+   *
+   * @param  int $newBlockId
+   * @return void|BlockRecord
+   */
+  public function duplicate($newBlockId) {
+    return parent::duplicate($newBlockId);
+  }
 
-    /**
-     * Run when the add or edit forms are submitted. This should return true if
-     * validation is successful or a Concrete\Core\Error\Error() object if it fails.
-     *
-     * @param  $data
-     * @return bool|Error
-     */
-    public function validate($data, $action = false)
-    {
-        $errors = new \Concrete\Core\Error\Error();
+  /**
+   * Runs when a block is deleted. This may not happen very often since a
+   * block is only completed deleted when all versions that reference
+   * that block, including the original, have themselves been deleted.
+   *
+   * @return [type] [description]
+   */
+  public function delete() {
+    parent::delete();
+  }
 
-        // we want to use a token to validate each call in order to protect from xss and request forgery
-        $token = \Core::make("token");
-        if($action && !$token->validate($action)){
-            $errors->add('Invalid Request, token must be valid.');
-        }
+  /**
+   * Provides text for the page search indexing routine. This method should
+   * return simple, unformatted plain text, not HTML.
+   *
+   * @return string
+   */
+  public function getSearchableContent() {
+    return '';
+  }
 
-        // validate the action addPonts
-        if($action == 'addPoints'){
-            if(empty($data['pointsValue'])){
-                $errors->add('No Points Value set.');
-            }
-            if(!is_numeric($data['pointsValue'])){
-                $errors->add('Invalid Points Value');
-            }
-        }
+  /* @section advanced */
 
-        if ($errors->has()) {
-            return $errors;
-        }
+  /**
+   * Runs when a block is being exported.
+   *
+   * @param  SimpleXMLElement $blockNode
+   * @return void
+   */
+  public function export(SimpleXMLElement $blockNode) {
+    parent::export($blockNode);
+  }
 
-        return true;
-    }
+  /**
+   * Runs when a block is being imported.
+   *
+   * @param  Page          $page
+   * @param  string          $areaHandle
+   * @param  SimpleXMLElement $blockNode
+   * @return void
+   */
+  public function import($page, $areaHandle, SimpleXMLElement $blockNode) {
+    parent::import($page, $areaHandle, $blockNode);
+  }
 
-    /**
-     * Run when the block add or edit form is submitted. The variables
-     * within the data array are mapped to columns found in the blocks table. Any
-     * post-processing of the blocks data before storage should be completed here.
-     *
-     * @param  $data
-     * @return
-     */
-    public function save($data)
-    {
-        /*
-         * if (isset($data['name']) && '' === trim($data['name'])) {
-         *     unset($data['name']);
-         * }
-         */
-
-        parent::save($data);
-    }
-
-    /**
-     * This happens automatically in Concrete5 when versioning blocks and pages.
-     *
-     * @param  int $newBlockId
-     * @return void|BlockRecord
-     */
-    public function duplicate($newBlockId)
-    {
-        return parent::duplicate($newBlockId);
-    }
-
-    /**
-     * Runs when a block is deleted. This may not happen very often since a
-     * block is only completed deleted when all versions that reference
-     * that block, including the original, have themselves been deleted.
-     *
-     * @return [type] [description]
-     */
-    public function delete()
-    {
-        parent::delete();
-    }
-
-    /**
-     * Provides text for the page search indexing routine. This method should
-     * return simple, unformatted plain text, not HTML.
-     *
-     * @return string
-     */
-    public function getSearchableContent()
-    {
-        return '';
-    }
-
-    /* @section advanced */
-
-    /**
-     * Runs when a block is being exported.
-     *
-     * @param  SimpleXMLElement $blockNode
-     * @return void
-     */
-    public function export(SimpleXMLElement $blockNode)
-    {
-        parent::export($blockNode);
-    }
-
-    /**
-     * Runs when a block is being imported.
-     *
-     * @param  Page          $page
-     * @param  string          $areaHandle
-     * @param  SimpleXMLElement $blockNode
-     * @return void
-     */
-    public function import($page, $areaHandle, SimpleXMLElement $blockNode)
-    {
-        parent::import($page, $areaHandle, $blockNode);
-    }
-
-    /* @endsection advanced */
+  /* @endsection advanced */
 }

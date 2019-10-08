@@ -2,12 +2,16 @@
 
 namespace Tfts;
 
-use Concrete\Core\User\User;
+use Concrete\Core\Support\Facade\Config;
 use Concrete\Core\User\Group\Group;
+use Concrete\Core\User\User;
+use Concrete\Core\User\UserList;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Doctrine\Common\Collections\Criteria;
-use Concrete\Core\Support\Facade\Database;
 use Tfts\Entity\Lan;
+use Tfts\Entity\Game;
+use Tfts\Entity\Registration;
+use Tfts\Entity\Match;
+use Tfts\Entity\Ranking;
 
 /**
  * This Class wraps all the important Functionality of the Turicane Fun Tourney System
@@ -25,14 +29,27 @@ class Tfts {
   }
 
   /**
-   * Get a List of all participating Users with Points& a Rank
    *
-   * src/Entity
+   * @param \Tfts\Game $game
    */
-  public function getUserRanking(Lan $lan) {
-    $repository = $this->em->getRepository('Tfts\Entity\Ranking');
-    $ranking = $repository->findBy(['lan' => $lan->getId()]);
-    return $ranking;
+  public function createGame(Game $game) {
+
+  }
+
+  /**
+   *
+   * @param \Tfts\Game $game
+   */
+  public function updateGame(Game $game) {
+
+  }
+
+  /**
+   *
+   * @param \Tfts\Game $game
+   */
+  public function deleteGame(Game $game) {
+    
   }
 
   /**
@@ -40,11 +57,25 @@ class Tfts {
    *
    * @param \Tfts\Game $game
    * @param User $user
+   * @return boolean true if the join was successful, false otherwise.
    */
   public function joinUserPool(Game $game, User $user) {
-    $registration = new Registration($game, $user);
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    // verify user is not already registered
+    if (!is_null($this->findRegistration($game, $user))) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $registration = new Registration($game, $this->userToEntity($user));
     $this->em->persist($registration);
-    return $registration;
+    $this->em->flush();
+    return true;
   }
 
   /**
@@ -52,9 +83,25 @@ class Tfts {
    * 
    * @param \Tfts\Game $game
    * @param User $user
+   * @return boolean true if the leave was successful, false otherwise.
    */
   public function leaveUserPool(Game $game, User $user) {
-    
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $registration = $this->findRegistration($game, $user);
+    // verify user is registered
+    if (is_null($registration)) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $this->em->remove($registration);
+    $this->em->flush();
+    return true;
   }
 
   /**
@@ -63,9 +110,39 @@ class Tfts {
    * @param \Tfts\Game $game
    * @param User $challenger
    * @param User $challenged
+   * @return Match null if an exception occured, the created match otherwise.
    */
   public function challengeUser(Game $game, User $challenger, User $challenged) {
-    
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return null;
+    }
+
+    // verify both users are registered for that game
+    if (is_null($this->findRegistration($game, $challenger)) || is_null($this->findRegistration($game, $challenged))) {
+      // @TODO: throw exception?
+      return null;
+    }
+
+    $repository = $this->em->getRepository('Tfts\Entity\Match');
+    // verify challenge cannot be triggered twice
+    if (!is_null($repository->findOneBy(['user1' => $challenger->getUserId(), 'user2' => $challenged->getUserId(), 'match_finish_date' => null]))) {
+      // @TODO: throw exception?
+      return null;
+    }
+
+    // verify challenged hasn't already challenged the challenger
+    if (!is_null($repository->findOneBy(['user1' => $challenged->getUserId(), 'user2' => $challenger->getUserId(), 'match_finish_date' => null]))) {
+      // @TODO: throw exception?
+      return null;
+    }
+
+    $match = new Match($game);
+    $match->setUsers($this->userToEntity($challenger), $this->userToEntity($challenged));
+    $this->em->persist($match);
+    $this->em->flush();
+    return $match;
   }
 
   /**
@@ -73,9 +150,25 @@ class Tfts {
    * 
    * @param \Tfts\Match $match
    * @param User $challenger
+   * @return boolean true if the withdraw was successful, false otherwise.
    */
   public function withdrawUserChallenge(Match $match, User $challenger) {
-    
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $repository = $this->em->getRepository('Tfts\Entity\Match');
+    // verify match exists and user is challenger
+    if (is_null($repository->findOneBy(['match_id' => $match, 'user1' => $challenger->getUserId()]))) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $this->em->remove($match);
+    $this->em->flush();
+    return true;
   }
 
   /**
@@ -83,9 +176,26 @@ class Tfts {
    * 
    * @param \Tfts\Match $match
    * @param User $challenged
+   * @return boolean true if the accept was successful, false otherwise.
    */
   public function acceptUserChallenge(Match $match, User $challenged) {
-    
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $repository = $this->em->getRepository('Tfts\Entity\Match');
+    // verify match exists and user is challenged
+    if (is_null($repository->findOneBy(['match_id' => $match, 'user2' => $challenged->getUserId()]))) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $match->setAccepted(true);
+    $this->em->persist($match);
+    $this->em->flush();
+    return true;
   }
 
   /**
@@ -93,42 +203,84 @@ class Tfts {
    * 
    * @param \Tfts\Match $match
    * @param User $challenged
+   * @return boolean true if the decline was successful, false otherwise.
    */
   public function declineUserChallenge(Match $match, User $challenged) {
-    
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $repository = $this->em->getRepository('Tfts\Entity\Match');
+    // verify match exists and user is challenged
+    if (is_null($repository->findOneBy(['match_id' => $match, 'user2' => $challenged->getUserId()]))) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $this->em->remove($match);
+    $this->em->flush();
+    return true;
   }
 
   /**
-   * The given players reports the result for the given match.
+   * The given user reports the result for the given match.
    * 
    * @param \Tfts\Match $match
-   * @param User $player
+   * @param User $user
    * @param type $score1 Score of the challenger.
    * @param type $score2 Score of the challenged.
    */
-  public function reportResultUserMatch(Match $match, User $player, $score1, $score2) {
-    
+  public function reportResultUserMatch(Match $match, User $user, $score1, $score2) {
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $is_challenger = $match->getUser1()->getUserId() == $user->getUserId();
+    $is_challenged = $match->getUser2()->getUserId() == $user->getUserId();
+
+    // verify user is challenger or challenged
+    if (!$is_challenger && !$is_challenged) {
+      // @TODO: throw exception?
+      return;
+    }
+
+    $repository = $this->em->getRepository('Tfts\Entity\Match');
+    $db_match = $repository->findOneBy(['match_id' => $match, ($is_challenger ? 'user1' : 'user2') => $user->getUserId()]);
+    // verify match exists
+    if (is_null($db_match)) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    // verify match is not closed
+    if (($match->isConfirmed1() && $match->isConfirmed2()) || $match->getFinishDate() != null) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $this->updateMatch($db_match, $is_challenger, $is_challenged, $score1, $score2);
+    $this->processMatch($db_match);
+    $this->em->persist($db_match);
+    $this->em->flush();
+    return true;
   }
 
   /**
    * The open match is cancelled by the given user (can be done by both players).
    * 
    * @param \Tfts\Match $match
-   * @param User $player
+   * @param User $user
    */
-  public function cancelUserMatch(Match $match, User $player) {
-    
-  }
-
-  /**
-   * Processes the given match. If both parties have reported the result, the 
-   * match is closed and points will be awarded, otherwise this method does 
-   * nothing.
-   * 
-   * @param \Tfts\Match $match
-   */
-  private function processMatch(Match $match) {
-    
+  public function cancelUserMatch(Match $match, User $user) {
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
   }
 
   /**
@@ -196,6 +348,52 @@ class Tfts {
   }
 
   /**
+   * @param User $user
+   * @return int the user rank for the current lan.
+   */
+  public function getUserRank(User $user) {
+    $rankings = $this->getLan()->getRankings()->toArray();
+    usort($rankings, 'Tfts\Entity\Ranking::compare');
+
+    $rank = 0;
+    $last_points = 0;
+    $skipped = 0;
+
+    foreach ($rankings as $ranking) {
+      if ($last_points == $ranking->getPoints()) {
+        $skipped++;
+      } else {
+        $rank = $rank + 1 + $skipped;
+        $skipped = 0;
+      }
+      if ($ranking->getUser()->getUserId() == $user->getUserId()) {
+        return $rank;
+      }
+      $last_points = $ranking->getPoints();
+    }
+    return 0;
+  }
+
+  /**
+   * Adds the given points to the given user.
+   *
+   * @param User $user
+   * @param int $points
+   */
+  public function addPoints(User $user, int $points) {
+    $repository = $this->em->getRepository('Tfts\Entity\Ranking');
+    $ranking = $repository->findOneBy(['lan' => $this->getLan(), 'user' => $user->getUserId()]);
+    if (is_null($ranking)) {
+      $ranking = new Ranking($this->getLan(), $this->userToEntity($user));
+    }
+
+    $ranking->setPoints($ranking->getPoints() + $points);
+    $this->em->persist($ranking);
+    $this->em->flush();
+    return true;
+  }
+
+  /**
    *
    * @return JsonResponse
    */
@@ -204,6 +402,149 @@ class Tfts {
     // @TODO: handle data
     $data = [$_REQUEST, 'Data processed!'];
     return new JsonResponse($data);
+  }
+
+  /**
+   * @return bool true if the TFTS system is active, false otherwise.
+   */
+  private function isSystemActive() {
+    return true;
+//    return filter_var(Config::get('tfts.systemActive'), FILTER_VALIDATE_BOOLEAN);
+  }
+
+  /**
+   * @return Lan the current lan object.
+   */
+  private function getLan() {
+    return $this->em->find('Tfts\Entity\Lan', Config::get('tfts.currentLanId'));
+  }
+
+  /**
+   * Finds a registration for given game, user and group composition.
+   *
+   * @param Game $game
+   * @param User $user
+   * @param Group $group
+   * @return Registration
+   */
+  private function findRegistration(Game $game, User $user = null, Group $group = null) {
+    $repository = $this->em->getRepository('Tfts\Entity\Registration');
+
+    // verify that only one and one only of user and group is set
+    if (($user == null && $group == null) || ($user != null && $group != null)) {
+      // @TODO: throw exception?
+      return null;
+    }
+
+    $e_user = $user == null ? null : $this->userToEntity($user);
+    $group_id = $group == null ? null : $group->getPermissionObjectIdentifier();
+    return $repository->findOneBy(['game' => $game, 'user' => $e_user, 'group_id' => $group_id]);
+  }
+
+  /**
+   * @param \Concrete\Core\Entity\User\User $entity
+   * @return User the user matching the given entity.
+   */
+  private function entityToUser(\Concrete\Core\Entity\User\User $entity) {
+    $user_list = new UserList();
+    $user_list->filterByUserName($entity->getUserName());
+    return $user_list->getResults()[0]->getUserObject();
+  }
+
+  /**
+   * @param User $user
+   * @return Concrete\Core\Entity\User\User the entity matching the given user.
+   */
+  private function userToEntity(User $user) {
+    $repository = $this->em->getRepository('Concrete\Core\Entity\User\User');
+    return $repository->findOneBy(['uID' => $user->getUserId()]);
+  }
+
+  /**
+   * Updates the given match with the scores and sets correct confirmed flags.
+   *
+   * @param Match $match
+   * @param bool $is_challenger
+   * @param bool $is_challenged
+   * @param int $score1
+   * @param int $score2
+   * @return boolean
+   */
+  private function updateMatch(Match $match, bool $is_challenger, bool $is_challenged, int $score1, int $score2) {
+    $first = !$match->isConfirmed1() && !$match->isConfirmed2();
+    $second = ($match->isConfirmed1() && $is_challenged) || ($match->isConfirmed2() && $is_challenger);
+    $confirm = $match->getScore1() == $score1 && $match->getScore2() == $score2;
+
+    // first one to report or other result than opponent
+    if ($first || ($second && !$confirm)) {
+      $match->setScore1($score1);
+      $match->setScore2($score2);
+      $match->setConfirmed1($is_challenger);
+      $match->setConfirmed2($is_challenged);
+    }
+    // second one to report and confirm result
+    else if ($second && $confirm) {
+      $match->setConfirmed1(true);
+      $match->setConfirmed2(true);
+    }
+    // update result
+    else {
+      $match->setScore1($score1);
+      $match->setScore2($score2);
+    }
+  }
+
+  /**
+   * Processes the given match. If both parties have confirmed the scores, the
+   * match is closed and points will be awarded, otherwise this method does
+   * nothing.
+   *
+   * @param Match $match
+   */
+  private function processMatch(Match $match) {
+    // match not finished - do nothing
+    if (!$match->isConfirmed1() || !$match->isConfirmed2()) {
+      return;
+    }
+
+    // @TODO: differ between solo and team game
+    $rank1 = $this->getUserRank($this->entityToUser($match->getUser1()));
+    $rank2 = $this->getUserRank($this->entityToUser($match->getUser2()));
+
+    $rank_diff = ($rank1 - $rank2) / 100;
+    if ($rank_diff > 0.7) {
+      $rank_diff = 0.7;
+    }
+    if ($rank_diff < -0.7) {
+      $rank_diff = -0.7;
+    }
+
+    $points_win = $match->getGame()->getPointsWin();
+    $points_loss = $match->getGame()->getPointsLoss();
+
+    // user 1 has won
+    if ($match->getscore1() > $match->getscore2()) {
+      $compute1 = $points_win + round($points_win * $rank_diff, 0);
+      $compute2 = $points_loss - round($points_loss * $rank_diff, 0);
+    }
+    // draw
+    else if ($match->getscore1() == $match->getscore2()) {
+      $compute1 = ($points_win / 2) + round(($points_win / 2) * $rank_diff, 0);
+      $compute2 = ($points_win / 2) - round(($points_win / 2) * $rank_diff, 0);
+    }
+    // user 2 has won
+    else if ($match->getscore1() < $match->getscore2()) {
+      $compute1 = $points_loss + round($points_loss * $rank_diff, 0);
+      $compute2 = $points_win - round($points_win * $rank_diff, 0);
+    }
+
+    $match->setFinished(true);
+    $match->setCompute1($compute1);
+    $match->setCompute2($compute2);
+
+    // @TODO: differ between solo and team game
+    $this->addPoints($this->entityToUser($match->getUser1()), $compute1);
+    $this->addPoints($this->entityToUser($match->getUser2()), $compute2);
   }
 
 }

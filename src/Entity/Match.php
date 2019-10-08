@@ -2,7 +2,9 @@
 
 namespace Tfts\Entity;
 
+use Concrete\Core\Entity\User\User;
 use Doctrine\ORM\Mapping as ORM;
+use Tfts\Entity\Game;
 
 /**
  * @ORM\Entity
@@ -38,42 +40,42 @@ class Match {
   /**
    * @ORM\Column(type="integer", length=1, nullable=false, options={"default":0})
    */
-  private $match_accepted;
+  private $match_accepted = 0;
 
   /**
    * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
    */
-  private $match_point1;
+  private $match_score1 = 0;
 
   /**
    * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
    */
-  private $match_point2;
+  private $match_score2 = 0;
 
   /**
    * @ORM\Column(type="integer", length=1, nullable=false, options={"default":0})
    */
-  private $match_confirmed1;
+  private $match_confirmed1 = 0;
 
   /**
    * @ORM\Column(type="integer", length=1, nullable=false, options={"default":0})
    */
-  private $match_confirmed2;
+  private $match_confirmed2 = 0;
 
   /**
    * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
    */
-  private $match_compute1;
+  private $match_compute1 = 0;
 
   /**
    * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
    */
-  private $match_compute2;
+  private $match_compute2 = 0;
 
   /**
    * @ORM\Column(type="integer", length=1, nullable=false, options={"default":0})
    */
-  private $match_published;
+  private $match_published = 0;
 
   /**
    * @ORM\ManyToOne(targetEntity="Tfts\Entity\Game", inversedBy="matches")
@@ -107,5 +109,130 @@ class Match {
    * @ORM\OneToMany(targetEntity="Tfts\Entity\MatchGroupUser", mappedBy="match")
    */
   private $matchGroupUsers;
+
+  public function __construct(Game $game) {
+    $this->game = $game;
+    $this->match_challenge_date = new \DateTime("now");
+  }
+
+  public function setUsers(User $challenger, User $challenged) {
+    $this->user1 = $challenger;
+    $this->user2 = $challenged;
+  }
+
+  public function setGroups(int $challenger_id, int $challenged_id) {
+    $this->group1_id = $challenger_id;
+    $this->group2_id = $challenged_id;
+  }
+
+  public function setAccepted(bool $accepted) {
+    if ($accepted) {
+      $this->match_accepted = 1;
+      $this->match_accept_date = new \DateTime("now");
+    } else {
+      $this->match_accepted = 0;
+      $this->match_accept_date = null;
+    }
+  }
+
+  public function setScore1(int $score) {
+    $this->match_score1 = $score;
+  }
+
+  public function setScore2(int $score) {
+    $this->match_score2 = $score;
+  }
+
+  public function setConfirmed1(bool $confirmed) {
+    $this->match_confirmed1 = $confirmed ? 1 : 0;
+  }
+
+  public function setConfirmed2(bool $confirmed) {
+    $this->match_confirmed2 = $confirmed ? 1 : 0;
+  }
+
+  public function setCompute1(int $compute) {
+    $this->match_compute1 = $compute;
+  }
+
+  public function setCompute2(int $compute) {
+    $this->match_compute2 = $compute;
+  }
+
+  public function setFinished(bool $finished) {
+    if ($finished) {
+      $this->match_finish_date = new \DateTime("now");
+    } else {
+      $this->match_finish_date = null;
+    }
+  }
+
+  public function setPublished(bool $published) {
+    if ($published) {
+      $this->match_published = new \DateTime("now");
+    } else {
+      $this->match_published = null;
+    }
+  }
+
+  public function getId() {
+    return $this->match_id;
+  }
+
+  public function getGame() {
+    return $this->game;
+  }
+
+  public function getUser1() {
+    return $this->user1;
+  }
+
+  public function getUser2() {
+    return $this->user2;
+  }
+
+  public function getGroup1Id() {
+    return $this->group1_id;
+  }
+
+  public function getGroup2Id() {
+    return $this->group2_id;
+  }
+
+  public function getMatchUsers() {
+    return $this->matchGroupUsers;
+  }
+
+  public function getChallengeDate() {
+    return $this->match_challenge_date;
+  }
+
+  public function getFinishDate() {
+    return $this->match_finish_date;
+  }
+
+  public function getScore1() {
+    return $this->match_score1;
+  }
+
+  public function getScore2() {
+    return $this->match_score2;
+  }
+
+  public function isConfirmed1() {
+    return $this->match_confirmed1 == 1;
+  }
+
+  public function isConfirmed2() {
+    return $this->match_confirmed2 == 1;
+  }
+
+  public function getCompute1() {
+    return $this->match_compute1;
+  }
+
+  public function getCompute2() {
+    return $this->match_compute2;
+  }
 
 }

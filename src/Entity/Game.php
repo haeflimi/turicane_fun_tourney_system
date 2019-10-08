@@ -43,37 +43,37 @@ class Game {
   /**
    * @ORM\Column(type="integer", length=1, nullable=false, options={"default":0})
    */
-  private $game_is_pool;
+  private $game_is_pool = 0;
 
   /**
    * @ORM\Column(type="integer", length=1, nullable=false, options={"default":0})
    */
-  private $game_is_mass;
+  private $game_is_mass = 0;
 
   /**
    * @ORM\Column(type="integer", length=1, nullable=false, options={"default":0})
    */
-  private $game_is_team;
+  private $game_is_team = 0;
 
   /**
    * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
    */
-  private $game_player_count;
+  private $game_player_count = 0;
 
   /**
-   * @ORM\Column(type="string", length=20, nullable=false)
+   * @ORM\Column(type="string", length=20, nullable=true)
    */
   private $game_mode;
 
   /**
-   * @ORM\Column(type="integer", length=10, nullable=false)
+   * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
    */
-  private $game_points;
+  private $game_points_win = 0;
 
   /**
-   * @ORM\Column(type="integer", length=10, nullable=false)
+   * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
    */
-  private $game_points_loss;
+  private $game_points_loss = 0;
 
   /**
    * @ORM\Column(type="string", nullable=true)
@@ -83,12 +83,12 @@ class Game {
   /**
    * @ORM\Column(type="integer", length=1, nullable=false, options={"default":0})
    */
-  private $game_is_deleted;
+  private $game_is_deleted = 0;
 
   /**
    * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
    */
-  private $game_is_featured;
+  private $game_is_featured = 0;
 
   /**
    * @ORM\ManyToOne(targetEntity="Tfts\Entity\Lan", inversedBy="games")
@@ -111,7 +111,8 @@ class Game {
    */
   private $pools;
 
-  public function __construct($game_id, $game_name) {
+  public function __construct(Lan $lan, $game_id, $game_name) {
+    $this->lan = $lan;
     $this->game_id = $game_id;
     $this->game_name = $game_name;
   }
@@ -122,6 +123,26 @@ class Game {
 
   public function getName() {
     return $this->game_name;
+  }
+
+  public function getPointsWin() {
+    return $this->game_points_win;
+  }
+
+  public function getPointsLoss() {
+    return $this->game_points_loss;
+  }
+
+  public function getIsPool() {
+    return $this->game_is_pool;
+  }
+
+  public function getIsTeam() {
+    return $this->game_is_team;
+  }
+
+  public function getIsMass() {
+    return $this->game_is_mass;
   }
 
   public function getLan() {
