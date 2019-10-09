@@ -12,6 +12,8 @@ use Tfts\Entity\Game;
 use Tfts\Entity\Registration;
 use Tfts\Entity\Match;
 use Tfts\Entity\Ranking;
+use Tfts\Entity\TrackmaniaMap;
+use Tfts\Entity\Trackmania;
 
 /**
  * This Class wraps all the important Functionality of the Turicane Fun Tourney System
@@ -393,10 +395,74 @@ class Tfts {
    * @return JsonResponse
    */
   public function processTrackmaniaData() {
-    // "password=" + PASSWORD + "&date=" + date + "&time=" + time + "&name=" + name + "&record=" + record + "&map=" + map;
-    // @TODO: handle data
-    $data = [$_REQUEST, 'Data processed!'];
-    return new JsonResponse($data);
+    $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
+    if ($password != Config::get('tfts.trackmaniaApiPassword')) {
+      // @TODO: exit here once the config values are updated
+//      return new JsonResponse('Invalid password');
+    }
+
+    // verify that user exists
+    $user_name = filter_input(INPUT_POST, 'user', FILTER_SANITIZE_STRING);
+    $userList = new UserList();
+    $userList->filterByUserName($user_name);
+    if (sizeof($userList->getResults()) != 1) {
+      return new JsonResponse('Invalid user: ' . $user_name);
+    }
+    $user = $userList->getResults()[0]->getUserObject();
+
+    // create map if necessary
+    $map_name = filter_input(INPUT_POST, 'map_name', FILTER_SANITIZE_STRING);
+    $map_repository = $this->em->getRepository('Tfts\Entity\TrackmaniaMap');
+    $map = $map_repository->findOneBy(['lan' => $this->getLan(), 'map_name' => $map_name]);
+    if (is_null($map)) {
+      $map = new TrackmaniaMap($this->getLan(), $map_name);
+      $this->em->persist($map);
+      $this->em->flush();
+    }
+
+    // prepare datetime object
+    $date = filter_input(INPUT_POST, 'date', FILTER_SANITIZE_STRING);
+    $time = filter_input(INPUT_POST, 'time', FILTER_SANITIZE_STRING);
+    $datetime = new \DateTime($date . ' ' . $time);
+
+    // split record to milliseconds
+    $record = filter_input(INPUT_POST, 'record', FILTER_SANITIZE_STRING);
+    $split = explode(".", $record);
+    $milliseconds = intval($split[1]);
+    $hms = explode(":", $split[0]);
+    switch (sizeof($hms)) {
+      case 1:
+        $milliseconds += intval($hms[0]) * 1000;
+        break;
+      case 2:
+        $milliseconds += (intval($hms[0]) * 60 + intval($hms[1])) * 1000;
+        break;
+      case 3:
+        $milliseconds += (intval($hms[0]) * 3600 + intval($hms[1]) * 60 + intval($hms[3])) * 1000;
+        break;
+      default:
+        return new JsonResponse('Invalid record: ' . $record);
+    }
+
+    $trackmania_repository = $this->em->getRepository('Tfts\Entity\Trackmania');
+    $trackmania = $trackmania_repository->findOneBy(['map' => $map, 'user' => $user->getUserId()]);
+    // new?
+    if (is_null($trackmania)) {
+      $this->em->persist(new Trackmania($this->userToEntity($user), $map, $datetime, $milliseconds));
+      $this->em->flush();
+      return new JsonResponse('Added new record');
+    }
+
+    // improvement?
+    if ($milliseconds < $trackmania->getRecord()) {
+      $trackmania->setDateTime($datetime);
+      $trackmania->setRecord($milliseconds);
+      $this->em->persist($trackmania);
+      $this->em->flush();
+      return new JsonResponse('Record improved');
+    }
+
+    return new JsonResponse('No improvement');
   }
 
   /**

@@ -3,6 +3,7 @@
 namespace Tfts\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Tfts\Entity\Lan;
 
 /**
  * @ORM\Entity
@@ -32,5 +33,22 @@ class TrackmaniaMap {
    * @ORM\JoinColumn(name="lan_id", referencedColumnName="lan_id", nullable=false)
    */
   private $lan;
+
+  public function __construct(Lan $lan, String $map_name) {
+    $this->lan = $lan;
+    $this->map_name = $map_name;
+  }
+
+  public function getId() {
+    return $this->map_id;
+  }
+
+  public function getName() {
+    return $this->map_name;
+  }
+
+  public function getTrackmanias() {
+    return $this->trackmanias;
+  }
 
 }
