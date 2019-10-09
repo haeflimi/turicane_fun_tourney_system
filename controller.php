@@ -64,7 +64,7 @@ class Controller extends Package implements ProviderAggregateInterface {
   public function registerRoutes() {
     $router = $this->app->make('router');
     // This Route is needed to "capture" the Data sent by the Trackmania result logger
-    $router->get('/tfts/api/trackmania', 'Tfts\Tfts::processTrackmaniaData');
+    $router->post('/tfts/api/trackmania', 'Tfts\Tfts::processTrackmaniaData');
   }
 
 }
