@@ -12,7 +12,7 @@ use Tfts\Entity\Game;
 use Tfts\Entity\Registration;
 use Tfts\Entity\Match;
 use Tfts\Entity\Ranking;
-use Tfts\Entity\TrackmaniaMap;
+use Tfts\Entity\Map;
 use Tfts\Entity\Trackmania;
 
 /**
@@ -412,10 +412,10 @@ class Tfts {
 
     // create map if necessary
     $map_name = filter_input(INPUT_POST, 'map_name', FILTER_SANITIZE_STRING);
-    $map_repository = $this->em->getRepository('Tfts\Entity\TrackmaniaMap');
+    $map_repository = $this->em->getRepository('Tfts\Entity\Map');
     $map = $map_repository->findOneBy(['lan' => $this->getLan(), 'map_name' => $map_name]);
     if (is_null($map)) {
-      $map = new TrackmaniaMap($this->getLan(), $map_name);
+      $map = new Map($this->getLan(), $map_name);
       $this->em->persist($map);
       $this->em->flush();
     }

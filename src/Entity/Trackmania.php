@@ -4,7 +4,7 @@ namespace Tfts\Entity;
 
 use Concrete\Core\Entity\User\User;
 use Doctrine\ORM\Mapping as ORM;
-use Tfts\Entity\TrackmaniaMap;
+use Tfts\Entity\Map;
 
 /**
  * @ORM\Entity
@@ -15,16 +15,16 @@ class Trackmania {
   /**
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $map_datetime;
+  private $tm_datetime;
 
   /**
    * @ORM\Column(type="integer", length=10, nullable=false)
    */
-  private $map_record;
+  private $tm_record;
 
   /**
    * @ORM\Id
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\TrackmaniaMap")
+   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Map")
    * @ORM\JoinColumn(name="map_id", referencedColumnName="map_id", nullable=false)
    */
   private $map;
@@ -36,11 +36,11 @@ class Trackmania {
    */
   private $user;
 
-  public function __construct(User $user, TrackmaniaMap $map, \DateTime $datetime, int $record) {
+  public function __construct(User $user, Map $map, \DateTime $datetime, int $record) {
     $this->user = $user;
     $this->map = $map;
-    $this->map_datetime = $datetime;
-    $this->map_record = $record;
+    $this->tm_datetime = $datetime;
+    $this->tm_record = $record;
   }
 
   public function getMap() {
@@ -52,19 +52,19 @@ class Trackmania {
   }
 
   public function getDateTime() {
-    return $this->map_datetime;
+    return $this->tm_datetime;
   }
 
   public function getRecord() {
-    return $this->map_record;
+    return $this->tm_record;
   }
 
   public function setDateTime(\DateTime $datetime) {
-    $this->map_datetime = $datetime;
+    $this->tm_datetime = $datetime;
   }
 
   public function setRecord(int $record) {
-    $this->map_record = $record;
+    $this->tm_record = $record;
   }
 
 }

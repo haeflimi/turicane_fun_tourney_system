@@ -7,9 +7,9 @@ use Tfts\Entity\Lan;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="tftsTrackmaniaMaps", uniqueConstraints={@ORM\UniqueConstraint(name="map_id", columns={"map_id","lan_id"})})
+ * @ORM\Table(name="tftsMaps", uniqueConstraints={@ORM\UniqueConstraint(name="map_id", columns={"map_id","lan_id"})})
  */
-class TrackmaniaMap {
+class Map {
 
   /**
    * @ORM\Id
@@ -24,7 +24,7 @@ class TrackmaniaMap {
   private $map_name;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\Trackmania", mappedBy="trackmaniamap")
+   * @ORM\OneToMany(targetEntity="Tfts\Entity\Trackmania", mappedBy="map")
    */
   private $trackmanias;
 

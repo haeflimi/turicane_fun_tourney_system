@@ -3,20 +3,16 @@
 namespace Concrete\Package\TuricaneFunTourneySystem;
 
 use Concrete\Core\Asset\AssetList;
-use Concrete\Core\Database\EntityManager\Provider\ProviderInterface;
 use Concrete\Core\Package\Package;
 use Concrete\Core\Backup\ContentImporter;
-use Concrete\Core;
 use Concrete\Core\Database\EntityManager\Provider\ProviderAggregateInterface;
 use Concrete\Core\Database\EntityManager\Provider\StandardPackageProvider;
-use Concrete\Core\Support\Facade\Config;
-use Concrete\Core\Support\Facade\Events;
 
 class Controller extends Package implements ProviderAggregateInterface {
 
   protected $pkgHandle = 'turicane_fun_tourney_system';
   protected $appVersionRequired = '8.4';
-  protected $pkgVersion = '0.120.16';
+  protected $pkgVersion = '0.120.18 ';
   protected $em;
   protected $pkgAutoloaderRegistries = array(
       'src/Tfts' => '\Tfts'
