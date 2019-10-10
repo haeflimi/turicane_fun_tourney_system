@@ -24,6 +24,11 @@ class Map {
   private $map_name;
 
   /**
+   * @ORM\Column(type="integer", length=1, nullable=false, options={"default":0})
+   */
+  private $map_is_processed = 0;
+
+  /**
    * @ORM\OneToMany(targetEntity="Tfts\Entity\Trackmania", mappedBy="map")
    */
   private $trackmanias;
@@ -49,6 +54,18 @@ class Map {
 
   public function getTrackmanias() {
     return $this->trackmanias;
+  }
+
+  public function isProcessed() {
+    return $this->map_is_processed == 1;
+  }
+
+  public function setProcessed(bool $processed) {
+    $this->map_is_processed = $processed ? 1 : 0;
+  }
+
+  public function getLan() {
+    return $this->lan;
   }
 
 }

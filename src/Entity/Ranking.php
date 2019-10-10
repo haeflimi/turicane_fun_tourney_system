@@ -55,7 +55,7 @@ class Ranking {
   }
 
   public static function compare(Ranking $ranking1, Ranking $ranking2) {
-    return $ranking1->getPoints() <=> $ranking2->getPoints();
+    return $ranking2->getPoints() <=> $ranking1->getPoints();
   }
 
 }

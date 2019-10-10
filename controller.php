@@ -12,7 +12,7 @@ class Controller extends Package implements ProviderAggregateInterface {
 
   protected $pkgHandle = 'turicane_fun_tourney_system';
   protected $appVersionRequired = '8.4';
-  protected $pkgVersion = '0.120.18 ';
+  protected $pkgVersion = '0.120.19';
   protected $em;
   protected $pkgAutoloaderRegistries = array(
       'src/Tfts' => '\Tfts'

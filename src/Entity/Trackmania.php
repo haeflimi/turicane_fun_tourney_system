@@ -67,4 +67,8 @@ class Trackmania {
     $this->tm_record = $record;
   }
 
+  public static function compare(Trackmania $trackmania1, Trackmania $trackmania2) {
+    return $trackmania1->getRecord() <=> $trackmania2->getRecord();
+  }
+
 }

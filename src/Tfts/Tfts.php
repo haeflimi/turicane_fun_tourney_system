@@ -14,6 +14,7 @@ use Tfts\Entity\Match;
 use Tfts\Entity\Ranking;
 use Tfts\Entity\Map;
 use Tfts\Entity\Trackmania;
+use Tfts\Entity\Special;
 
 /**
  * This Class wraps all the important Functionality of the Turicane Fun Tourney System
@@ -371,6 +372,29 @@ class Tfts {
     return 0;
   }
 
+  public function getTrackmaniaRank(Map $map, User $user) {
+    $trackmanias = $map->getTrackmanias()->toArray();
+    usort($trackmanias, 'Tfts\Entity\Trackmania::compare');
+
+    $rank = 0;
+    $last_record = 0;
+    $skipped = 0;
+
+    foreach ($trackmanias as $trackmania) {
+      if ($last_record == $trackmania->getRecord()) {
+        $skipped++;
+      } else {
+        $rank = $rank + 1 + $skipped;
+        $skipped = 0;
+      }
+      if ($trackmania->getUser()->getUserId() == $user->getUserId()) {
+        return $rank;
+      }
+      $last_record = $trackmania->getRecord();
+    }
+    return 0;
+  }
+
   /**
    * Adds the given points to the given user.
    *
@@ -391,8 +415,10 @@ class Tfts {
   }
 
   /**
+   * Processes the data provided which is considered to be a trackmania result.
+   * In order to be processed, the password must match and the user must exist.
    *
-   * @return JsonResponse
+   * @return JsonResponse result of the process.
    */
   public function processTrackmaniaData() {
     $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
@@ -463,6 +489,58 @@ class Tfts {
     }
 
     return new JsonResponse('No improvement');
+  }
+
+  /**
+   * Processes the given map. Every user that was able to set a record is
+   * awarded with 1 point. The best users will be awarded with more points:
+   *
+   * 1st = 25
+   * 2nd = 18
+   * 3rd = 15
+   * 4th = 12
+   * 5th = 10
+   * 6th = 8
+   * 7th = 6
+   * 8th = 4
+   * 9th = 3
+   * 10th= 2
+   *
+   * @param Map $map
+   * @return bool true if the map was processed, false otherwise.
+   */
+  public function processMap(Map $map) {
+    $db_map = $this->em->find('Tfts\Entity\Map', $map->getId());
+
+    // verify map exists
+    if (is_null($db_map)) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    // verify map hasn't been processed
+    if ($db_map->isProcessed()) {
+      return false;
+    }
+
+    $awardedPoints = array('default' => 1, 1 => 25, 2 => 18, 3 => 15, 4 => 12, 5 => 10, 6 => 8, 7 => 6, 8 => 4, 9 => 3, 10 => 2);
+    foreach ($db_map->getTrackmanias() as $trackmania) {
+      $rank = $this->getTrackmaniaRank($db_map, $this->entityToUser($trackmania->getUser()));
+      if ($rank == 0) {
+        continue;
+      }
+
+      $points = array_key_exists($rank, $awardedPoints) ? $awardedPoints[$rank] : $awardedPoints['default'];
+      $description = 'Teilnahme Trackmania (#' . $rank . ', ' . $db_map->getName() . ')';
+
+      $this->em->persist(new Special($db_map->getLan(), $trackmania->getUser(), $description, $points));
+      $this->addPoints($this->entityToUser($trackmania->getUser()), $points);
+    }
+
+    $db_map->setProcessed(true);
+    $this->em->persist($db_map);
+    $this->em->flush();
+    return true;
   }
 
   /**
