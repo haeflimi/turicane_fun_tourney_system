@@ -20,75 +20,15 @@ class Game {
    */
   private $game_id;
 
-  /**
-   * @ORM\Column(type="string", length=50, nullable=false)
-   */
-  private $game_name;
+    /**
+     * @ORM\Column(type="string", length=50, nullable=false)
+     */
+    private $game_handle;
 
-  /**
-   * @ORM\Column(type="string", length=200, nullable=true)
-   */
-  private $game_icon;
-
-  /**
-   * @ORM\Column(type="string", length=200, nullable=true)
-   */
-  private $game_logo;
-
-  /**
-   * @ORM\Column(type="string", length=200, nullable=true)
-   */
-  private $game_banner;
-
-  /**
-   * @ORM\Column(type="integer", length=1, nullable=false, options={"default":0})
-   */
-  private $game_is_pool = 0;
-
-  /**
-   * @ORM\Column(type="integer", length=1, nullable=false, options={"default":0})
-   */
-  private $game_is_mass = 0;
-
-  /**
-   * @ORM\Column(type="integer", length=1, nullable=false, options={"default":0})
-   */
-  private $game_is_team = 0;
-
-  /**
-   * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
-   */
-  private $game_player_count = 0;
-
-  /**
-   * @ORM\Column(type="string", length=20, nullable=true)
-   */
-  private $game_mode;
-
-  /**
-   * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
-   */
-  private $game_points_win = 0;
-
-  /**
-   * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
-   */
-  private $game_points_loss = 0;
-
-  /**
-   * @ORM\Column(type="string", nullable=true)
-   */
-  private $game_rules;
-
-  /**
-   * @ORM\Column(type="integer", length=1, nullable=false, options={"default":0})
-   */
-  private $game_is_deleted = 0;
-
-  /**
-   * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
-   */
-  private $game_is_featured = 0;
+    /**
+     * @ORM\Column(type="integer", length=10)
+     */
+    private $game_page_id;
 
   /**
    * @ORM\ManyToOne(targetEntity="Tfts\Entity\Lan", inversedBy="games")
@@ -111,54 +51,125 @@ class Game {
    */
   private $pools;
 
-  public function __construct(Lan $lan, $game_id, $game_name) {
-    $this->lan = $lan;
-    $this->game_id = $game_id;
-    $this->game_name = $game_name;
+  private $game_page;
+
+  public function __construct($game_handle) {
+      $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
+      $this->em = $app->make('Doctrine\ORM\EntityManager');
+      $game = $this->em->getRepository('Tfts\Entity\Game')->findOneBy(['game_handle'=>$game_handle]);
+      return $game;
   }
 
   public function getId() {
     return $this->game_id;
   }
 
+    public function getLan() {
+        return $this->lan;
+    }
+
+    public function getRegistrations() {
+        return $this->registrations;
+    }
+
+    public function getMatches() {
+        return $this->matches;
+    }
+
+    public function getPools() {
+        return $this->pools;
+    }
+
+    public function setLan(Lan $lan){
+        $this->lan = $lan;
+        return $this;
+    }
+
+    public function setGameHandle($game_handle){
+        $this->game_handle = $game_handle;
+        return $this;
+    }
+
+    public function setGamePageId($game_page_id){
+        $this->game_page_id = $game_page_id;
+        return $this;
+    }
+
+    public static function addGame(Lan $lan, $game_handle, $game_page_id){
+        $game = new Game();
+        $game->setLan($lan)
+            ->setGameHandle($game_handle)
+            ->setGamePageId($game_page_id);
+        $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
+        $em = $app->make('Doctrine\ORM\EntityManager');
+        $em->persist($game);
+        $em->flush();
+        return $game;
+    }
+
+    /**
+     * The Following Getter Methods make use of c5 specific Features to store Game Information in Pages
+     */
+
   public function getName() {
-    return $this->game_name;
+      if(!is_object($game_page = $this->getGamePage())){
+          return $this->game_handle;
+      }
+      return $game_page->getCollecitonName();
+
   }
 
   public function getPointsWin() {
-    return $this->game_points_win;
+      if(!is_object($game_page = $this->getGamePage())){
+          return null;
+      }
+    return $game_page->getAttributes('tfts_game_points_win');
   }
 
   public function getPointsLoss() {
-    return $this->game_points_loss;
+      if(!is_object($game_page = $this->getGamePage())){
+          return null;
+      }
+      return $game_page->getAttributes('tfts_game_points_loss');
   }
 
   public function getIsPool() {
-    return $this->game_is_pool;
+      if(!is_object($game_page = $this->getGamePage())){
+          return null;
+      }
+      return $game_page->getAttributes('tfts_game_is_pool');
   }
 
   public function getIsTeam() {
-    return $this->game_is_team;
+      if(!is_object($game_page = $this->getGamePage())){
+          return null;
+      }
+      return $game_page->getAttributes('tfts_game_is_team');
   }
 
   public function getIsMass() {
-    return $this->game_is_mass;
+      if(!is_object($game_page = $this->getGamePage())){
+          return null;
+      }
+      return $game_page->getAttributes('tfts_game_is_mass');
   }
 
-  public function getLan() {
-    return $this->lan;
+  public function getGamePage(){
+      if(empty($this->game_page_id)){
+          return null;
+      }
+      if(empty($this->game_page)){
+          $this->game_page = Page::getById($this->game_page_id);
+      }
+      return $this->game_page;
   }
 
-  public function getRegistrations() {
-    return $this->registrations;
+  public function getGamePageURL(){
+      if(!is_object($game_page = $this->getGamePage())){
+          return null;
+      }
+      return $game_page->getCollectionLink();
   }
 
-  public function getMatches() {
-    return $this->matches;
-  }
-
-  public function getPools() {
-    return $this->pools;
-  }
 
 }

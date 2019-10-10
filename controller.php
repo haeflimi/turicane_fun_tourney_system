@@ -12,7 +12,7 @@ class Controller extends Package implements ProviderAggregateInterface {
 
   protected $pkgHandle = 'turicane_fun_tourney_system';
   protected $appVersionRequired = '8.4';
-  protected $pkgVersion = '0.120.19';
+  protected $pkgVersion = '0.120.24';
   protected $em;
   protected $pkgAutoloaderRegistries = array(
       'src/Tfts' => '\Tfts'
@@ -40,6 +40,9 @@ class Controller extends Package implements ProviderAggregateInterface {
     $al->register('javascript', 'tfts_notifications', 'js/tfts_notifications.js',
             array('minify' => false, 'combine' => false), $pkg
     );
+      $al->register('javascript', 'tfts', 'js/tfts.js',
+          array('minify' => false, 'combine' => false), $pkg
+      );
   }
 
   public function install() {

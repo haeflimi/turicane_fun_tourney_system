@@ -2,13 +2,13 @@
 <concrete5-cif version="1.0">
     <blocktypes>
         <blocktype handle="tfts_ranking_list" package="turicane_fun_tourney_system"/>
-        <blocktype handle="tfts_team_manager" package="turicane_fun_tourney_system"/>
+        <blocktype handle="tfts_pool_overview" package="turicane_fun_tourney_system"/>
         <blocktype handle="tfts_live_results" package="turicane_fun_tourney_system"/>
     </blocktypes>
     <blocktypesets>
         <blocktypeset handle="tfts" name="Turicane TFTS" package="turicane_fun_tourney_system">
             <blocktype handle="tfts_ranking_list"/>
-            <blocktype handle="tfts_team_manager"/>
+            <blocktype handle="tfts_pool_overview"/>
             <blocktype handle="tfts_live_results"/>
         </blocktypeset>
     </blocktypesets>
@@ -18,4 +18,34 @@
         <page name="TFTS" path="/dashboard/tfts" filename="/dashboard/tfts.php" package="turicane_fun_tourney_system">
         </page>
     </singlepages>
+    <attributekeys>
+        <attributekey handle="tfts_game_icon" name="Game Icon" package="turicane_fun_tourney_system" type="image_file" category="collection"/>
+        <attributekey handle="tfts_game_logo" name="Game Logo" package="turicane_fun_tourney_system" type="image_file" category="collection"/>
+        <attributekey handle="tfts_game_mode" name="Game Modus" package="turicane_fun_tourney_system" type="text" category="collection"/>
+        <attributekey handle="tfts_game_is_pool" name="Game Is Pool" package="turicane_fun_tourney_system" type="boolean" category="collection">
+            <value>0</value>
+        </attributekey>
+        <attributekey handle="tfts_game_is_mass" name="Game Is Massgame" package="turicane_fun_tourney_system" type="boolean" category="collection">
+            <value>0</value>
+        </attributekey>
+        <attributekey handle="tfts_game_is_team" name="Game Is Team" package="turicane_fun_tourney_system" type="boolean" category="collection">
+            <value>0</value>
+        </attributekey>
+        <attributekey handle="tfts_game_players" name="Team Game Player Count" package="turicane_fun_tourney_system" type="number" category="collection"/>
+        <attributekey handle="tfts_game_points_win" name="Win Game Points" package="turicane_fun_tourney_system" type="number" category="collection"/>
+        <attributekey handle="tfts_game_points_loss" name="Loss Game Points" package="turicane_fun_tourney_system" type="number" category="collection"/>
+    </attributekeys>
+    <attributesets>
+        <attributeset handle="tfts_game" name="TFTS Game Attributes" package="turicane_fun_tourney_system" locked="1" category="collection">
+            <attributekey handle="tfts_game_icon"/>
+            <attributekey handle="tfts_game_logo"/>
+            <attributekey handle="tfts_game_mode"/>
+            <attributekey handle="tfts_game_is_pool"/>
+            <attributekey handle="tfts_game_is_mass"/>
+            <attributekey handle="tfts_game_is_team"/>
+            <attributekey handle="tfts_game_players"/>
+            <attributekey handle="tfts_game_points_win"/>
+            <attributekey handle="tfts_game_points_loss"/>
+        </attributeset>
+    </attributesets>
 </concrete5-cif>

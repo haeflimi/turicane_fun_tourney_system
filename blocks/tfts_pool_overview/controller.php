@@ -3,6 +3,7 @@ namespace Concrete\Package\TuricaneFunTourneySystem\Block\TftsPoolOverview;
 
 use Concrete\Core\Block\BlockController;
 use Concrete\Core\Page\PageList;
+use Concrete\Core\User\User;
 use Site;
 use Group;
 use Core;
@@ -10,6 +11,7 @@ use Database;
 use Page;
 use Permissions;
 use \DateTime;
+use Tfts\Tfts;
 
 class Controller extends BlockController
 {
@@ -43,8 +45,21 @@ class Controller extends BlockController
 
     public function view()
     {
-        // Here we could make use of the Notification System to send Team Invites to Users and having
-        // them accept or decline them: https://documentation.concrete5.org/tutorials/how-to-create-alert-notifications-and-modals
+        $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
+        $em = $app->make('Doctrine\ORM\EntityManager');
+        $me = new User();
+        $this->requireAsset('javascript', 'tfts');
 
+        $page = Page::getCurrentPage();
+        $this->set('is_pool', $page->getAttribute('tfts_game_is_pool'));
+
+        $game = $em->getRepository('Tfts\Entity\Game')->findOneBy(['game_page_id'=>$page->getCollectionId()]);
+        $myRegistration = $em->getRepository('Tfts\Entity\Registration')->findOneBy(['user'=>$me->getUserId()]);
+        $tfts = new Tfts();
+        $this->set('in_pool', (is_object($myRegistration)?true:false));
+        $this->set('registrations', $tfts->getRegistrations($game));
+        $this->set('openChallenges', $tfts->getOpenChallenges($game));
+        $this->set('openMatches', $tfts->getOpenMatches($game));
+        $this->set('closedMatches', $tfts->getClosedMatches($game));
     }
 }
