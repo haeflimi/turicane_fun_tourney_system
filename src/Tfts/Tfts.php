@@ -110,7 +110,7 @@ class Tfts {
       return null;
     }
 
-    $repository = $this->em->getRepository('Tfts\Entity\Match');
+    $repository = $this->em->getRepository(Match::class);
     // verify challenge cannot be triggered twice
     if (!is_null($repository->findOneBy(['user1' => $challenger->getUserId(), 'user2' => $challenged->getUserId(), 'match_finish_date' => null]))) {
       // @TODO: throw exception?
@@ -144,7 +144,7 @@ class Tfts {
       return false;
     }
 
-    $repository = $this->em->getRepository('Tfts\Entity\Match');
+    $repository = $this->em->getRepository(Match::class);
     // verify match exists and user is challenger
     if (is_null($repository->findOneBy(['match_id' => $match, 'user1' => $challenger->getUserId()]))) {
       // @TODO: throw exception?
@@ -170,7 +170,7 @@ class Tfts {
       return false;
     }
 
-    $repository = $this->em->getRepository('Tfts\Entity\Match');
+    $repository = $this->em->getRepository(Match::class);
     // verify match exists and user is challenged
     if (is_null($repository->findOneBy(['match_id' => $match, 'user2' => $challenged->getUserId()]))) {
       // @TODO: throw exception?
@@ -197,7 +197,7 @@ class Tfts {
       return false;
     }
 
-    $repository = $this->em->getRepository('Tfts\Entity\Match');
+    $repository = $this->em->getRepository(Match::class);
     // verify match exists and user is challenged
     if (is_null($repository->findOneBy(['match_id' => $match, 'user2' => $challenged->getUserId()]))) {
       // @TODO: throw exception?
@@ -353,6 +353,11 @@ class Tfts {
     return 0;
   }
 
+  /**
+   * @param Map $map
+   * @param User $user
+   * @return int the user rank for the given map.
+   */
   public function getTrackmaniaRank(Map $map, User $user) {
     $trackmanias = $map->getTrackmanias()->toArray();
     usort($trackmanias, 'Tfts\Entity\Trackmania::compare');
@@ -383,7 +388,7 @@ class Tfts {
    * @param int $points
    */
   public function addPoints(User $user, int $points) {
-    $repository = $this->em->getRepository('Tfts\Entity\Ranking');
+    $repository = $this->em->getRepository(Ranking::class);
     $ranking = $repository->findOneBy(['lan' => $this->getLan(), 'user' => $user->getUserId()]);
     if (is_null($ranking)) {
       $ranking = new Ranking($this->getLan(), $this->userToEntity($user));
@@ -419,7 +424,7 @@ class Tfts {
 
     // create map if necessary
     $map_name = filter_input(INPUT_POST, 'map_name', FILTER_SANITIZE_STRING);
-    $map_repository = $this->em->getRepository('Tfts\Entity\Map');
+    $map_repository = $this->em->getRepository(Map::class);
     $map = $map_repository->findOneBy(['lan' => $this->getLan(), 'map_name' => $map_name]);
     if (is_null($map)) {
       $map = new Map($this->getLan(), $map_name);
@@ -451,7 +456,7 @@ class Tfts {
         return new JsonResponse('Invalid record: ' . $record);
     }
 
-    $trackmania_repository = $this->em->getRepository('Tfts\Entity\Trackmania');
+    $trackmania_repository = $this->em->getRepository(Trackmania::class);
     $trackmania = $trackmania_repository->findOneBy(['map' => $map, 'user' => $user->getUserId()]);
     // new?
     if (is_null($trackmania)) {
@@ -491,7 +496,7 @@ class Tfts {
    * @return bool true if the map was processed, false otherwise.
    */
   public function processMap(Map $map) {
-    $db_map = $this->em->find('Tfts\Entity\Map', $map->getId());
+    $db_map = $this->em->find(Map::class, $map->getId());
 
     // verify map exists
     if (is_null($db_map)) {
@@ -536,7 +541,7 @@ class Tfts {
    * @return Lan the current lan object.
    */
   private function getLan() {
-    return $this->em->find('Tfts\Entity\Lan', Config::get('tfts.currentLanId'));
+    return $this->em->find(Lan::class, Config::get('tfts.currentLanId'));
   }
 
   /**
@@ -548,7 +553,7 @@ class Tfts {
    * @return Registration
    */
   private function findRegistration(Game $game, User $user = null, Group $group = null) {
-    $repository = $this->em->getRepository('Tfts\Entity\Registration');
+    $repository = $this->em->getRepository(Registration::class);
 
     // verify that only one and one only of user and group is set
     if (($user == null && $group == null) || ($user != null && $group != null)) {
@@ -576,7 +581,7 @@ class Tfts {
    * @return Concrete\Core\Entity\User\User the entity matching the given user.
    */
   private function userToEntity(User $user) {
-    $repository = $this->em->getRepository('Concrete\Core\Entity\User\User');
+    $repository = $this->em->getRepository(\Concrete\Core\Entity\User\User::class);
     return $repository->findOneBy(['uID' => $user->getUserId()]);
   }
 
@@ -591,7 +596,7 @@ class Tfts {
     $is_challenger = $match->getUser1()->getUserId() == $user->getUserId();
     $is_challenged = $match->getUser2()->getUserId() == $user->getUserId();
 
-    $repository = $this->em->getRepository('Tfts\Entity\Match');
+    $repository = $this->em->getRepository(Match::class);
     $db_match = $repository->findOneBy(['match_id' => $match, ($is_challenger ? 'user1' : 'user2') => $user->getUserId()]);
     // verify match exists
     if (is_null($db_match)) {
