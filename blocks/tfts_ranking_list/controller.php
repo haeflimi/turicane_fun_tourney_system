@@ -11,6 +11,7 @@ use Concrete\Core\Entity\User;
 //use Tfts\Entity\Lan;
 //use Tfts\Entity\Game;
 use Tfts\Tfts;
+
 //use Concrete\Core\Support\Facade\Config;
 
 defined('C5_EXECUTE') or die('Access Denied.');
@@ -242,35 +243,61 @@ class Controller extends BlockController {
    * @return void
    */
   public function view() {
-//    $userList = new UserList();
-//
-//    $userList->filterByUserName('Freezer');
-//    $freezer = $userList->getResults()[0]->getUserObject();
-//
-//    $userList->filterByUserName('TuBorg');
-//    $tuborg = $userList->getResults()[0]->getUserObject();
-//    $hearthstone = $this->em->find('Tfts\Entity\Game', 1);
-
     $tfts = new Tfts();
+//    $this->simulateUserGame($tfts);
+    $this->simulateMassGame($tfts);
+//    $this->processTrackmaniaMap($tfts);
+  }
+
+  private function simulateUserGame(Tfts $tfts) {
+    $freezer = $this->getUserByName('Freezer');
+    $tuborg = $this->getUserByName('TuBorg');
+
+    $hearthstone = $this->em->find('Tfts\Entity\Game', 1);
+
+    $tfts->joinUserPool($hearthstone, $freezer);
+    $tfts->joinUserPool($hearthstone, $tuborg);
+
+    $match1 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
+    $tfts->withdrawUserChallenge($match1, $freezer);
+
+    $match2 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
+    $tfts->declineUserChallenge($match2, $tuborg);
+
+    $match3 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
+    $tfts->acceptUserChallenge($match3, $tuborg);
+    $tfts->cancelUserMatch($match3, $freezer);
+
+    $match4 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
+    $tfts->acceptUserChallenge($match4, $tuborg);
+    $tfts->reportResultUserMatch($match4, $freezer, 2, 1);
+    $tfts->reportResultUserMatch($match4, $tuborg, 1, 2);
+    $tfts->reportResultUserMatch($match4, $freezer, 1, 2);
+  }
+
+  private function simulateMassGame(Tfts $tfts) {
+    $flatout2 = $this->em->find('Tfts\Entity\Game', 5);
+
+    $tfts->joinUserPool($flatout2, $this->getUserByName('Freezer'));
+    $tfts->joinUserPool($flatout2, $this->getUserByName('TuBorg'));
+    $tfts->joinUserPool($flatout2, $this->getUserByName('Buddha'));
+    $tfts->joinUserPool($flatout2, $this->getUserByName('Xelsor'));
+    $tfts->joinUserPool($flatout2, $this->getUserByName('Jackal'));
+    $tfts->joinUserPool($flatout2, $this->getUserByName('Yogiman'));
+    $tfts->joinUserPool($flatout2, $this->getUserByName('Nando'));
+    $tfts->joinUserPool($flatout2, $this->getUserByName('DrAcul'));
+
+    $tfts->createPools($flatout2, 4);
+  }
+
+  private function processTrackmaniaMap(Tfts $tfts) {
     $tfts->processMap($this->em->find('Tfts\Entity\Map', 1));
-//    $tfts->joinUserPool($hearthstone, $freezer);
-//    $tfts->joinUserPool($hearthstone, $tuborg);
-//
-//    $match1 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
-//    $tfts->withdrawUserChallenge($match1, $freezer);
-//
-//    $match2 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
-//    $tfts->declineUserChallenge($match2, $tuborg);
-//
-//    $match3 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
-//    $tfts->acceptUserChallenge($match3, $tuborg);
-//    $tfts->cancelUserMatch($match3, $freezer);
-//
-//    $match4 = $tfts->challengeUser($hearthstone, $freezer, $tuborg);
-//    $tfts->acceptUserChallenge($match4, $tuborg);
-//    $tfts->reportResultUserMatch($match4, $freezer, 2, 1);
-//    $tfts->reportResultUserMatch($match4, $tuborg, 1, 2);
-//    $tfts->reportResultUserMatch($match4, $freezer, 1, 2);
+  }
+
+  private function getUserByName(String $user_name) {
+    $userList = new UserList();
+    $userList->filterByUserName($user_name);
+    return $userList->getResults()[0]->getUserObject();
   }
 
   /**

@@ -48,19 +48,23 @@ class Special {
     $this->special_points = $points;
   }
 
-  public function getId() {
+  public function getId(): int {
     return $this->special_id;
   }
 
-  public function getUser() {
+  public function getLan(): Lan {
+    return $this->lan;
+  }
+
+  public function getUser(): User {
     return $this->user;
   }
 
-  public function getDescription() {
+  public function getDescription(): String {
     return $this->special_description;
   }
 
-  public function getPoints() {
+  public function getPoints(): int {
     return $this->special_points;
   }
 

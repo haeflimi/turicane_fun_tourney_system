@@ -2,6 +2,8 @@
 
 namespace Tfts\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -197,5 +199,12 @@ class Game
         return $game_page->getCollectionLink();
     }
 
+
+  public function getOpenPools(): Collection {
+    return $this->pools
+                    ->filter(function(Pool $pool) {
+                      return !$pool->isPlayed();
+                    });
+  }
 
 }

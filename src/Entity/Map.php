@@ -2,6 +2,7 @@
 
 namespace Tfts\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Tfts\Entity\Lan;
 
@@ -44,19 +45,19 @@ class Map {
     $this->map_name = $map_name;
   }
 
-  public function getId() {
+  public function getId(): int {
     return $this->map_id;
   }
 
-  public function getName() {
+  public function getName(): String {
     return $this->map_name;
   }
 
-  public function getTrackmanias() {
+  public function getTrackmanias(): Collection {
     return $this->trackmanias;
   }
 
-  public function isProcessed() {
+  public function isProcessed(): bool {
     return $this->map_is_processed == 1;
   }
 
@@ -64,7 +65,7 @@ class Map {
     $this->map_is_processed = $processed ? 1 : 0;
   }
 
-  public function getLan() {
+  public function getLan(): Lan {
     return $this->lan;
   }
 

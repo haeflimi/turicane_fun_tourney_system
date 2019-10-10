@@ -43,19 +43,19 @@ class Trackmania {
     $this->tm_record = $record;
   }
 
-  public function getMap() {
+  public function getMap(): Map {
     return $this->map;
   }
 
-  public function getUser() {
+  public function getUser(): User {
     return $this->user;
   }
 
-  public function getDateTime() {
+  public function getDateTime(): \DateTime {
     return $this->tm_datetime;
   }
 
-  public function getRecord() {
+  public function getRecord(): int {
     return $this->tm_record;
   }
 
@@ -67,7 +67,7 @@ class Trackmania {
     $this->tm_record = $record;
   }
 
-  public static function compare(Trackmania $trackmania1, Trackmania $trackmania2) {
+  public static function compare(Trackmania $trackmania1, Trackmania $trackmania2): int {
     return $trackmania1->getRecord() <=> $trackmania2->getRecord();
   }
 

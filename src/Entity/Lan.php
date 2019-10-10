@@ -2,6 +2,7 @@
 
 namespace Tfts\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -58,35 +59,35 @@ class Lan {
     $this->page_id = $page_id;
   }
 
-  public function getId() {
+  public function getId(): int {
     return $this->lan_id;
   }
 
-  public function getHandle() {
+  public function getHandle(): String {
     return $this->handle;
   }
 
-  public function getPageId() {
+  public function getPageId(): int {
     return $this->page_id;
   }
 
-  public function getGames() {
+  public function getGames(): Collection {
     return $this->games;
   }
 
-  public function getRankings() {
+  public function getRankings(): Collection {
     return $this->rankings;
   }
 
-  public function getRankingSnapshots() {
+  public function getRankingSnapshots(): Collection {
     return $this->rankingSnapshots;
   }
 
-  public function getSpecials() {
+  public function getSpecials(): Collection {
     return $this->specials;
   }
 
-  public function getTrackmanias() {
+  public function getTrackmanias(): Collection {
     return $this->trackmanias;
   }
 

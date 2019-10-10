@@ -50,24 +50,28 @@ class Registration {
     $this->rnd_number = rand(1, 1000000);
   }
 
-  public function getId() {
+  public function getId(): int {
     return $this->registration_id;
   }
 
-  public function getGame() {
+  public function getGame(): Game {
     return $this->game;
   }
 
-  public function getUser() {
+  public function getUser(): User {
     return $this->user;
   }
 
-  public function getGroupId() {
+  public function getGroupId(): int {
     return $this->group_id;
   }
 
-  public function getRandomNumber() {
+  public function getRandomNumber(): int {
     return $this->rnd_number;
+  }
+
+  public static function compare(Registration $registration1, Registration $registration2): int {
+    return $registration1->getRandomNumber() <=> $registration2->getRandomNumber();
   }
 
 }

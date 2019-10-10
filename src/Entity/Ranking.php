@@ -38,15 +38,15 @@ class Ranking {
     $this->user = $user;
   }
 
-  public function getLan() {
+  public function getLan(): Lan {
     return $this->lan;
   }
 
-  public function getUser() {
+  public function getUser(): User {
     return $this->user;
   }
 
-  public function getPoints() {
+  public function getPoints(): int {
     return $this->points;
   }
 
@@ -54,7 +54,7 @@ class Ranking {
     $this->points = $points;
   }
 
-  public static function compare(Ranking $ranking1, Ranking $ranking2) {
+  public static function compare(Ranking $ranking1, Ranking $ranking2): int {
     return $ranking2->getPoints() <=> $ranking1->getPoints();
   }
 

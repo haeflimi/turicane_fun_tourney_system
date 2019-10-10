@@ -3,6 +3,7 @@
 namespace Tfts\Entity;
 
 use Concrete\Core\Entity\User\User;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Tfts\Entity\Game;
 
@@ -175,63 +176,67 @@ class Match {
     }
   }
 
-  public function getId() {
+  public function getId(): int {
     return $this->match_id;
   }
 
-  public function getGame() {
+  public function getGame(): Game {
     return $this->game;
   }
 
-  public function getUser1() {
+  public function getUser1(): User {
     return $this->user1;
   }
 
-  public function getUser2() {
+  public function getUser2(): User {
     return $this->user2;
   }
 
-  public function getGroup1Id() {
+  public function getGroup1Id(): int {
     return $this->group1_id;
   }
 
-  public function getGroup2Id() {
+  public function getGroup2Id(): int {
     return $this->group2_id;
   }
 
-  public function getMatchUsers() {
+  public function getMatchUsers(): Collection {
     return $this->matchGroupUsers;
   }
 
-  public function getChallengeDate() {
+  public function getChallengeDate(): \DateTime {
     return $this->match_challenge_date;
   }
 
-  public function getFinishDate() {
+  public function isAccepted(): bool {
+    return $this->match_accepted == 1;
+  }
+
+  public function getFinishDate(): ?\DateTime {
     return $this->match_finish_date;
   }
 
-  public function getScore1() {
+  public function getScore1(): int {
     return $this->match_score1;
   }
 
-  public function getScore2() {
+  public function getScore2(): int {
     return $this->match_score2;
   }
 
-  public function isConfirmed1() {
+  public function isConfirmed1(): bool {
     return $this->match_confirmed1 == 1;
   }
 
-  public function isConfirmed2() {
+  public function isConfirmed2(): bool {
     return $this->match_confirmed2 == 1;
   }
 
-  public function getCompute1() {
+  public function getCompute1(): int {
     return $this->match_compute1;
   }
 
-  public function getCompute2() {
+  public function getCompute2(): int {
     return $this->match_compute2;
   }
 
