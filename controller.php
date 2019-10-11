@@ -7,9 +7,6 @@ use Concrete\Core\Package\Package;
 use Concrete\Core\Backup\ContentImporter;
 use Concrete\Core\Database\EntityManager\Provider\ProviderAggregateInterface;
 use Concrete\Core\Database\EntityManager\Provider\StandardPackageProvider;
-use Tfts\Tfts;
-use Tfts\Entity\Game;
-use Concrete\Core\User\User;
 
 class Controller extends Package implements ProviderAggregateInterface {
 
