@@ -56,7 +56,9 @@ class Controller extends BlockController
         $game = $em->getRepository('Tfts\Entity\Game')->findOneBy(['game_page_id'=>$page->getCollectionId()]);
         $myRegistration = $em->getRepository('Tfts\Entity\Registration')->findOneBy(['user'=>$me->getUserId()]);
         $tfts = new Tfts();
+        $this->set('tfts_game_id', $game->getId());
         $this->set('in_pool', (is_object($myRegistration)?true:false));
+        $this->set('me', $me);
         $this->set('registrations', $tfts->getRegistrations($game));
         $this->set('openChallenges', $tfts->getOpenChallenges($game));
         $this->set('openMatches', $tfts->getOpenMatches($game));

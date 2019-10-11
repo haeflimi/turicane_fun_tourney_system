@@ -7,12 +7,15 @@ use Concrete\Core\Package\Package;
 use Concrete\Core\Backup\ContentImporter;
 use Concrete\Core\Database\EntityManager\Provider\ProviderAggregateInterface;
 use Concrete\Core\Database\EntityManager\Provider\StandardPackageProvider;
+use Tfts\Tfts;
+use Tfts\Entity\Game;
+use Concrete\Core\User\User;
 
 class Controller extends Package implements ProviderAggregateInterface {
 
   protected $pkgHandle = 'turicane_fun_tourney_system';
   protected $appVersionRequired = '8.4';
-  protected $pkgVersion = '0.120.24';
+  protected $pkgVersion = '0.120.25';
   protected $em;
   protected $pkgAutoloaderRegistries = array(
       'src/Tfts' => '\Tfts'
@@ -61,9 +64,36 @@ class Controller extends Package implements ProviderAggregateInterface {
   }
 
   public function registerRoutes() {
+
     $router = $this->app->make('router');
     // This Route is needed to "capture" the Data sent by the Trackmania result logger
     $router->post('/tfts/api/trackmania', 'Tfts\Tfts::processTrackmaniaData');
+    // Register other routes for interface actions and pass them along to the tfts
+    $router->post('/tfts/api/joinUserPool', function(){
+        if($this->validateRequest($_POST,$_POST['action'])){
+            $tfts = new Tfts();
+            $em = $this->getPackageEntityManager();
+            $user = User::getByUserID($_POST['user_id']);
+            $game = $em->find('Tfts\Entity\Game', $_POST['game_id']);
+            $tfts->joinUserPool($game, $user);
+        }
+    });
+  }
+
+  public function validateRequest($data, $action = false) {
+      $errors = new \Concrete\Core\Error\Error();
+
+      // we want to use a token to validate each call in order to protect from xss and request forgery
+      $token = \Core::make("token");
+      if ($action && !$token->validate($action)) {
+          $errors->add('Invalid Request, token must be valid.');
+      }
+
+      if ($errors->has()) {
+          return $errors;
+      }
+
+      return true;
   }
 
 }

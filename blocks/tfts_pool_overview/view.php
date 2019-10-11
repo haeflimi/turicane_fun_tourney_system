@@ -9,7 +9,7 @@ endif;?>
 
 
 <h2>Pool Members <?php if(1 || !$in_pool):?>
-        <button href="" class="btn btn-success pull-right" onClick="Tfts.joinPool()">Turnierpool beitreten</button>
+        <button class="btn btn-success pull-right" onClick="Tfts.joinUserPool(<?=$me->getUserId();?>,<?=$tfts_game_id;?>,'<?=Core::make('token')->generate('joinPool');?>');">Turnierpool beitreten</button>
     <?php endif; ?></h2>
 
 <table class="table table-striped table-condensed">
