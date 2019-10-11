@@ -2,7 +2,8 @@
 
 namespace Tfts\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
+use Concrete\Core\Support\Facade\Application;
+use Concrete\Core\Page\Page;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -55,51 +56,50 @@ class Game {
   private $game_page;
 
   public function __construct($game_handle) {
-    $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
+    $app = Application::getFacadeApplication();
     $this->em = $app->make('Doctrine\ORM\EntityManager');
-    $game = $this->em->getRepository('Tfts\Entity\Game')->findOneBy(['game_handle' => $game_handle]);
-    return $game;
+    $game = $this->em->getRepository(Game::class)->findOneBy(['game_handle' => $game_handle]);
   }
 
-  public static function getById($id) {
-    $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
+  public static function getById($id): Game {
+    $app = Application::getFacadeApplication();
     $em = $app->make('Doctrine\ORM\EntityManager');
-    return $em->find('Tfts\Entity\Game', $id);
+    return $em->find(Game::class, $id);
   }
 
-  public function getId() {
+  public function getId(): int {
     return $this->game_id;
   }
 
-  public function getLan() {
+  public function getLan(): Lan {
     return $this->lan;
   }
 
-  public function getRegistrations() {
+  public function getRegistrations(): Collection {
     return $this->registrations;
   }
 
-  public function setLan(Lan $lan) {
+  public function setLan(Lan $lan): Game {
     $this->lan = $lan;
     return $this;
   }
 
-  public function setGameHandle($game_handle) {
+  public function setGameHandle($game_handle): Game {
     $this->game_handle = $game_handle;
     return $this;
   }
 
-  public function setGamePageId($game_page_id) {
+  public function setGamePageId($game_page_id): Game {
     $this->game_page_id = $game_page_id;
     return $this;
   }
 
-  public static function addGame(Lan $lan, $game_handle, $game_page_id) {
+  public static function addGame(Lan $lan, $game_handle, $game_page_id): Game {
     $game = new Game();
     $game->setLan($lan)
             ->setGameHandle($game_handle)
             ->setGamePageId($game_page_id);
-    $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
+    $app = Application::getFacadeApplication();
     $em = $app->make('Doctrine\ORM\EntityManager');
     $em->persist($game);
     $em->flush();
@@ -109,49 +109,49 @@ class Game {
   /**
    * The Following Getter Methods make use of c5 specific Features to store Game Information in Pages
    */
-  public function getName() {
+  public function getName(): String {
     if (!is_object($game_page = $this->getGamePage())) {
       return $this->game_handle;
     }
-    return $game_page->getCollecitonName();
+    return $game_page->getCollectionName();
   }
 
-  public function getPointsWin() {
+  public function getPointsWin(): int {
     if (!is_object($game_page = $this->getGamePage())) {
-      return null;
+      return 0;
     }
-    return $game_page->getAttributes('tfts_game_points_win');
+    return $game_page->getAttribute('tfts_game_points_win');
   }
 
-  public function getPointsLoss() {
+  public function getPointsLoss(): int {
     if (!is_object($game_page = $this->getGamePage())) {
-      return null;
+      return 0;
     }
-    return $game_page->getAttributes('tfts_game_points_loss');
+    return $game_page->getAttribute('tfts_game_points_loss');
   }
 
-  public function getIsPool() {
+  public function isPool(): bool {
     if (!is_object($game_page = $this->getGamePage())) {
-      return null;
+      return false;
     }
-    return $game_page->getAttributes('tfts_game_is_pool');
+    return $game_page->getAttribute('tfts_game_is_pool');
   }
 
-  public function getIsTeam() {
+  public function isTeam(): bool {
     if (!is_object($game_page = $this->getGamePage())) {
-      return null;
+      return false;
     }
-    return $game_page->getAttributes('tfts_game_is_team');
+    return $game_page->getAttribute('tfts_game_is_team');
   }
 
-  public function getIsMass() {
+  public function isMass(): bool {
     if (!is_object($game_page = $this->getGamePage())) {
-      return null;
+      return false;
     }
-    return $game_page->getAttributes('tfts_game_is_mass');
+    return $game_page->getAttribute('tfts_game_is_mass');
   }
 
-  public function getGamePage() {
+  public function getGamePage(): Page {
     if (empty($this->game_page_id)) {
       return null;
     }

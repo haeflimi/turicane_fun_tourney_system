@@ -278,16 +278,48 @@ class Controller extends BlockController {
   private function simulateMassGame(Tfts $tfts) {
     $flatout2 = $this->em->find('Tfts\Entity\Game', 5);
 
-    $tfts->joinUserPool($flatout2, $this->getUserByName('Freezer'));
-    $tfts->joinUserPool($flatout2, $this->getUserByName('TuBorg'));
-    $tfts->joinUserPool($flatout2, $this->getUserByName('Buddha'));
-    $tfts->joinUserPool($flatout2, $this->getUserByName('Xelsor'));
-    $tfts->joinUserPool($flatout2, $this->getUserByName('Jackal'));
-    $tfts->joinUserPool($flatout2, $this->getUserByName('Yogiman'));
-    $tfts->joinUserPool($flatout2, $this->getUserByName('Nando'));
-    $tfts->joinUserPool($flatout2, $this->getUserByName('DrAcul'));
+    $round = 1;
+    if ($round == 1) {
+      $tfts->joinUserPool($flatout2, $this->getUserByName('Freezer'));
+      $tfts->joinUserPool($flatout2, $this->getUserByName('TuBorg'));
+      $tfts->joinUserPool($flatout2, $this->getUserByName('Buddha'));
+      $tfts->joinUserPool($flatout2, $this->getUserByName('Xelsor'));
+      $tfts->joinUserPool($flatout2, $this->getUserByName('Jackal'));
+      $tfts->joinUserPool($flatout2, $this->getUserByName('Yogiman'));
+      $tfts->joinUserPool($flatout2, $this->getUserByName('Nando'));
+      $tfts->joinUserPool($flatout2, $this->getUserByName('DrAcul'));
+      $tfts->createPools($flatout2, 4);
+    }
 
-    $tfts->createPools($flatout2, 4);
+    if ($round == 2) {
+      foreach ($flatout2->getOpenPools() as $pool) {
+        $rank = 1;
+        foreach ($pool->getUsers() as $poolUser) {
+          $tfts->setPoolRank($pool, $this->getUserByName($poolUser->getUser()->getUserName()), $rank++);
+        }
+      }
+      $tfts->processPools($flatout2, 2, 1);
+    }
+
+    if ($round == 3) {
+      foreach ($flatout2->getOpenPools() as $pool) {
+        $rank = 1;
+        foreach ($pool->getUsers() as $poolUser) {
+          $tfts->setPoolRank($pool, $this->getUserByName($poolUser->getUser()->getUserName()), $rank++);
+        }
+      }
+      $tfts->processPools($flatout2, 1, 1);
+    }
+
+    if ($round == 4) {
+      foreach ($flatout2->getOpenPools() as $pool) {
+        $rank = 1;
+        foreach ($pool->getUsers() as $poolUser) {
+          $tfts->setPoolRank($pool, $this->getUserByName($poolUser->getUser()->getUserName()), $rank++);
+        }
+      }
+      $tfts->processFinalPool($flatout2);
+    }
   }
 
   private function processTrackmaniaMap(Tfts $tfts) {

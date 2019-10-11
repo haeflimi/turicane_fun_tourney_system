@@ -6,6 +6,7 @@ use Concrete\Core\Support\Facade\Config;
 use Concrete\Core\User\Group\Group;
 use Concrete\Core\User\User;
 use Concrete\Core\User\UserList;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Tfts\Entity\Lan;
@@ -41,11 +42,11 @@ class Tfts {
    * @param User $user
    * @return bool true if the join was successful, false otherwise.
    */
-  public function joinUserPool($game = false, $user = false) {
-      if(!$game && !$user && $this->validateRequest($_POST, $_POST['action'])){
-          $user = User::getByUserID($_POST['user_id']);
-          $game = $this->em->find('Tfts\Entity\Game',$_POST['game_id']);
-      }
+  public function joinUserPool($game = false, $user = false): bool {
+    if (!$game && !$user && $this->validateRequest($_POST, $_POST['action'])) {
+      $user = User::getByUserID($_POST['user_id']);
+      $game = $this->em->find(Game::class, $_POST['game_id']);
+    }
 
     // verify system is active
     if (!$this->isSystemActive()) {
@@ -67,7 +68,7 @@ class Tfts {
 
   /**
    * The given user wants to leave the pool of the given game.
-   * 
+   *
    * @param \Tfts\Game $game
    * @param User $user
    * @return bool true if the leave was successful, false otherwise.
@@ -93,7 +94,7 @@ class Tfts {
 
   /**
    * A user challenges another user for a duel of the given game.
-   * 
+   *
    * @param \Tfts\Game $game
    * @param User $challenger
    * @param User $challenged
@@ -135,7 +136,7 @@ class Tfts {
 
   /**
    * The challenger withdraws the challenge.
-   * 
+   *
    * @param \Tfts\Match $match
    * @param User $challenger
    * @return bool true if the withdraw was successful, false otherwise.
@@ -161,7 +162,7 @@ class Tfts {
 
   /**
    * The challenged accepts the challenge.
-   * 
+   *
    * @param \Tfts\Match $match
    * @param User $challenged
    * @return bool true if the accept was successful, false otherwise.
@@ -188,7 +189,7 @@ class Tfts {
 
   /**
    * The challenged declines the challenge.
-   * 
+   *
    * @param \Tfts\Match $match
    * @param User $challenged
    * @return bool true if the decline was successful, false otherwise.
@@ -214,7 +215,7 @@ class Tfts {
 
   /**
    * The given user reports the result for the given match.
-   * 
+   *
    * @param \Tfts\Match $match
    * @param User $user
    * @param type $score1 Score of the challenger.
@@ -245,7 +246,7 @@ class Tfts {
 
   /**
    * The open match is cancelled by the given user (can be done by both players).
-   * 
+   *
    * @param \Tfts\Match $match
    * @param User $user
    * @return bool true if the cancel was successful, false otherwise.
@@ -269,7 +270,7 @@ class Tfts {
 
   /**
    * Returns all registrations for the given game.
-   * 
+   *
    * @param \Tfts\Game $game
    * @return Registration a list of registrations.
    */
@@ -552,35 +553,129 @@ class Tfts {
       return false;
     }
 
-    // create pools
-    $pools = array();
-    for ($idx = 0; $idx < $count; $idx++) {
-      $pool = new Pool('Pool ' . ($idx + 1));
-      $game->addPool($pool);
-      $this->em->persist($pool);
-      $pools[] = $pool;
-    }
-
     // sort registrations for shuffeling reasons
     $registrations = $game->getRegistrations()->toArray();
     usort($registrations, 'Tfts\Entity\Registration::compare');
-    for ($idx = 0; $idx < sizeof($registrations); $idx++) {
-      $registration = $registrations[$idx];
-      $pool = $pools[$idx % $count];
 
-      $poolUser = new PoolUser($registration->getUser());
-      $pool->addUser($poolUser);
-      $this->em->persist($poolUser);
+    // read users from registrations
+    $users = new ArrayCollection();
+    foreach ($registrations as $registration) {
+      $users->add($registration->getUser());
+    }
 
-      if (is_null($pool->getHost())) {
-        $pool->setHost($registration->getUser());
-        $this->em->persist($pool);
-      }
+    $this->createAndFillPools($game, $count, $users);
 
-      // delete registrations
+    // delete registrations
+    foreach ($registrations as $registration) {
       $this->em->remove($registration);
     }
 
+    $this->em->flush();
+    return true;
+  }
+
+  /**
+   * The open pools of the given game will be processed and the requested amount
+   * of new pools will be created. The rank is the requirement for a user to
+   * proceed. If a user drops out, 3 points will be awarded.
+   *
+   * @param Game $game
+   * @param int $count
+   * @param int $rank
+   * @return bool true if the pools were processed, false otherwise.
+   */
+  public function processPools(Game $game, int $count, int $rank): bool {
+    if (!$game->isMass()) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    // verify there are at least 2 open pools
+    $oldPools = $game->getOpenPools();
+    if (sizeof($oldPools) < 2) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $usersToAdvance = new ArrayCollection();
+
+    // filter users for next round & award points to dropped out users
+    foreach ($oldPools as $oldPool) {
+      foreach ($oldPool->getUsers() as $poolUser) {
+        if ($poolUser->getRank() != 0 && $poolUser->getRank() <= $rank) {
+          $usersToAdvance->add($poolUser->getUser());
+        } else {
+          $this->em->persist(new Special($this->getLan(), $poolUser->getUser(), 'Teilnahme ' . $game->getName(), 3));
+          $this->addPoints($this->entityToUser($poolUser->getUser()), 3);
+        }
+      }
+    }
+
+    $pools = $this->createAndFillPools($game, $count, $usersToAdvance);
+    // ensure hirarchy and mark old pools as played
+    foreach ($oldPools as $oldPool) {
+      foreach ($pools as $pool) {
+        $oldPool->setPlayed(true);
+        $oldPool->addChild($pool);
+        $pool->addParent($oldPool);
+
+        $this->em->persist($oldPool);
+        $this->em->persist($pool);
+      }
+    }
+    $this->em->flush();
+    return true;
+  }
+
+  /**
+   * If the game has only one pool left, finish it.
+   *
+   * @param Game $game
+   * @return bool true if the final pool was processed, false otherwise.
+   */
+  public function processFinalPool(Game $game): bool {
+    if (!$game->isMass()) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    // verify there's only one pool left
+    $pools = $game->getOpenPools();
+    if (sizeof($pools) != 1) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $awardedPoints = array('default' => 3, 1 => 15, 2 => 12, 3 => 10, 4 => 8, 5 => 7, 6 => 6, 7 => 5, 8 => 4);
+    $finalPool = $pools->first();
+    foreach ($finalPool->getUsers() as $poolUser) {
+      $points = array_key_exists($poolUser->getRank(), $awardedPoints) ? $awardedPoints[$poolUser->getRank()] : $awardedPoints['default'];
+      $this->em->persist(new Special($this->getLan(), $poolUser->getUser(), 'Finale ' . $game->getName() . ' (#' . $poolUser->getRank() . ')', $points));
+      $this->addPoints($this->entityToUser($poolUser->getUser()), $points);
+    }
+    $finalPool->setPlayed(true);
+    $this->em->persist($finalPool);
+    $this->em->flush();
+    return true;
+  }
+
+  /**
+   * Sets the rank for the given user if and only if they belong to the pool.
+   *
+   * @param Pool $pool
+   * @param User $user
+   * @param int $rank
+   * @return bool true if the rank has been set, false otherwise.
+   */
+  public function setPoolRank(Pool $pool, User $user, int $rank): bool {
+    // verify that user belongs to pool
+    $poolUser = $pool->getPoolUser($this->userToEntity($user));
+    if (is_null($poolUser)) {
+      return false;
+    }
+
+    $poolUser->setRank($rank);
+    $this->em->persist($poolUser);
     $this->em->flush();
     return true;
   }
@@ -762,26 +857,53 @@ class Tfts {
     $this->addPoints($this->entityToUser($match->getUser2()), $compute2);
   }
 
-    /**
-     * Validate a Post Request for a token
-     *
-     * @param $data
-     * @param bool $action
-     * @return bool|\Concrete\Core\Error\Error
-     */
-    public function validateRequest($data, $action = false) {
-        $errors = new \Concrete\Core\Error\Error();
+  private function createAndFillPools(Game $game, int $count, Collection $users): Collection {
+    $pools = new ArrayCollection();
 
-        // we want to use a token to validate each call in order to protect from xss and request forgery
-        $token = \Core::make("token");
-        if ($action && !$token->validate($action)) {
-            $errors->add('Invalid Request, token must be valid.');
-        }
-
-        if ($errors->has()) {
-            return $errors;
-        }
-
-        return true;
+    // create
+    for ($idx = 1; $idx <= $count; $idx++) {
+      $pool = new Pool($game, 'Pool ' . $idx);
+      $this->em->persist($pool);
+      $pools->add($pool);
     }
+
+    // fill
+    for ($idx = 0; $idx < sizeof($users); $idx++) {
+      $user = $users->get($idx);
+      $pool = $pools->get($idx % sizeof($pools));
+
+      $this->em->persist(new PoolUser($pool, $user));
+
+      // first user in pool is always host
+      if (is_null($pool->getHost())) {
+        $pool->setHost($user);
+        $this->em->persist($pool);
+      }
+    }
+    return $pools;
+  }
+
+  /**
+   * Validate a Post Request for a token
+   *
+   * @param $data
+   * @param bool $action
+   * @return bool|\Concrete\Core\Error\Error
+   */
+  public function validateRequest($data, $action = false) {
+    $errors = new \Concrete\Core\Error\Error();
+
+    // we want to use a token to validate each call in order to protect from xss and request forgery
+    $token = \Core::make("token");
+    if ($action && !$token->validate($action)) {
+      $errors->add('Invalid Request, token must be valid.');
+    }
+
+    if ($errors->has()) {
+      return $errors;
+    }
+
+    return true;
+  }
+
 }

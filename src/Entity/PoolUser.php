@@ -16,9 +16,9 @@ use Tfts\Entity\Pool;
 class PoolUser {
 
   /**
-   * @ORM\Column(type="integer", length=10, nullable=true)
+   * @ORM\Column(type="integer", length=10, nullable=false)
    */
-  private $rank;
+  private $rank = 0;
 
   /**
    * @ORM\Id
@@ -34,11 +34,12 @@ class PoolUser {
    */
   private $user;
 
-  public function __construct(User $user) {
+  public function __construct(Pool $pool, User $user) {
+    $this->pool = $pool;
     $this->user = $user;
   }
 
-  public function getRank(): int {
+  public function getRank(): ?int {
     return $this->rank;
   }
 
@@ -48,10 +49,6 @@ class PoolUser {
 
   public function getPool(): Pool {
     return $this->pool;
-  }
-
-  public function setPool(Pool $pool) {
-    $this->pool = $pool;
   }
 
   public function getUser(): User {

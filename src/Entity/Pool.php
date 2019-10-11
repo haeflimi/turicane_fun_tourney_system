@@ -64,7 +64,8 @@ class Pool {
    */
   private $children;
 
-  public function __construct(String $name) {
+  public function __construct(Game $game, String $name) {
+    $this->game = $game;
     $this->pool_name = $name;
 
     $this->users = new ArrayCollection();
@@ -84,12 +85,12 @@ class Pool {
     return $this->pool_is_played == 1;
   }
 
-  public function getGame(): ?Game {
-    return $this->game;
+  public function setPlayed(bool $played) {
+    $this->pool_is_played = $played ? 1 : 0;
   }
 
-  public function setGame(Game $game) {
-    $this->game = $game;
+  public function getGame(): ?Game {
+    return $this->game;
   }
 
   public function getHost(): ?User {
@@ -107,12 +108,10 @@ class Pool {
 
   public function addParent(Pool $parent) {
     $this->parents->add($parent);
-    $parent->addChild($this);
   }
 
   public function addChild(Pool $child) {
     $this->children->add($child);
-    $child->addParent($this);
   }
 
   public function getUsers(): Collection {
@@ -125,6 +124,14 @@ class Pool {
 
   public function getChildren(): Collection {
     return $this->children;
+  }
+
+  public function getPoolUser(User $user): ?PoolUser {
+    $filtered = $this->users
+            ->filter(function(PoolUser $poolUser) use (&$user) {
+      return $poolUser->getUser()->getUserId() == $user->getUserId();
+    });
+    return sizeof($filtered) == 1 ? $filtered->first() : null;
   }
 
 }
