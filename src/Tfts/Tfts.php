@@ -2,6 +2,7 @@
 
 namespace Tfts;
 
+use Concrete\Core\Support\Facade\Application;
 use Concrete\Core\Support\Facade\Config;
 use Concrete\Core\User\Group\Group;
 use Concrete\Core\User\User;
@@ -31,8 +32,96 @@ class Tfts {
   protected $em; // Doctrine Entity Manager
 
   public function __construct($obj = null) {
-    $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
+    $app = Application::getFacadeApplication();
     $this->em = $app->make('Doctrine\ORM\EntityManager');
+  }
+
+  /**
+   * Returns all registrations for the given game.
+   *
+   * @param \Tfts\Game $game
+   * @return Registration a list of registrations.
+   */
+  public function getRegistrations(Game $game): Collection {
+    return $game->getRegistrations();
+  }
+
+  /**
+   * @param \Tfts\Game $game
+   * @return Match a list of open matches for the given game.
+   */
+  public function getOpenChallenges(Game $game): Collection {
+    return $game->getOpenChallenges();
+  }
+
+  /**
+   * @param \Tfts\Game $game
+   * @return Match a list of open matches for the given game.
+   */
+  public function getOpenMatches(Game $game): Collection {
+    return $game->getOpenMatches();
+  }
+
+  /**
+   * @param \Tfts\Game $game
+   * @return Match a list of closed matches for the given game.
+   */
+  public function getClosedMatches(Game $game): Collection {
+    return $game->getClosedMatches();
+  }
+
+  /**
+   * @param User $user
+   * @return Match a list of open challenges for the given user.
+   */
+  public function getOpenUserChallenges(User $user): Collection {
+    // @TODO: get open challenges for user
+    return null;
+  }
+
+  /**
+   * @param User $user
+   * @return Match a list of open matches for the given user.
+   */
+  public function getOpenUserMatches(User $user): Collection {
+    // @TODO: get open matches for user
+    return null;
+  }
+
+  /**
+   * @param User $user
+   * @return Match a list of finished matches for the given user.
+   */
+  public function getFinishedUserMatches(User $user): Collection {
+    // @TODO: get finished matches for user
+    return null;
+  }
+
+  /**
+   * @param Group $group
+   * @return Match a list of open challenges for the given group.
+   */
+  public function getOpenGroupChallenges(Group $group): Collection {
+    // @TODO: get open challenges for user
+    return null;
+  }
+
+  /**
+   * @param Group $group
+   * @return Match a list of open matches for the given group.
+   */
+  public function getOpenGroupMatches(Group $group): Collection {
+    // @TODO: get open matches for user
+    return null;
+  }
+
+  /**
+   * @param Group $group
+   * @return Match a list of finished matches for the given group.
+   */
+  public function getFinishedGroupMatches(Group $group): Collection {
+    // @TODO: get finished matches for user
+    return null;
   }
 
   /**
@@ -50,6 +139,12 @@ class Tfts {
 
     // verify system is active
     if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    // verify game
+    if (!$game->isPool() || $game->isTeam()) {
       // @TODO: throw exception?
       return false;
     }
@@ -93,7 +188,7 @@ class Tfts {
   }
 
   /**
-   * A user challenges another user for a duel of the given game.
+   * A user challenges another user for a match.
    *
    * @param \Tfts\Game $game
    * @param User $challenger
@@ -269,64 +364,94 @@ class Tfts {
   }
 
   /**
-   * Returns all registrations for the given game.
+   * The given group wants to join the pool of the given game.
    *
    * @param \Tfts\Game $game
-   * @return Registration a list of registrations.
+   * @param Group $group
+   * @return bool true if the join was successful, false otherwise.
    */
-  public function getRegistrations(Game $game): Collection {
-    return $game->getRegistrations();
+  public function joinTeamPool(Game $game, Group $group): bool {
+
   }
 
   /**
+   * The given group wants to leave the pool of the given game.
+   *
+   * @param Game $game
+   * @param Group $group
+   * @return bool true if the leave was successful, false otherwise.
+   */
+  public function leaveTeamPool(Game $game, Group $group): bool {
+
+  }
+
+  /**
+   * A group challenges another group for a match.
+   *
    * @param \Tfts\Game $game
-   * @return Match a list of open matches for the given game.
+   * @param User $challenger
+   * @param User $challenged
+   * @return Match null if an exception occured, the created match otherwise.
    */
-  public function getOpenChallenges(Game $game): Collection {
-    return $game->getOpenChallenges();
+  public function challengeTeam(Game $game, Group $challenger, Group $challenged): Match {
+
   }
 
   /**
-   * @param \Tfts\Game $game
-   * @return Match a list of open matches for the given game.
+   * The challenger withdraws the challenge.
+   *
+   * @param \Tfts\Match $match
+   * @param Group $challenger
+   * @return bool true if the withdraw was successful, false otherwise.
    */
-  public function getOpenMatches(Game $game): Collection {
-    return $game->getOpenMatches();
+  public function withdrawGroupChallenge(Match $match, Group $challenger): bool {
+
   }
 
   /**
-   * @param \Tfts\Game $game
-   * @return Match a list of closed matches for the given game.
+   * The challenged accepts the challenge.
+   *
+   * @param \Tfts\Match $match
+   * @param Group $challenged
+   * @return bool true if the accept was successful, false otherwise.
    */
-  public function getClosedMatches(Game $game): Collection {
-    return $game->getClosedMatches();
+  public function acceptGroupChallenge(Match $match, Group $challenged): bool {
+
   }
 
   /**
-   * @param User $user
-   * @return Match a list of open challenges for the given user.
+   * The challenged declines the challenge.
+   *
+   * @param \Tfts\Match $match
+   * @param Group $challenged
+   * @return bool true if the decline was successful, false otherwise.
    */
-  public function getOpenUserChallenges(User $user): Collection {
-    // @TODO: get open challenges for user
-    return null;
+  public function declineGroupChallenge(Match $match, Group $challenged): bool {
+
   }
 
   /**
-   * @param User $user
-   * @return Match a list of open matches for the given user.
+   * The given group reports the result for the given match.
+   *
+   * @param \Tfts\Match $match
+   * @param Group $group
+   * @param type $score1 Score of the challenger.
+   * @param type $score2 Score of the challenged.
+   * @return bool true if the report was successful, false otherwise.
    */
-  public function getOpenUserMatches(User $user): Collection {
-    // @TODO: get open matches for user
-    return null;
+  public function reportResultGroupMatch(Match $match, Group $group, $score1, $score2): bool {
+
   }
 
   /**
-   * @param User $user
-   * @return Match a list of finished matches for the given user.
+   * The open match is cancelled by the given group (can be done by both groups).
+   *
+   * @param \Tfts\Match $match
+   * @param Group $group
+   * @return bool true if the cancel was successful, false otherwise.
    */
-  public function getFinishedUserMatches(User $user): Collection {
-    // @TODO: get finished matches for user
-    return null;
+  public function cancelGroupMatch(Match $match, Group $group): bool {
+
   }
 
   /**
