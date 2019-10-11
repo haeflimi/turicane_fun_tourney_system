@@ -27,7 +27,7 @@ class Game
     private $game_handle;
 
     /**
-     * @ORM\Column(type="integer", length=10)
+     * @ORM\Column(type="integer", length=10, nullable=false)
      */
     private $game_page_id;
 
