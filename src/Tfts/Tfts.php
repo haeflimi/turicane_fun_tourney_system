@@ -32,37 +32,18 @@ class Tfts {
   }
 
   /**
-   *
-   * @param \Tfts\Game $game
-   */
-  public function createGame(Game $game) {
-
-  }
-
-  /**
-   *
-   * @param \Tfts\Game $game
-   */
-  public function updateGame(Game $game) {
-
-  }
-
-  /**
-   *
-   * @param \Tfts\Game $game
-   */
-  public function deleteGame(Game $game) {
-    
-  }
-
-  /**
    * The given user wants to join the pool of the given game.
    *
    * @param \Tfts\Game $game
    * @param User $user
    * @return boolean true if the join was successful, false otherwise.
    */
-  public function joinUserPool(Game $game, User $user) {
+  public function joinUserPool($game = false, $user = false) {
+      if(!$game && !$user && $this->validateRequest($_POST, $_POST['action'])){
+          $user = User::getByUserID($_POST['user_id']);
+          $game = $this->em->find('Tfts\Entity\Game',$_POST['game_id']);
+      }
+
     // verify system is active
     if (!$this->isSystemActive()) {
       // @TODO: throw exception?
@@ -720,4 +701,26 @@ class Tfts {
     $this->addPoints($this->entityToUser($match->getUser2()), $compute2);
   }
 
+    /**
+     * Validate a Post Request for a token
+     *
+     * @param $data
+     * @param bool $action
+     * @return bool|\Concrete\Core\Error\Error
+     */
+    public function validateRequest($data, $action = false) {
+        $errors = new \Concrete\Core\Error\Error();
+
+        // we want to use a token to validate each call in order to protect from xss and request forgery
+        $token = \Core::make("token");
+        if ($action && !$token->validate($action)) {
+            $errors->add('Invalid Request, token must be valid.');
+        }
+
+        if ($errors->has()) {
+            return $errors;
+        }
+
+        return true;
+    }
 }

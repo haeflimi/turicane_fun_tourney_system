@@ -64,36 +64,10 @@ class Controller extends Package implements ProviderAggregateInterface {
   }
 
   public function registerRoutes() {
-
     $router = $this->app->make('router');
     // This Route is needed to "capture" the Data sent by the Trackmania result logger
     $router->post('/tfts/api/trackmania', 'Tfts\Tfts::processTrackmaniaData');
     // Register other routes for interface actions and pass them along to the tfts
-    $router->post('/tfts/api/joinUserPool', function(){
-        if($this->validateRequest($_POST,$_POST['action'])){
-            $tfts = new Tfts();
-            $em = $this->getPackageEntityManager();
-            $user = User::getByUserID($_POST['user_id']);
-            $game = $em->find('Tfts\Entity\Game', $_POST['game_id']);
-            $tfts->joinUserPool($game, $user);
-        }
-    });
+    $router->post('/tfts/api/joinUserPool', 'Tfts\Tfts::joinUserPool');
   }
-
-  public function validateRequest($data, $action = false) {
-      $errors = new \Concrete\Core\Error\Error();
-
-      // we want to use a token to validate each call in order to protect from xss and request forgery
-      $token = \Core::make("token");
-      if ($action && !$token->validate($action)) {
-          $errors->add('Invalid Request, token must be valid.');
-      }
-
-      if ($errors->has()) {
-          return $errors;
-      }
-
-      return true;
-  }
-
 }
