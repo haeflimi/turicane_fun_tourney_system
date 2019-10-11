@@ -3,6 +3,7 @@
 namespace Tfts\Entity;
 
 use Concrete\Core\Entity\User\User;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Tfts\Entity\Game;
@@ -114,6 +115,7 @@ class Match {
   public function __construct(Game $game) {
     $this->game = $game;
     $this->match_challenge_date = new \DateTime("now");
+    $this->matchGroupUsers = new ArrayCollection();
   }
 
   public function setUsers(User $challenger, User $challenged) {
@@ -200,7 +202,7 @@ class Match {
     return $this->group2_id;
   }
 
-  public function getMatchUsers(): Collection {
+  public function getMatchGroupUsers(): Collection {
     return $this->matchGroupUsers;
   }
 

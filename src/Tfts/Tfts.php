@@ -14,6 +14,7 @@ use Tfts\Entity\Lan;
 use Tfts\Entity\Game;
 use Tfts\Entity\Registration;
 use Tfts\Entity\Match;
+use Tfts\Entity\MatchGroupUser;
 use Tfts\Entity\Ranking;
 use Tfts\Entity\Map;
 use Tfts\Entity\Trackmania;
@@ -144,7 +145,7 @@ class Tfts {
     }
 
     // verify game
-    if (!$game->isPool() || $game->isTeam()) {
+    if (!$game->isPool() || $game->isGroup()) {
       // @TODO: throw exception?
       return false;
     }
@@ -195,7 +196,7 @@ class Tfts {
    * @param User $challenged
    * @return Match null if an exception occured, the created match otherwise.
    */
-  public function challengeUser(Game $game, User $challenger, User $challenged): Match {
+  public function challengeUser(Game $game, User $challenger, User $challenged): ?Match {
     // verify system is active
     if (!$this->isSystemActive()) {
       // @TODO: throw exception?
@@ -370,8 +371,35 @@ class Tfts {
    * @param Group $group
    * @return bool true if the join was successful, false otherwise.
    */
-  public function joinTeamPool(Game $game, Group $group): bool {
+  public function joinGroupPool(Game $game, Group $group): bool {
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
 
+    // verify game
+    if (!$game->isPool() || !$game->isGroup()) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    // verify group has enough members
+    if ($group->getGroupMembersNum() < $game->getGroupSize()) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    // verify group is not already registered
+    if (!is_null($this->findRegistration($game, null, $group))) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $registration = new Registration($game, null, $group->getGroupId());
+    $this->em->persist($registration);
+    $this->em->flush();
+    return true;
   }
 
   /**
@@ -381,8 +409,23 @@ class Tfts {
    * @param Group $group
    * @return bool true if the leave was successful, false otherwise.
    */
-  public function leaveTeamPool(Game $game, Group $group): bool {
+  public function leaveGroupPool(Game $game, Group $group): bool {
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
 
+    $registration = $this->findRegistration($game, null, $group);
+    // verify group is registered
+    if (is_null($registration)) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $this->em->remove($registration);
+    $this->em->flush();
+    return true;
   }
 
   /**
@@ -393,8 +436,38 @@ class Tfts {
    * @param User $challenged
    * @return Match null if an exception occured, the created match otherwise.
    */
-  public function challengeTeam(Game $game, Group $challenger, Group $challenged): Match {
+  public function challengeGroup(Game $game, Group $challenger, Group $challenged): ?Match {
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return null;
+    }
 
+    // @TODO: check max games against another group
+    // verify both users are registered for that game
+    if (is_null($this->findRegistration($game, null, $challenger)) || is_null($this->findRegistration($game, null, $challenged))) {
+      // @TODO: throw exception?
+      return null;
+    }
+
+    $repository = $this->em->getRepository(Match::class);
+    // verify challenge cannot be triggered twice
+    if (!is_null($repository->findOneBy(['group1_id' => $challenger->getGroupId(), 'group2_id' => $challenged->getGroupId(), 'match_finish_date' => null]))) {
+      // @TODO: throw exception?
+      return null;
+    }
+
+    // verify challenged hasn't already challenged the challenger
+    if (!is_null($repository->findOneBy(['group1_id' => $challenged->getGroupId(), 'group2_id' => $challenger->getGroupId(), 'match_finish_date' => null]))) {
+      // @TODO: throw exception?
+      return null;
+    }
+
+    $match = new Match($game);
+    $match->setGroups($challenger->getGroupId(), $challenged->getGroupId());
+    $this->em->persist($match);
+    $this->em->flush();
+    return $match;
   }
 
   /**
@@ -405,7 +478,22 @@ class Tfts {
    * @return bool true if the withdraw was successful, false otherwise.
    */
   public function withdrawGroupChallenge(Match $match, Group $challenger): bool {
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
 
+    $repository = $this->em->getRepository(Match::class);
+    // verify match exists and user is challenger
+    if (is_null($repository->findOneBy(['match_id' => $match, 'group1_id' => $challenger->getGroupId()]))) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $this->em->remove($match);
+    $this->em->flush();
+    return true;
   }
 
   /**
@@ -416,7 +504,23 @@ class Tfts {
    * @return bool true if the accept was successful, false otherwise.
    */
   public function acceptGroupChallenge(Match $match, Group $challenged): bool {
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
 
+    $repository = $this->em->getRepository(Match::class);
+    // verify match exists and group is challenged
+    if (is_null($repository->findOneBy(['match_id' => $match, 'group2_id' => $challenged->getGroupId()]))) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $match->setAccepted(true);
+    $this->em->persist($match);
+    $this->em->flush();
+    return true;
   }
 
   /**
@@ -427,20 +531,82 @@ class Tfts {
    * @return bool true if the decline was successful, false otherwise.
    */
   public function declineGroupChallenge(Match $match, Group $challenged): bool {
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
 
+    $repository = $this->em->getRepository(Match::class);
+    // verify match exists and group is challenged
+    if (is_null($repository->findOneBy(['match_id' => $match, 'group2_id' => $challenged->getGroupId()]))) {
+      // @TODO: throw exception?
+      return false;
+    }
+
+    $this->em->remove($match);
+    $this->em->flush();
+    return true;
   }
 
   /**
-   * The given group reports the result for the given match.
+   * The given group reports the result for the given match. It also has to
+   * provide a list of users that actually participated in the match.
    *
    * @param \Tfts\Match $match
    * @param Group $group
+   * @param Collection $users
    * @param type $score1 Score of the challenger.
    * @param type $score2 Score of the challenged.
    * @return bool true if the report was successful, false otherwise.
    */
-  public function reportResultGroupMatch(Match $match, Group $group, $score1, $score2): bool {
+  public function reportResultGroupMatch(Match $match, Group $group, Collection $users, $score1, $score2): bool {
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
 
+    $db_match = $this->getGroupMatch($match, $group);
+    if ($db_match == null) {
+      return false;
+    }
+
+    // verify the correct amount of users is provided
+    if ($db_match->getGame()->getGroupSize() != sizeof($users)) {
+      return false;
+    }
+
+    // verify users are members of the group
+    foreach ($users as $user) {
+      if (!$user->inGroup($group)) {
+        // @TODO: throw exception?
+        return false;
+      }
+    }
+
+    // remove existing group match users
+    foreach ($this->getMatchGroupUsers($match, $group->getGroupId()) as $matchGroupUser) {
+      if ($matchGroupUser->getGroupId() == $group->getGroupId()) {
+        $this->em->remove($matchGroupUser);
+      }
+    }
+    $this->em->flush();
+
+    // create new group match users
+    foreach ($users as $user) {
+      $this->em->persist(new MatchGroupUser($match, $this->userToEntity($user), $group->getGroupId()));
+    }
+    $this->em->flush();
+
+    $is_challenger = $match->getGroup1Id() == $group->getGroupId();
+    $is_challenged = $match->getGroup2Id() == $group->getGroupId();
+
+    $this->updateMatch($db_match, $is_challenger, $is_challenged, $score1, $score2);
+    $this->processMatch($db_match);
+    $this->em->persist($db_match);
+    $this->em->flush();
+    return true;
   }
 
   /**
@@ -451,7 +617,20 @@ class Tfts {
    * @return bool true if the cancel was successful, false otherwise.
    */
   public function cancelGroupMatch(Match $match, Group $group): bool {
+    // verify system is active
+    if (!$this->isSystemActive()) {
+      // @TODO: throw exception?
+      return false;
+    }
 
+    $db_match = $this->getGroupMatch($match, $group);
+    if ($db_match == null) {
+      return false;
+    }
+
+    $this->em->remove($db_match);
+    $this->em->flush();
+    return true;
   }
 
   /**
@@ -868,12 +1047,38 @@ class Tfts {
    * @param User $user
    * @return Match the updated match entity from the database.
    */
-  private function getUserMatch(Match $match, User $user): Match {
-    $is_challenger = $match->getUser1()->getUserId() == $user->getUserId();
-    $is_challenged = $match->getUser2()->getUserId() == $user->getUserId();
+  private function getUserMatch(Match $match, User $user): ?Match {
+    return $this->getMatch($match, $match->getUser1()->getUserId(), $match->getUser2()->getUserId(), $user->getUserId(), 'user1', 'user2');
+  }
+
+  /**
+   * Loads the match from the database and verifies that it exists and the group is a part of it.
+   *
+   * @param Match $match
+   * @param Group $group
+   * @return Match the updated match entity from the database.
+   */
+  private function getGroupMatch(Match $match, Group $group): ?Match {
+    return $this->getMatch($match, $match->getGroup1Id(), $match->getGroup2Id(), $group->getGroupId(), 'group1_id', 'group2_id');
+  }
+
+  /**
+   * Loads the match from the database and verifies that it exists and the identifier is a part of it.
+   *
+   * @param Match $match
+   * @param int $challengerId
+   * @param int $challengedId
+   * @param int $id
+   * @param \Tfts\String $challenger_field
+   * @param \Tfts\String $challenged_field
+   * @return Match|null
+   */
+  private function getMatch(Match $match, int $challengerId, int $challengedId, int $id, String $challenger_field, String $challenged_field): ?Match {
+    $is_challenger = $challengerId == $id;
+    $is_challenged = $challengedId == $id;
 
     $repository = $this->em->getRepository(Match::class);
-    $db_match = $repository->findOneBy(['match_id' => $match, ($is_challenger ? 'user1' : 'user2') => $user->getUserId()]);
+    $db_match = $repository->findOneBy(['match_id' => $match, ($is_challenger ? $challenger_field : $challenged_field) => $id]);
     // verify match exists
     if (is_null($db_match)) {
       // @TODO: throw exception?
@@ -942,11 +1147,15 @@ class Tfts {
       return;
     }
 
-    // @TODO: differ between solo and team game
-    $rank1 = $this->getUserRank($this->entityToUser($match->getUser1()));
-    $rank2 = $this->getUserRank($this->entityToUser($match->getUser2()));
+    if ($match->getGame()->isGroup()) {
+      $rank1 = $this->getGroupRank($match, $match->getGroup1Id());
+      $rank2 = $this->getGroupRank($match, $match->getGroup1Id());
+    } else {
+      $rank1 = $this->getUserRank($this->entityToUser($match->getUser1()));
+      $rank2 = $this->getUserRank($this->entityToUser($match->getUser2()));
+    }
 
-    $rank_diff = ($rank1 - $rank2) / 100;
+    $rank_diff = ($rank1 - $rank2) / 100.0;
     if ($rank_diff > 0.7) {
       $rank_diff = 0.7;
     }
@@ -958,17 +1167,17 @@ class Tfts {
     $points_loss = $match->getGame()->getPointsLoss();
 
     // user 1 has won
-    if ($match->getscore1() > $match->getscore2()) {
+    if ($match->getScore1() > $match->getScore2()) {
       $compute1 = $points_win + round($points_win * $rank_diff, 0);
       $compute2 = $points_loss - round($points_loss * $rank_diff, 0);
     }
     // draw
-    else if ($match->getscore1() == $match->getscore2()) {
+    else if ($match->getScore1() == $match->getScore2()) {
       $compute1 = ($points_win / 2) + round(($points_win / 2) * $rank_diff, 0);
       $compute2 = ($points_win / 2) - round(($points_win / 2) * $rank_diff, 0);
     }
     // user 2 has won
-    else if ($match->getscore1() < $match->getscore2()) {
+    else if ($match->getScore1() < $match->getScore2()) {
       $compute1 = $points_loss + round($points_loss * $rank_diff, 0);
       $compute2 = $points_win - round($points_win * $rank_diff, 0);
     }
@@ -977,11 +1186,51 @@ class Tfts {
     $match->setCompute1($compute1);
     $match->setCompute2($compute2);
 
-    // @TODO: differ between solo and team game
-    $this->addPoints($this->entityToUser($match->getUser1()), $compute1);
-    $this->addPoints($this->entityToUser($match->getUser2()), $compute2);
+    if ($match->getGame()->isGroup()) {
+      foreach ($this->getMatchGroupUsers($match, $match->getGroup1Id()) as $matchGroupUser) {
+        $this->addPoints($this->entityToUser($matchGroupUser->getUser()), $compute1);
+      }
+      foreach ($this->getMatchGroupUsers($match, $match->getGroup2Id()) as $matchGroupUser) {
+        $this->addPoints($this->entityToUser($matchGroupUser->getUser()), $compute2);
+      }
+    } else {
+      $this->addPoints($this->entityToUser($match->getUser1()), $compute1);
+      $this->addPoints($this->entityToUser($match->getUser2()), $compute2);
+    }
   }
 
+  /**
+   * @param type $match
+   * @param int $group_id
+   * @return int the group rank for the current lan.
+   */
+  private function getGroupRank($match, int $group_id): int {
+    $matchGroupUsers = $this->getMatchGroupUsers($match, $group_id);
+    $rank = 0;
+    foreach ($matchGroupUsers as $matchGroupUser) {
+      $rank += $this->getUserRank($this->entityToUser($matchGroupUser->getUser()));
+    }
+    return $rank / sizeof($matchGroupUsers);
+  }
+
+  /**
+   * @param type $match
+   * @param int $group_id
+   * @return Collection a list of match group users.
+   */
+  private function getMatchGroupUsers($match, int $group_id): Collection {
+    $repository = $this->em->getRepository(MatchGroupUser::class);
+    return new ArrayCollection($repository->findBy(['match' => $match, 'group_id' => $group_id]));
+  }
+
+  /**
+   * Creates the given amount of pools and fills the users in it.
+   *
+   * @param Game $game
+   * @param int $count
+   * @param Collection $users
+   * @return Collection the created pools
+   */
   private function createAndFillPools(Game $game, int $count, Collection $users): Collection {
     $pools = new ArrayCollection();
 

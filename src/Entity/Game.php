@@ -137,7 +137,7 @@ class Game {
     return $game_page->getAttribute('tfts_game_is_pool');
   }
 
-  public function isTeam(): bool {
+  public function isGroup(): bool {
     if (!is_object($game_page = $this->getGamePage())) {
       return false;
     }
@@ -149,6 +149,13 @@ class Game {
       return false;
     }
     return $game_page->getAttribute('tfts_game_is_mass');
+  }
+
+  public function getGroupSize(): int {
+    if (!is_object($game_page = $this->getGamePage())) {
+      return false;
+    }
+    return $game_page->getAttribute('tfts_game_players');
   }
 
   public function getGamePage(): Page {

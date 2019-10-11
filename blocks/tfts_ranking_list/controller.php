@@ -4,12 +4,11 @@ namespace Concrete\Package\TuricaneFunTourneySystem\Block\TftsRankingList;
 
 use SimpleXMLElement;
 use Concrete\Core\Block\BlockController;
-//use Concrete\Core\Package\Package;
-//use Concrete\Core\User\Group\Group;
+use Concrete\Core\User\Group\Group;
 use Concrete\Core\User\UserList;
 use Concrete\Core\Entity\User;
-//use Tfts\Entity\Lan;
-//use Tfts\Entity\Game;
+use Doctrine\Common\Collections\ArrayCollection;
+use Tfts\Entity\Game;
 use Tfts\Tfts;
 
 //use Concrete\Core\Support\Facade\Config;
@@ -244,16 +243,40 @@ class Controller extends BlockController {
    */
   public function view() {
     $tfts = new Tfts();
-//    $this->simulateUserGame($tfts);
-    $this->simulateMassGame($tfts);
-//    $this->processTrackmaniaMap($tfts);
+
+    $usergame = false;
+    $teamgame = true;
+    $massgame = false;
+    $trackmania = false;
+
+    if ($usergame) {
+      $this->simulateUserGame($tfts);
+    }
+
+    if ($teamgame) {
+      $this->simulateGroupGame($tfts);
+    }
+
+    if ($massgame) {
+      $this->simulateMassGame($tfts);
+    }
+
+    if ($trackmania) {
+      $this->processTrackmaniaMap($tfts);
+    }
   }
 
   private function simulateUserGame(Tfts $tfts) {
     $freezer = $this->getUserByName('Freezer');
     $tuborg = $this->getUserByName('TuBorg');
 
-    $hearthstone = $this->em->find('Tfts\Entity\Game', 1);
+    $hearthstone = $this->em->find(Game::class, 1);
+
+    $tfts->joinUserPool($hearthstone, $freezer);
+    $tfts->joinUserPool($hearthstone, $tuborg);
+
+    $tfts->leaveUserPool($hearthstone, $freezer);
+    $tfts->leaveUserPool($hearthstone, $tuborg);
 
     $tfts->joinUserPool($hearthstone, $freezer);
     $tfts->joinUserPool($hearthstone, $tuborg);
@@ -275,8 +298,58 @@ class Controller extends BlockController {
     $tfts->reportResultUserMatch($match4, $freezer, 1, 2);
   }
 
+  private function simulateGroupGame(Tfts $tfts) {
+    $fartingAsses = $this->getGroupByName('Farting Asses');
+    $munschkin = $this->getGroupByName('Munschkin');
+
+    $freezer = $this->getUserByName('Freezer');
+    $tuborg = $this->getUserByName('TuBorg');
+    $buddha = $this->getUserByName('Buddha');
+    $xelsor = $this->getUserByName('Xelsor');
+
+    if (!$freezer->inGroup($fartingAsses)) {
+      $freezer->enterGroup($fartingAsses);
+    }
+    if (!$tuborg->inGroup($fartingAsses)) {
+      $tuborg->enterGroup($fartingAsses);
+    }
+    if (!$buddha->inGroup($munschkin)) {
+      $buddha->enterGroup($munschkin);
+    }
+    if (!$xelsor->inGroup($munschkin)) {
+      $xelsor->enterGroup($munschkin);
+    }
+
+    $brawlhalla = $this->em->find(Game::class, 2);
+
+    $tfts->joinGroupPool($brawlhalla, $fartingAsses);
+    $tfts->joinGroupPool($brawlhalla, $munschkin);
+
+    $tfts->leaveGroupPool($brawlhalla, $fartingAsses);
+    $tfts->leaveGroupPool($brawlhalla, $munschkin);
+
+    $tfts->joinGroupPool($brawlhalla, $fartingAsses);
+    $tfts->joinGroupPool($brawlhalla, $munschkin);
+
+    $match1 = $tfts->challengeGroup($brawlhalla, $fartingAsses, $munschkin);
+    $tfts->withdrawGroupChallenge($match1, $fartingAsses);
+
+    $match2 = $tfts->challengeGroup($brawlhalla, $fartingAsses, $munschkin);
+    $tfts->declineGroupChallenge($match2, $munschkin);
+
+    $match3 = $tfts->challengeGroup($brawlhalla, $fartingAsses, $munschkin);
+    $tfts->acceptGroupChallenge($match3, $munschkin);
+    $tfts->cancelGroupMatch($match3, $fartingAsses);
+
+    $match4 = $tfts->challengeGroup($brawlhalla, $fartingAsses, $munschkin);
+    $tfts->acceptGroupChallenge($match4, $munschkin);
+    $tfts->reportResultGroupMatch($match4, $fartingAsses, new ArrayCollection([$freezer, $tuborg]), 2, 1);
+    $tfts->reportResultGroupMatch($match4, $munschkin, new ArrayCollection([$buddha, $xelsor]), 1, 2);
+    $tfts->reportResultGroupMatch($match4, $fartingAsses, new ArrayCollection([$freezer, $tuborg]), 1, 2);
+  }
+
   private function simulateMassGame(Tfts $tfts) {
-    $flatout2 = $this->em->find('Tfts\Entity\Game', 5);
+    $flatout2 = $this->em->find(Game::class, 5);
 
     $round = 1;
     if ($round == 1) {
@@ -330,6 +403,10 @@ class Controller extends BlockController {
     $userList = new UserList();
     $userList->filterByUserName($user_name);
     return $userList->getResults()[0]->getUserObject();
+  }
+
+  private function getGroupByName(String $group_name) {
+    return Group::getByName($group_name);
   }
 
   /**
