@@ -7,7 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="tftsLans", uniqueConstraints={@ORM\UniqueConstraint(name="lan_id", columns={"lan_id"})})
+ * @ORM\Table(name="tftsLans")
  */
 class Lan {
 
@@ -39,9 +39,9 @@ class Lan {
   private $rankings;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\RankingSnapshot", mappedBy="lan")
+   * @ORM\OneToMany(targetEntity="Tfts\Entity\Snapshot", mappedBy="lan")
    */
-  private $rankingSnapshots;
+  private $snapshots;
 
   /**
    * @ORM\OneToMany(targetEntity="Tfts\Entity\Special", mappedBy="lan")
@@ -79,8 +79,8 @@ class Lan {
     return $this->rankings;
   }
 
-  public function getRankingSnapshots(): Collection {
-    return $this->rankingSnapshots;
+  public function getSnapshots(): Collection {
+    return $this->snapshots;
   }
 
   public function getSpecials(): Collection {

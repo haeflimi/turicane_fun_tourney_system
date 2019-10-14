@@ -3,39 +3,61 @@
 namespace Tfts\Entity;
 
 use Concrete\Core\Entity\User\User;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(
- *     name="tftsRankings",
- *     uniqueConstraints={@ORM\UniqueConstraint(name="user_id", columns={"user_id","lan_id"})}
+ * @ORM\Table(name="tftsRankings",
+ *     uniqueConstraints={@ORM\UniqueConstraint(name="INDEX", columns={"ranking_id","user_id","lan_id"})}
  * )
  */
 class Ranking {
 
   /**
-   * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
+   * @ORM\Id
+   * @ORM\Column(type="integer", length=10)
+   * @ORM\GeneratedValue(strategy="AUTO")
    */
-  private $points = 0;
+  private $ranking_id;
 
   /**
-   * @ORM\Id
-   * @ORM\ManyToOne(targetEntity="Concrete\Core\Entity\User\User", inversedBy="rankings")
+   * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
+   */
+  private $ranking_points = 0;
+
+  /**
+   * @ORM\ManyToOne(targetEntity="Concrete\Core\Entity\User\User")
    * @ORM\JoinColumn(name="user_id", referencedColumnName="uID")
    */
   private $user;
 
   /**
-   * @ORM\Id
    * @ORM\ManyToOne(targetEntity="Tfts\Entity\Lan", inversedBy="rankings")
    * @ORM\JoinColumn(name="lan_id", referencedColumnName="lan_id")
    */
   private $lan;
 
+  /**
+   * @ORM\OneToMany(targetEntity="Tfts\Entity\RankingSnapshot", mappedBy="ranking")
+   */
+  private $rankingSnapshots;
+
   public function __construct(Lan $lan, User $user) {
     $this->lan = $lan;
     $this->user = $user;
+  }
+
+  public function getId(): int {
+    return $this->ranking_id;
+  }
+
+  public function getPoints(): int {
+    return $this->ranking_points;
+  }
+
+  public function setPoints(int $ranking_points) {
+    $this->ranking_points = $ranking_points;
   }
 
   public function getLan(): Lan {
@@ -46,12 +68,8 @@ class Ranking {
     return $this->user;
   }
 
-  public function getPoints(): int {
-    return $this->points;
-  }
-
-  public function setPoints(int $points) {
-    $this->points = $points;
+  public function getRankingSnapshots(): Collection {
+    return $this->rankingSnapshots;
   }
 
   public static function compare(Ranking $ranking1, Ranking $ranking2): int {

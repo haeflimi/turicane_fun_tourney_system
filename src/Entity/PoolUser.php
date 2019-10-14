@@ -8,10 +8,7 @@ use Tfts\Entity\Pool;
 
 /**
  * @ORM\Entity
- * @ORM\Table(
- *     name="tftsPoolUsers",
- *     uniqueConstraints={@ORM\UniqueConstraint(name="user_id", columns={"user_id","pool_id"})}
- * )
+ * @ORM\Table(name="tftsPoolUsers")
  */
 class PoolUser {
 

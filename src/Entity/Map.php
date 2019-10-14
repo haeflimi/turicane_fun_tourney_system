@@ -8,7 +8,7 @@ use Tfts\Entity\Lan;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="tftsMaps", uniqueConstraints={@ORM\UniqueConstraint(name="map_id", columns={"map_id","lan_id"})})
+ * @ORM\Table(name="tftsMaps")
  */
 class Map {
 

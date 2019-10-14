@@ -16,6 +16,8 @@ use Tfts\Entity\Registration;
 use Tfts\Entity\Match;
 use Tfts\Entity\MatchGroupUser;
 use Tfts\Entity\Ranking;
+use Tfts\Entity\RankingSnapshot;
+use Tfts\Entity\Snapshot;
 use Tfts\Entity\Map;
 use Tfts\Entity\Trackmania;
 use Tfts\Entity\Special;
@@ -634,12 +636,75 @@ class Tfts {
   }
 
   /**
+   * @return Snapshot|null the latest snapshot or null.
+   */
+  public function getLatestSnapshot(): ?Snapshot {
+    $repository = $this->em->getRepository(Snapshot::class);
+    $snapshots = $repository->findBy(['lan' => $this->getLan()], ['snapshot_datetime' => 'DESC']);
+    return sizeof($snapshots) == 0 ? null : $snapshots[0];
+  }
+
+  /**
+   * Creates a snapshot of the current ranking. Only one snapshot per hour is allowed.
+   *
+   * @return bool true if the snapshot was created, false otherwise.
+   */
+  public function createRankingSnapshot(): bool {
+    $rankings = $this->getLan()->getRankings();
+    // check we have a ranking first
+    if (sizeof($rankings) == 0) {
+      return false;
+    }
+
+    // verify last snapshot happened at least over an hour ago
+    $dateTime = new \DateTime("now");
+    $latestSnapshot = $this->getLatestSnapshot();
+    if (!is_null($latestSnapshot) && $dateTime->diff($latestSnapshot->getDateTime(), true)->h < 1) {
+      return false;
+    }
+
+    $snapshot = new Snapshot($this->getLan(), $dateTime);
+    $this->em->persist($snapshot);
+    foreach ($rankings as $ranking) {
+      $this->em->persist(new RankingSnapshot($ranking, $snapshot, $this->getUserRank($this->entityToUser($ranking->getUser()))));
+    }
+    $this->em->flush();
+    return true;
+  }
+
+  /**
    * @param User $user
+   * @return int the rank movement since the last ranking snapshot.
+   */
+  public function getRankMovement(User $user): int {
+    $currentRank = $this->getUserRank($user);
+    $previousRank = $this->getUserRank($user, $this->getLatestSnapshot());
+    return $previousRank - $currentRank;
+  }
+
+  /**
+   *
+   * @param User $user
+   * @param Snapshot|null $snapshot
    * @return int the user rank for the current lan.
    */
-  public function getUserRank(User $user): int {
-    $rankings = $this->getLan()->getRankings()->toArray();
-    usort($rankings, 'Tfts\Entity\Ranking::compare');
+  public function getUserRank(User $user, Snapshot $snapshot = null): int {
+    if (is_null($snapshot)) {
+      $rankings = $this->getLan()->getRankings()->toArray();
+      usort($rankings, 'Tfts\Entity\Ranking::compare');
+    } else {
+      $snapshot = $this->getLatestSnapshot();
+      if (is_null($snapshot)) {
+        return $this->getUserRank($user);
+      }
+
+      foreach ($snapshot->getRankingSnapshots() as $rankingSnapshot) {
+        if ($rankingSnapshot->getRanking()->getUser()->getUserId() == $user->getUserId()) {
+          return $rankingSnapshot->getRank();
+        }
+      }
+      return 0;
+    }
 
     $rank = 0;
     $last_points = 0;

@@ -245,7 +245,7 @@ class Controller extends BlockController {
     $tfts = new Tfts();
 
     $usergame = false;
-    $teamgame = true;
+    $teamgame = false;
     $massgame = false;
     $trackmania = false;
 
@@ -264,6 +264,8 @@ class Controller extends BlockController {
     if ($trackmania) {
       $this->processTrackmaniaMap($tfts);
     }
+
+    $tfts->createRankingSnapshot();
   }
 
   private function simulateUserGame(Tfts $tfts) {

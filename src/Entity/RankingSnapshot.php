@@ -3,6 +3,8 @@
 namespace Tfts\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Tfts\Entity\Ranking;
+use Tfts\Entity\Snapshot;
 
 /**
  * @ORM\Entity
@@ -12,27 +14,43 @@ class RankingSnapshot {
 
   /**
    * @ORM\Id
-   * @ORM\Column(type="datetime", options={"default":"CURRENT_TIMESTAMP"})
+   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Ranking", inversedBy="rankingSnapshots")
+   * @ORM\JoinColumn(name="ranking_id", referencedColumnName="ranking_id", nullable=false)
    */
-  private $timestamp;
+  private $ranking;
+
+  /**
+   * @ORM\Id
+   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Snapshot", inversedBy="rankingSnapshots")
+   * @ORM\JoinColumn(name="snapshot_id", referencedColumnName="snapshot_id", nullable=false)
+   */
+  private $snapshot;
 
   /**
    * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
    */
-  private $points;
+  private $rank;
 
-  /**
-   * @ORM\Id
-   * @ORM\ManyToOne(targetEntity="Concrete\Core\Entity\User\User")
-   * @ORM\JoinColumn(name="user_id", referencedColumnName="uID", nullable=false)
-   */
-  private $user;
+  public function __construct(Ranking $ranking, Snapshot $snapshot, int $rank) {
+    $this->ranking = $ranking;
+    $this->snapshot = $snapshot;
+    $this->rank = $rank;
+  }
 
-  /**
-   * @ORM\Id
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Lan", inversedBy="rankingSnapshots")
-   * @ORM\JoinColumn(name="lan_id", referencedColumnName="lan_id", nullable=false)
-   */
-  private $lan;
+  public function getTimestamp(): \DateTime {
+    return $this->timestamp;
+  }
+
+  public function getRanking(): Ranking {
+    return $this->ranking;
+  }
+
+  public function getSnapshot(): Snapshot {
+    return $this->snapshot;
+  }
+
+  public function getRank(): int {
+    return $this->rank;
+  }
 
 }

@@ -9,10 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity
- * @ORM\Table(
- *     name="tftsGames",
- *     uniqueConstraints={@ORM\UniqueConstraint(name="game_id", columns={"game_id", "lan_id"})}
- * )
+ * @ORM\Table(name="tftsGames")
  */
 class Game {
 

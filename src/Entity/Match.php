@@ -10,10 +10,7 @@ use Tfts\Entity\Game;
 
 /**
  * @ORM\Entity
- * @ORM\Table(
- *     name="tftsMatches",
- *     uniqueConstraints={@ORM\UniqueConstraint(name="match_id", columns={"match_id","game_id"})}
- * )
+ * @ORM\Table(name="tftsMatches")
  */
 class Match {
 
