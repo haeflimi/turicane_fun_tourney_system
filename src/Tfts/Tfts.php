@@ -372,6 +372,8 @@ class Tfts {
      */
     public function declineResultUserMatch($match_id, $user_id): bool {
         //@todo What to do here?
+        throw new Exception("This is not implemented yet. What should happen here?");
+        return false;
     }
 
   /**

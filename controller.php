@@ -141,6 +141,10 @@ class Controller extends Package
                         case 'confirmResultUserMatch':
                             $resp = $tfts->confirmResultUserMatch($_POST['match_id'], $_POST['user_id']);
                             break;
+
+                        case 'declineResultUserMatch':
+                            $resp = $tfts->declineResultUserMatch($_POST['match_id'], $_POST['user_id']);
+                            break;
                     }
                     if ($resp) {
                         return new Response('success');

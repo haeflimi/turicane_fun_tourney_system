@@ -117,9 +117,7 @@ var Tfts = {
         });
     },
     declineResultUserMatch: function( match_id, user_id) {
-        Tfts.error('Not implemented yet');
-        return;
-        /*$.post(
+        $.post(
             "/tfts/api/action", {
                 match_id: match_id,
                 user_id: user_id,
@@ -131,7 +129,7 @@ var Tfts = {
                 window.location.reload();
             }).fail(function ( response ) {
             Tfts.error(response.responseJSON.error.message);
-        });*/
+        });
     },
     /*
     Helper Methods
