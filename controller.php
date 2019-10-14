@@ -7,6 +7,11 @@ use Concrete\Core\Package\Package;
 use Concrete\Core\Backup\ContentImporter;
 use Concrete\Core\Database\EntityManager\Provider\ProviderAggregateInterface;
 use Concrete\Core\Database\EntityManager\Provider\StandardPackageProvider;
+use Concrete\Core\Support\Facade\Application;
+use Concrete\Core\User\User;
+use Tfts\Entity\Game;
+use Concrete\Core\Foundation\ClassLoader;
+use Tfts\Tfts;
 
 class Controller extends Package implements ProviderAggregateInterface {
 
@@ -15,7 +20,8 @@ class Controller extends Package implements ProviderAggregateInterface {
   protected $pkgVersion = '0.120.32';
   protected $em;
   protected $pkgAutoloaderRegistries = array(
-      'src/Tfts' => '\Tfts'
+      'src/Tfts' => '\Tfts',
+      'src/Entity' => '\Tfts\Entity'
   );
 
   public function getPackageName() {
@@ -65,7 +71,35 @@ class Controller extends Package implements ProviderAggregateInterface {
     // This Route is needed to "capture" the Data sent by the Trackmania result logger
     $router->post('/tfts/api/trackmania', 'Tfts\Tfts::processTrackmaniaData');
     // Register other routes for interface actions and pass them along to the tfts
-    $router->post('/tfts/api/joinUserPool', 'Tfts\Tfts::joinUserPool');
+      $router->post('/tfts/api/joinUserPool', function(){
+          if($this->validateRequestToken($_POST, $_POST['action'])){
+              $em = $this->getPackageEntityManager();
+              $user = User::getByUserID($_POST['user_id']);
+              $game = $em->find(Game::class, $_POST['game_id']);
+              $tfts = new Tfts();
+              $tfts->joinUserPool($game->getId(), $user->getUserID());
+          }
+      });
   }
+
+    /**
+     * Validate a Post Request for a token
+     *
+     * @param $data
+     * @param bool $action
+     * @return bool|\Concrete\Core\Error\Error
+     */
+    public function validateRequestToken($data, $action = false) {
+        $errors = new \Concrete\Core\Error\Error();
+        // we want to use a token to validate each call in order to protect from xss and request forgery
+        $token = \Core::make("token");
+        if ($action && !$token->validate($action)) {
+            $errors->add('Invalid Request, token must be valid.');
+        }
+        if ($errors->has()) {
+            return $errors;
+        }
+        return true;
+    }
 
 }
