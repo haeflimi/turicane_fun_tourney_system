@@ -1,10 +1,10 @@
 <?php
 
-namespace Tfts\Entity;
+namespace Tfts;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Tfts\Entity\Lan;
+use Tfts\Lan;
 
 /**
  * @ORM\Entity
@@ -25,13 +25,13 @@ class Snapshot {
   private $snapshot_datetime;
 
   /**
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Lan", inversedBy="snapshots")
+   * @ORM\ManyToOne(targetEntity="Tfts\Lan", inversedBy="snapshots")
    * @ORM\JoinColumn(name="lan_id", referencedColumnName="lan_id", nullable=false)
    */
   private $lan;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\RankingSnapshot", mappedBy="snapshot")
+   * @ORM\OneToMany(targetEntity="Tfts\RankingSnapshot", mappedBy="snapshot")
    */
   private $rankingSnapshots;
 

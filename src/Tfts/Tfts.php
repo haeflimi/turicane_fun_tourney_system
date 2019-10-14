@@ -10,25 +10,24 @@ use Concrete\Core\User\UserList;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Tfts\Entity\Lan;
-use Tfts\Entity\Game;
-use Tfts\Entity\Registration;
-use Tfts\Entity\Match;
-use Tfts\Entity\MatchGroupUser;
-use Tfts\Entity\Ranking;
-use Tfts\Entity\RankingSnapshot;
-use Tfts\Entity\Snapshot;
-use Tfts\Entity\Map;
-use Tfts\Entity\Trackmania;
-use Tfts\Entity\Special;
-use Tfts\Entity\Pool;
-use Tfts\Entity\PoolUser;
+use Tfts\Lan;
+use Tfts\Game;
+use Tfts\Registration;
+use Tfts\Match;
+use Tfts\MatchGroupUser;
+use Tfts\Ranking;
+use Tfts\RankingSnapshot;
+use Tfts\Snapshot;
+use Tfts\Map;
+use Tfts\Trackmania;
+use Tfts\Special;
+use Tfts\Pool;
+use Tfts\PoolUser;
 
 /**
  * This Class wraps all the important Functionality of the Turicane Fun Tourney System
  *
  * Class Tfts
- * @package TuricaneFunTourneySystem
  */
 class Tfts {
 
@@ -53,9 +52,10 @@ class Tfts {
    * @param \Tfts\Game $game
    * @return Match a list of open matches for the given game.
    */
-  public function getOpenChallenges(Game $game): Collection {
+  public function getOpenGameChallenges(Game $game): Collection {
     return $game->getOpenChallenges();
   }
+
 
   /**
    * @param \Tfts\Game $game
@@ -77,10 +77,16 @@ class Tfts {
    * @param User $user
    * @return Match a list of open challenges for the given user.
    */
-  public function getOpenUserChallenges(User $user): Collection {
-    // @TODO: get open challenges for user
-    return null;
-  }
+    public function getOpenUserChallenges(User $user): Collection
+    {
+        $qb = $this->em->createQueryBuilder();
+        $qb->select('m')
+            ->from('Tfts\Match', 'm')
+            ->where('m.user2_id = ?')
+            ->andWhere('m.match_accepted = 0')
+            ->setParameter(0,$user->getUserID());
+        return $qb->getQuery()->getResult();
+    }
 
   /**
    * @param User $user
@@ -134,27 +140,23 @@ class Tfts {
    * @param User $user
    * @return bool true if the join was successful, false otherwise.
    */
-  public function joinUserPool($game = false, $user = false): bool {
-    if (!$game && !$user && $this->validateRequest($_POST, $_POST['action'])) {
-      $user = User::getByUserID($_POST['user_id']);
-      $game = $this->em->find(Game::class, $_POST['game_id']);
-    }
+  public function joinUserPool(Game $game, User $user): bool {
 
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+        throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     // verify game
     if (!$game->isPool() || $game->isGroup()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     // verify user is not already registered
     if (!is_null($this->findRegistration($game, $user))) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -174,14 +176,14 @@ class Tfts {
   public function leaveUserPool(Game $game, User $user): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     $registration = $this->findRegistration($game, $user);
     // verify user is registered
     if (is_null($registration)) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -201,27 +203,27 @@ class Tfts {
   public function challengeUser(Game $game, User $challenger, User $challenged): ?Match {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return null;
     }
 
     // @TODO: check max games against another player
     // verify both users are registered for that game
     if (is_null($this->findRegistration($game, $challenger)) || is_null($this->findRegistration($game, $challenged))) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return null;
     }
 
     $repository = $this->em->getRepository(Match::class);
     // verify challenge cannot be triggered twice
     if (!is_null($repository->findOneBy(['user1' => $challenger->getUserId(), 'user2' => $challenged->getUserId(), 'match_finish_date' => null]))) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return null;
     }
 
     // verify challenged hasn't already challenged the challenger
     if (!is_null($repository->findOneBy(['user1' => $challenged->getUserId(), 'user2' => $challenger->getUserId(), 'match_finish_date' => null]))) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return null;
     }
 
@@ -242,14 +244,14 @@ class Tfts {
   public function withdrawUserChallenge(Match $match, User $challenger): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     $repository = $this->em->getRepository(Match::class);
     // verify match exists and user is challenger
     if (is_null($repository->findOneBy(['match_id' => $match, 'user1' => $challenger->getUserId()]))) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -268,14 +270,14 @@ class Tfts {
   public function acceptUserChallenge(Match $match, User $challenged): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     $repository = $this->em->getRepository(Match::class);
     // verify match exists and user is challenged
     if (is_null($repository->findOneBy(['match_id' => $match, 'user2' => $challenged->getUserId()]))) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -295,14 +297,14 @@ class Tfts {
   public function declineUserChallenge(Match $match, User $challenged): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     $repository = $this->em->getRepository(Match::class);
     // verify match exists and user is challenged
     if (is_null($repository->findOneBy(['match_id' => $match, 'user2' => $challenged->getUserId()]))) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -323,7 +325,7 @@ class Tfts {
   public function reportResultUserMatch(Match $match, User $user, $score1, $score2): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -352,7 +354,7 @@ class Tfts {
   public function cancelUserMatch(Match $match, User $user): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -376,25 +378,25 @@ class Tfts {
   public function joinGroupPool(Game $game, Group $group): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     // verify game
     if (!$game->isPool() || !$game->isGroup()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     // verify group has enough members
     if ($group->getGroupMembersNum() < $game->getGroupSize()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     // verify group is not already registered
     if (!is_null($this->findRegistration($game, null, $group))) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -414,14 +416,14 @@ class Tfts {
   public function leaveGroupPool(Game $game, Group $group): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     $registration = $this->findRegistration($game, null, $group);
     // verify group is registered
     if (is_null($registration)) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -441,27 +443,27 @@ class Tfts {
   public function challengeGroup(Game $game, Group $challenger, Group $challenged): ?Match {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return null;
     }
 
     // @TODO: check max games against another group
     // verify both users are registered for that game
     if (is_null($this->findRegistration($game, null, $challenger)) || is_null($this->findRegistration($game, null, $challenged))) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return null;
     }
 
     $repository = $this->em->getRepository(Match::class);
     // verify challenge cannot be triggered twice
     if (!is_null($repository->findOneBy(['group1_id' => $challenger->getGroupId(), 'group2_id' => $challenged->getGroupId(), 'match_finish_date' => null]))) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return null;
     }
 
     // verify challenged hasn't already challenged the challenger
     if (!is_null($repository->findOneBy(['group1_id' => $challenged->getGroupId(), 'group2_id' => $challenger->getGroupId(), 'match_finish_date' => null]))) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return null;
     }
 
@@ -482,14 +484,14 @@ class Tfts {
   public function withdrawGroupChallenge(Match $match, Group $challenger): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     $repository = $this->em->getRepository(Match::class);
     // verify match exists and user is challenger
     if (is_null($repository->findOneBy(['match_id' => $match, 'group1_id' => $challenger->getGroupId()]))) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -508,14 +510,14 @@ class Tfts {
   public function acceptGroupChallenge(Match $match, Group $challenged): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     $repository = $this->em->getRepository(Match::class);
     // verify match exists and group is challenged
     if (is_null($repository->findOneBy(['match_id' => $match, 'group2_id' => $challenged->getGroupId()]))) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -535,14 +537,14 @@ class Tfts {
   public function declineGroupChallenge(Match $match, Group $challenged): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     $repository = $this->em->getRepository(Match::class);
     // verify match exists and group is challenged
     if (is_null($repository->findOneBy(['match_id' => $match, 'group2_id' => $challenged->getGroupId()]))) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -565,7 +567,7 @@ class Tfts {
   public function reportResultGroupMatch(Match $match, Group $group, Collection $users, $score1, $score2): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -582,7 +584,7 @@ class Tfts {
     // verify users are members of the group
     foreach ($users as $user) {
       if (!$user->inGroup($group)) {
-        // @TODO: throw exception?
+        throw new Exception("Something bad happened"); //@TODO: let me know hat happened
         return false;
       }
     }
@@ -621,7 +623,7 @@ class Tfts {
   public function cancelGroupMatch(Match $match, Group $group): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -691,7 +693,7 @@ class Tfts {
   public function getUserRank(User $user, Snapshot $snapshot = null): int {
     if (is_null($snapshot)) {
       $rankings = $this->getLan()->getRankings()->toArray();
-      usort($rankings, 'Tfts\Entity\Ranking::compare');
+      usort($rankings, 'Tfts\Ranking::compare');
     } else {
       $snapshot = $this->getLatestSnapshot();
       if (is_null($snapshot)) {
@@ -732,7 +734,7 @@ class Tfts {
    */
   public function getTrackmaniaRank(Map $map, User $user): int {
     $trackmanias = $map->getTrackmanias()->toArray();
-    usort($trackmanias, 'Tfts\Entity\Trackmania::compare');
+    usort($trackmanias, 'Tfts\Trackmania::compare');
 
     $rank = 0;
     $last_record = 0;
@@ -873,7 +875,7 @@ class Tfts {
 
     // verify map exists
     if (is_null($db_map)) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -912,19 +914,19 @@ class Tfts {
    */
   public function createPools(Game $game, int $count): bool {
     if (!$game->isMass()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     // verify there are no open pools
     if (sizeof($game->getOpenPools()) > 0) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     // sort registrations for shuffeling reasons
     $registrations = $game->getRegistrations()->toArray();
-    usort($registrations, 'Tfts\Entity\Registration::compare');
+    usort($registrations, 'Tfts\Registration::compare');
 
     // read users from registrations
     $users = new ArrayCollection();
@@ -955,14 +957,14 @@ class Tfts {
    */
   public function processPools(Game $game, int $count, int $rank): bool {
     if (!$game->isMass()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     // verify there are at least 2 open pools
     $oldPools = $game->getOpenPools();
     if (sizeof($oldPools) < 2) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -1004,14 +1006,14 @@ class Tfts {
    */
   public function processFinalPool(Game $game): bool {
     if (!$game->isMass()) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
     // verify there's only one pool left
     $pools = $game->getOpenPools();
     if (sizeof($pools) != 1) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
@@ -1077,7 +1079,7 @@ class Tfts {
 
     // verify that only one and one only of user and group is set
     if (($user == null && $group == null) || ($user != null && $group != null)) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return null;
     }
 
@@ -1146,19 +1148,19 @@ class Tfts {
     $db_match = $repository->findOneBy(['match_id' => $match, ($is_challenger ? $challenger_field : $challenged_field) => $id]);
     // verify match exists
     if (is_null($db_match)) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return null;
     }
 
     // verify user is challenger or challenged
     if (!$is_challenger && !$is_challenged) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return null;
     }
 
     // verify match is not closed
     if ($db_match->getFinishDate() != null) {
-      // @TODO: throw exception?
+      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return null;
     }
 

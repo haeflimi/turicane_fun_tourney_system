@@ -3,17 +3,20 @@
 namespace Concrete\Package\TuricaneFunTourneySystem;
 
 use Concrete\Core\Asset\AssetList;
+use Concrete\Core\Database\CharacterSetCollation\Exception;
 use Concrete\Core\Package\Package;
 use Concrete\Core\Backup\ContentImporter;
 use Concrete\Core\Database\EntityManager\Provider\ProviderAggregateInterface;
 use Concrete\Core\Database\EntityManager\Provider\StandardPackageProvider;
 use Concrete\Core\Support\Facade\Application;
 use Concrete\Core\User\User;
-use Tfts\Entity\Game;
+use Concrete\Core\View\View;
+use Tfts\Game;
 use Concrete\Core\Foundation\ClassLoader;
 use Tfts\Tfts;
+use Core;
 
-class Controller extends Package implements ProviderAggregateInterface {
+class Controller extends Package {
 
   protected $pkgHandle = 'turicane_fun_tourney_system';
   protected $appVersionRequired = '8.4';
@@ -21,7 +24,7 @@ class Controller extends Package implements ProviderAggregateInterface {
   protected $em;
   protected $pkgAutoloaderRegistries = array(
       'src/Tfts' => '\Tfts',
-      'src/Entity' => '\Tfts\Entity'
+      'src/Entity' => '\Tfts',
   );
 
   public function getPackageName() {
@@ -32,23 +35,40 @@ class Controller extends Package implements ProviderAggregateInterface {
     return t('');
   }
 
-  public function getEntityManagerProvider() {
-    $provider = new StandardPackageProvider($this->app, $this, [
-        'src/Entity' => 'Tfts\Entity'
-    ]);
-    return $provider;
-  }
-
   public function on_start() {
-    $this->registerRoutes();
-    $al = AssetList::getInstance();
-    $pkg = Package::getByHandle($this->pkgHandle);
-    $al->register('javascript', 'tfts_notifications', 'js/tfts_notifications.js',
-            array('minify' => false, 'combine' => false), $pkg
-    );
+      // Makte the Notification Class available everywhere
+      Core::singleton('helper/tfts/ui', function () {
+          return new \Tfts\Notification();
+      });
+
+      // Load some stuff
+      $em = $this->getPackageEntityManager();
+      $view = new View();
+      $al = AssetList::getInstance();
+      $u = new User();
+      $pkg = Package::getByHandle($this->pkgHandle);
+      // Register Routes
+      $this->registerRoutes();
+      // Register JS Assets for TFTS and c5 Backend Stuff for Notifications
       $al->register('javascript', 'tfts', 'js/tfts.js',
           array('minify' => false, 'combine' => false), $pkg
       );
+      $view->requireAsset('javascript', 'tfts');
+      $view->requireAsset('core/app');
+      // Check TFTS for Open Challanges to display as Notifications
+      if ($u->isLoggedIn() && $_GET['debug'] == '1') {
+          $tfts = new Tfts();
+          $challenges = $tfts->getOpenUserChallenges($u);
+          foreach ($challenges as $match) {
+              $notification = Core::make('helper/tfts/ui')->challenge($match);
+              $view->addFooterItem($notification);
+          }
+          $confirmations = $tfts->getOpenUserChallenges($u);
+          foreach ($confirmations as $match) {
+              $notification = Core::make('helper/tfts/ui')->confirm($match);
+              $view->addFooterItem($notification);
+          }
+      };
   }
 
   public function install() {
@@ -77,7 +97,49 @@ class Controller extends Package implements ProviderAggregateInterface {
               $user = User::getByUserID($_POST['user_id']);
               $game = $em->find(Game::class, $_POST['game_id']);
               $tfts = new Tfts();
-              $tfts->joinUserPool($game->getId(), $user->getUserID());
+              return $tfts->joinUserPool($game->getId(), $user->getUserID());
+          }
+      });
+      $router->post('/tfts/api/action', function(){
+          if($this->validateRequestToken($_POST, $_POST['action'])){
+              $em = $this->getPackageEntityManager();
+              $tfts = new Tfts();
+              try {
+                  switch ($_POST['action']){
+                      case 'joinUserPool':
+                          $user = User::getByUserID($_POST['user_id']);
+                          $game = $em->find(Game::class, $_POST['game_id']);
+                          return $tfts->joinUserPool($game, $user);
+                          break;
+
+                      case 'leaveUserPool':
+                          $user = User::getByUserID($_POST['user_id']);
+                          $game = $em->find(Game::class, $_POST['game_id']);
+                          return $tfts->leaveUserPool($game, $user);
+                          break;
+
+                      case 'challengeUser':
+                          $challenger = User::getByUserID($_POST['challenger_id']);
+                          $challenged = User::getByUserID($_POST['challenged_id']);
+                          $game = $em->find(Game::class, $_POST['game_id']);
+                          return $tfts->challengeUser($game, $challenger, $challenged);
+                          break;
+
+                      case 'acceptUserChallenge':
+                          $match = $em->find(Game::class, $_POST['match_id']);
+                          $user = User::getByUserID($_POST['user_id']);
+                          return $tfts->acceptUserChallenge($match, $user);
+                          break;
+
+                      case 'declineUserChallenge':
+                          $match = $em->find(Game::class, $_POST['match_id']);
+                          $user = User::getByUserID($_POST['user_id']);
+                          return $tfts->declineUserChallenge($match, $user);
+                          break;
+                  }
+              } catch(Exception $e) {
+                  return $e->getMessage();
+              }
           }
       });
   }

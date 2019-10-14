@@ -1,10 +1,10 @@
 <?php
 
-namespace Tfts\Entity;
+namespace Tfts;
 
 use Concrete\Core\Entity\User\User;
 use Doctrine\ORM\Mapping as ORM;
-use Tfts\Entity\Match;
+use Tfts\Match;
 
 /**
  * @ORM\Entity
@@ -14,7 +14,7 @@ class MatchGroupUser {
 
   /**
    * @ORM\Id
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Match", inversedBy="matchPlayers")
+   * @ORM\ManyToOne(targetEntity="Tfts\Match", inversedBy="matchPlayers")
    * @ORM\JoinColumn(name="match_id", referencedColumnName="match_id", nullable=false)
    */
   private $match;

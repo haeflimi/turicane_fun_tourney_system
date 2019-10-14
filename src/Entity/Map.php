@@ -1,10 +1,10 @@
 <?php
 
-namespace Tfts\Entity;
+namespace Tfts;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Tfts\Entity\Lan;
+use Tfts\Lan;
 
 /**
  * @ORM\Entity
@@ -30,12 +30,12 @@ class Map {
   private $map_is_processed = 0;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\Trackmania", mappedBy="map")
+   * @ORM\OneToMany(targetEntity="Tfts\Trackmania", mappedBy="map")
    */
   private $trackmanias;
 
   /**
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Lan", inversedBy="trackmanias")
+   * @ORM\ManyToOne(targetEntity="Tfts\Lan", inversedBy="trackmanias")
    * @ORM\JoinColumn(name="lan_id", referencedColumnName="lan_id", nullable=false)
    */
   private $lan;

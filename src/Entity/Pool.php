@@ -1,13 +1,13 @@
 <?php
 
-namespace Tfts\Entity;
+namespace Tfts;
 
 use Concrete\Core\Entity\User\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Tfts\Entity\Game;
-use Tfts\Entity\PoolUser;
+use Tfts\Game;
+use Tfts\PoolUser;
 
 /**
  * @ORM\Entity
@@ -33,7 +33,7 @@ class Pool {
   private $pool_is_played = 0;
 
   /**
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Game", inversedBy="pools")
+   * @ORM\ManyToOne(targetEntity="Tfts\Game", inversedBy="pools")
    * @ORM\JoinColumn(name="game_id", referencedColumnName="game_id", nullable=false)
    */
   private $game;
@@ -45,17 +45,17 @@ class Pool {
   private $host;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\PoolUser", mappedBy="pool")
+   * @ORM\OneToMany(targetEntity="Tfts\PoolUser", mappedBy="pool")
    */
   private $users;
 
   /**
-   * @ORM\ManyToMany(targetEntity="Tfts\Entity\Pool", mappedBy="children")
+   * @ORM\ManyToMany(targetEntity="Tfts\Pool", mappedBy="children")
    */
   private $parents;
 
   /**
-   * @ORM\ManyToMany(targetEntity="Tfts\Entity\Pool", inversedBy="parents")
+   * @ORM\ManyToMany(targetEntity="Tfts\Pool", inversedBy="parents")
    * @ORM\JoinTable(
    *     name="tftsPoolParentChild",
    *     joinColumns={@ORM\JoinColumn(name="child_id", referencedColumnName="pool_id", nullable=false)},

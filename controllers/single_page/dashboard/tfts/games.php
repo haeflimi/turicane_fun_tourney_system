@@ -2,7 +2,7 @@
 namespace Concrete\Package\TuricaneFunTourneySystem\Controller\SinglePage\Dashboard\Tfts;
 
 use Concrete\Core\Page\Controller\DashboardPageController;
-use Tfts\Entity\Game;
+use Tfts\Game;
 
 class Games extends DashboardPageController
 {
@@ -27,7 +27,7 @@ class Games extends DashboardPageController
     {
         // https://documentation.concrete5.org/developers/working-with-pages/single-pages/dashboard-pages
 
-        $gameList = $this->em->getRepository('Tfts\Entity\Game');
+        $gameList = $this->em->getRepository('Tfts\Game');
 
         $this->set('games', $gameList->findAll());
     }

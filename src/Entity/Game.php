@@ -1,6 +1,6 @@
 <?php
 
-namespace Tfts\Entity;
+namespace Tfts;
 
 use Concrete\Core\Support\Facade\Application;
 use Concrete\Core\Page\Page;
@@ -31,23 +31,23 @@ class Game {
   private $game_page_id;
 
   /**
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Lan", inversedBy="games")
+   * @ORM\ManyToOne(targetEntity="Tfts\Lan", inversedBy="games")
    * @ORM\JoinColumn(name="lan_id", referencedColumnName="lan_id", nullable=false)
    */
   private $lan;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\Registration", mappedBy="game")
+   * @ORM\OneToMany(targetEntity="Tfts\Registration", mappedBy="game")
    */
   private $registrations;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\Match", mappedBy="game")
+   * @ORM\OneToMany(targetEntity="Tfts\Match", mappedBy="game")
    */
   private $matches;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\Pool", mappedBy="game")
+   * @ORM\OneToMany(targetEntity="Tfts\Pool", mappedBy="game")
    */
   private $pools;
   private $game_page;
@@ -122,42 +122,42 @@ class Game {
     if (!is_object($game_page = $this->getGamePage())) {
       return 0;
     }
-    return $game_page->getAttribute('tfts_game_points_win');
+    return (int)$game_page->getAttribute('tfts_game_points_win');
   }
 
   public function getPointsLoss(): int {
     if (!is_object($game_page = $this->getGamePage())) {
       return 0;
     }
-    return $game_page->getAttribute('tfts_game_points_loss');
+    return (int)$game_page->getAttribute('tfts_game_points_loss');
   }
 
   public function isPool(): bool {
     if (!is_object($game_page = $this->getGamePage())) {
       return false;
     }
-    return $game_page->getAttribute('tfts_game_is_pool');
+    return (bool)$game_page->getAttribute('tfts_game_is_pool');
   }
 
   public function isGroup(): bool {
     if (!is_object($game_page = $this->getGamePage())) {
       return false;
     }
-    return $game_page->getAttribute('tfts_game_is_team');
+    return (bool)$game_page->getAttribute('tfts_game_is_team');
   }
 
   public function isMass(): bool {
     if (!is_object($game_page = $this->getGamePage())) {
       return false;
     }
-    return $game_page->getAttribute('tfts_game_is_mass');
+    return (bool)$game_page->getAttribute('tfts_game_is_mass');
   }
 
   public function getGroupSize(): int {
     if (!is_object($game_page = $this->getGamePage())) {
       return false;
     }
-    return $game_page->getAttribute('tfts_game_players');
+    return (int)$game_page->getAttribute('tfts_game_players');
   }
 
   public function getGamePage(): Page {

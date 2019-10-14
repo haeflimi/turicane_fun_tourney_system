@@ -1,10 +1,10 @@
 <?php
 
-namespace Tfts\Entity;
+namespace Tfts;
 
 use Doctrine\ORM\Mapping as ORM;
-use Tfts\Entity\Ranking;
-use Tfts\Entity\Snapshot;
+use Tfts\Ranking;
+use Tfts\Snapshot;
 
 /**
  * @ORM\Entity
@@ -14,14 +14,14 @@ class RankingSnapshot {
 
   /**
    * @ORM\Id
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Ranking", inversedBy="rankingSnapshots")
+   * @ORM\ManyToOne(targetEntity="Tfts\Ranking", inversedBy="rankingSnapshots")
    * @ORM\JoinColumn(name="ranking_id", referencedColumnName="ranking_id", nullable=false)
    */
   private $ranking;
 
   /**
    * @ORM\Id
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Snapshot", inversedBy="rankingSnapshots")
+   * @ORM\ManyToOne(targetEntity="Tfts\Snapshot", inversedBy="rankingSnapshots")
    * @ORM\JoinColumn(name="snapshot_id", referencedColumnName="snapshot_id", nullable=false)
    */
   private $snapshot;

@@ -4,13 +4,21 @@ if(!$is_pool):?>
     <div class="alert alert-danger">
         <?=t('TFTS Games configured as Poll Games can use the Pool Overview Block')?>
     </div>
+<?php elseif(!$me->isLoggedIn()):?>
+    <div class="alert alert-danger">
+        <?=t('You need to be logged in to see Tournament details.')?>
+    </div>
 <?php return;
 endif;?>
 
 
-<h2>Pool Members <?php if(1 || !$in_pool):?>
-        <button class="btn btn-success pull-right" onClick="Tfts.joinUserPool(<?=$me->getUserId();?>,<?=$tfts_game_id;?>,'<?=Core::make('token')->generate('joinPool');?>');">Turnierpool beitreten</button>
-    <?php endif; ?></h2>
+<h2>Pool Members
+<?php if($in_pool):?>
+    <button class="btn btn-danger pull-right" onClick="Tfts.leaveUserPool(<?=$me->getUserId();?>,<?=$tfts_game_id;?>,'<?=Core::make('token')->generate('leaveUserPool');?>');">Turnierpool verlassen</button>
+<?php else:?>
+    <button class="btn btn-success pull-right" onClick="Tfts.joinUserPool(<?=$me->getUserId();?>,<?=$tfts_game_id;?>,'<?=Core::make('token')->generate('joinUserPool');?>');">Turnierpool beitreten</button>
+<?php endif; ?>
+</h2>
 
 <table class="table table-striped table-condensed">
     <tbody>
@@ -18,7 +26,9 @@ endif;?>
         <tr>
             <td><?=$r->getUser()->getUserName()?></td>
             <td>
-                <button class="btn btn-transparent btn-sm" onclick="Tfts.challengeUser(<?=$r->getUser()->getUserId()?>);"><?=t('Challange')?></button>
+                <?php if($r->getUser()->getUserId() != $me->getUserId()):?>
+                <button class="btn btn-transparent btn-sm pull-right"  onClick="Tfts.challengeUser(<?=$me->getUserId();?>,<?=$r->getUser()->getUserId();?>,<?=$tfts_game_id;?>,'<?=Core::make('token')->generate('joinUserPool');?>', '<?=$r->getUser()->getUserName()?>');"><?=t('Challenge')?></button>
+                <?php endif; ?>
             </td>
         </tr>
     <?php endforeach; ?>
@@ -32,21 +42,13 @@ endif;?>
         <tr>
             <td><?=$om->getUser1()->getUserName()?> vs. <?=$om->getUser2()->getUserName()?></td>
             <td>
-                <button class="btn btn-transparent btn-sm" onclick="Tfts.reportMatchResults();"><?=t('Report Result')?></button>
-            </td>
-        </tr>
-    <?php endforeach; ?>
-    </tbody>
-</table>
-<hr/>
-<h2>Open Callanges</h2>
-<table class="table table-striped table-condensed">
-    <tbody>
-    <?php foreach($openChallenges as $om):?>
-        <tr>
-            <td><?=$om->getUser1()->getUserName()?> vs. <?=$om->getUser2()->getUserName()?></td>
-            <td>
-                <button class="btn btn-transparent btn-sm" onclick="Tfts.acceptChallenge();"><?=t('Accept Challenge')?></button>
+                <?php if(1):?>
+                <form id="resultForm" class="form-inline pull-right">
+                    <input class="form-control form-control-sm" type="number" placeholder="<?=$om->getUser1()->getUserName()?> Score" name="user1_score"/>&nbsp;
+                    <input class="form-control form-control-sm" type="number" placeholder="<?=$om->getUser2()->getUserName()?> Score" name="user2_score"/>&nbsp;
+                    <button class="btn btn-transparent btn-sm pull-right" onclick="Tfts.reportMatchResults();"><?=t('Report Result')?></button>
+                </form>
+                <?php endif;?>
             </td>
         </tr>
     <?php endforeach; ?>

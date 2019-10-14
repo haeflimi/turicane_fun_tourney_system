@@ -1,10 +1,10 @@
 <?php
 
-namespace Tfts\Entity;
+namespace Tfts;
 
 use Concrete\Core\Entity\User\User;
 use Doctrine\ORM\Mapping as ORM;
-use Tfts\Entity\Lan;
+use Tfts\Lan;
 
 /**
  * @ORM\Entity
@@ -36,7 +36,7 @@ class Special {
   private $user;
 
   /**
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Lan", inversedBy="specials")
+   * @ORM\ManyToOne(targetEntity="Tfts\Lan", inversedBy="specials")
    * @ORM\JoinColumn(name="lan_id", referencedColumnName="lan_id")
    */
   private $lan;

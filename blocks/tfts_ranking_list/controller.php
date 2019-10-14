@@ -8,7 +8,7 @@ use Concrete\Core\User\Group\Group;
 use Concrete\Core\User\UserList;
 use Concrete\Core\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
-use Tfts\Entity\Game;
+use Tfts\Game;
 use Tfts\Tfts;
 
 //use Concrete\Core\Support\Facade\Config;
@@ -398,7 +398,7 @@ class Controller extends BlockController {
   }
 
   private function processTrackmaniaMap(Tfts $tfts) {
-    $tfts->processMap($this->em->find('Tfts\Entity\Map', 1));
+    $tfts->processMap($this->em->find('Tfts\Map', 1));
   }
 
   private function getUserByName(String $user_name) {

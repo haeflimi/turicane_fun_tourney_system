@@ -1,12 +1,12 @@
 <?php
 
-namespace Tfts\Entity;
+namespace Tfts;
 
 use Concrete\Core\Entity\User\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Tfts\Entity\Game;
+use Tfts\Game;
 
 /**
  * @ORM\Entity
@@ -77,7 +77,7 @@ class Match {
   private $match_published = 0;
 
   /**
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Game", inversedBy="matches")
+   * @ORM\ManyToOne(targetEntity="Tfts\Game", inversedBy="matches")
    * @ORM\JoinColumn(name="game_id", referencedColumnName="game_id")
    */
   private $game;
@@ -105,7 +105,7 @@ class Match {
   private $group2_id;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\MatchGroupUser", mappedBy="match")
+   * @ORM\OneToMany(targetEntity="Tfts\MatchGroupUser", mappedBy="match")
    */
   private $matchGroupUsers;
 

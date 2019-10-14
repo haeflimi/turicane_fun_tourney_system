@@ -1,6 +1,6 @@
 <?php
 
-namespace Tfts\Entity;
+namespace Tfts;
 
 use Concrete\Core\Entity\User\User;
 use Doctrine\Common\Collections\Collection;
@@ -33,13 +33,13 @@ class Ranking {
   private $user;
 
   /**
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Lan", inversedBy="rankings")
+   * @ORM\ManyToOne(targetEntity="Tfts\Lan", inversedBy="rankings")
    * @ORM\JoinColumn(name="lan_id", referencedColumnName="lan_id")
    */
   private $lan;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\RankingSnapshot", mappedBy="ranking")
+   * @ORM\OneToMany(targetEntity="Tfts\RankingSnapshot", mappedBy="ranking")
    */
   private $rankingSnapshots;
 

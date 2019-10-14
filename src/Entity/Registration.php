@@ -1,6 +1,6 @@
 <?php
 
-namespace Tfts\Entity;
+namespace Tfts;
 
 use Concrete\Core\Entity\User\User;
 use Doctrine\ORM\Mapping as ORM;
@@ -22,7 +22,7 @@ class Registration {
   private $registration_id;
 
   /**
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Game", inversedBy="registrations")
+   * @ORM\ManyToOne(targetEntity="Tfts\Game", inversedBy="registrations")
    * @ORM\JoinColumn(name="game_id", referencedColumnName="game_id", nullable=false)
    */
   private $game;

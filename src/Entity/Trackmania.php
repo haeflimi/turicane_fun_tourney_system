@@ -1,10 +1,10 @@
 <?php
 
-namespace Tfts\Entity;
+namespace Tfts;
 
 use Concrete\Core\Entity\User\User;
 use Doctrine\ORM\Mapping as ORM;
-use Tfts\Entity\Map;
+use Tfts\Map;
 
 /**
  * @ORM\Entity
@@ -24,7 +24,7 @@ class Trackmania {
 
   /**
    * @ORM\Id
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Map")
+   * @ORM\ManyToOne(targetEntity="Tfts\Map")
    * @ORM\JoinColumn(name="map_id", referencedColumnName="map_id", nullable=false)
    */
   private $map;

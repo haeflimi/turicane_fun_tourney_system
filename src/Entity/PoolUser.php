@@ -1,10 +1,10 @@
 <?php
 
-namespace Tfts\Entity;
+namespace Tfts;
 
 use Concrete\Core\Entity\User\User;
 use Doctrine\ORM\Mapping as ORM;
-use Tfts\Entity\Pool;
+use Tfts\Pool;
 
 /**
  * @ORM\Entity
@@ -19,7 +19,7 @@ class PoolUser {
 
   /**
    * @ORM\Id
-   * @ORM\ManyToOne(targetEntity="Tfts\Entity\Pool", inversedBy="poolAllocations")
+   * @ORM\ManyToOne(targetEntity="Tfts\Pool", inversedBy="poolAllocations")
    * @ORM\JoinColumn(name="pool_id", referencedColumnName="pool_id", nullable=false)
    */
   private $pool;

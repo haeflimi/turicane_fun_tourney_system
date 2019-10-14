@@ -1,6 +1,6 @@
 <?php
 
-namespace Tfts\Entity;
+namespace Tfts;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -29,27 +29,27 @@ class Lan {
   private $page_id;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\Game", mappedBy="lan")
+   * @ORM\OneToMany(targetEntity="Tfts\Game", mappedBy="lan")
    */
   private $games;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\Ranking", mappedBy="lan")
+   * @ORM\OneToMany(targetEntity="Tfts\Ranking", mappedBy="lan")
    */
   private $rankings;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\Snapshot", mappedBy="lan")
+   * @ORM\OneToMany(targetEntity="Tfts\Snapshot", mappedBy="lan")
    */
   private $snapshots;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\Special", mappedBy="lan")
+   * @ORM\OneToMany(targetEntity="Tfts\Special", mappedBy="lan")
    */
   private $specials;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Entity\Trackmania", mappedBy="lan")
+   * @ORM\OneToMany(targetEntity="Tfts\Trackmania", mappedBy="lan")
    */
   private $trackmanias;
 

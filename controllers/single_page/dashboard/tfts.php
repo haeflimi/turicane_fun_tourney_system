@@ -2,7 +2,7 @@
 namespace Concrete\Package\TuricaneFunTourneySystem\Controller\SinglePage\Dashboard;
 
 use Concrete\Core\Page\Controller\DashboardPageController;
-use Tfts\Entity\Game;
+use Tfts\Game;
 
 class Tfts extends DashboardPageController
 {

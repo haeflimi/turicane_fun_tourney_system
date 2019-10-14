@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <skipper version="3.2.20.1575" mvc="Without MVC" orm="Doctrine2" name="TuricaneTfts" uuid="437ecaa1-d01a-43a8-977f-b8b0de6d43d6">
-  <module name="\src/Entity" local-name="src/Entity" namespace="\TuricaneTfts\Entity" local-namespace="\TuricaneTfts\Entity" export-format="Doctrine2Php" export-path="src/Entity" uuid="fdc2005a-d272-4e9a-aa63-f4d464a8f9e5">
-    <entity name="\TuricaneTfts\Entity\Game" local-name="Game" namespace="\TuricaneTfts\Entity" uuid="6588051e-cba6-48c3-8669-2812510a6121">
+  <module name="\src/Entity" local-name="src/Entity" namespace="\TuricaneTfts" local-namespace="\TuricaneTfts" export-format="Doctrine2Php" export-path="src/Entity" uuid="fdc2005a-d272-4e9a-aa63-f4d464a8f9e5">
+    <entity name="\TuricaneTfts\Game" local-name="Game" namespace="\TuricaneTfts" uuid="6588051e-cba6-48c3-8669-2812510a6121">
       <field name="game_id" type="integer" size="10" required="true" primary="true" uuid="d821e3cd-c519-49c6-b2be-7cedba9d0bae">
         <orm-attributes>
           <attribute name="generator">
@@ -32,7 +32,7 @@
         <attribute name="export-file-name">Game.php</attribute>
       </orm-attributes>
     </entity>
-    <entity name="\TuricaneTfts\Entity\Lan" local-name="Lan" namespace="\TuricaneTfts\Entity" uuid="07fabbed-451d-45f3-b53a-6d5389cc4131">
+    <entity name="\TuricaneTfts\Lan" local-name="Lan" namespace="\TuricaneTfts" uuid="07fabbed-451d-45f3-b53a-6d5389cc4131">
       <field name="lan_id" type="integer" required="true" primary="true" uuid="1d37ffa2-2a62-41f3-a361-65ce4d5aa023">
         <orm-attributes>
           <attribute name="generator">
@@ -50,7 +50,7 @@
         <attribute name="export-file-name">Lan.php</attribute>
       </orm-attributes>
     </entity>
-    <entity name="\TuricaneTfts\Entity\Lfg" local-name="Lfg" namespace="\TuricaneTfts\Entity" uuid="b0eabca7-ba9d-42a5-948d-2d2e9aa7b8c1">
+    <entity name="\TuricaneTfts\Lfg" local-name="Lfg" namespace="\TuricaneTfts" uuid="b0eabca7-ba9d-42a5-948d-2d2e9aa7b8c1">
       <field name="lfg_id" type="integer" size="10" required="true" primary="true" uuid="3849884c-0786-4cbb-bd03-599b9e2327d1">
         <orm-attributes>
           <attribute name="generator">
@@ -68,28 +68,28 @@
         <attribute name="export-file-name">Lfg.php</attribute>
       </orm-attributes>
     </entity>
-    <association from="\TuricaneTfts\Entity\Lfg" to="\TuricaneTfts\Entity\Lan" owner-alias="lfgs" inverse-alias="lan" many-owner="true" many-inverse="false" uuid="b00f7f44-c4c1-4639-a169-2536aab0e4ee">
+    <association from="\TuricaneTfts\Lfg" to="\TuricaneTfts\Lan" owner-alias="lfgs" inverse-alias="lan" many-owner="true" many-inverse="false" uuid="b00f7f44-c4c1-4639-a169-2536aab0e4ee">
       <association-field from="lan_id" to="lan_id" uuid="87e4d73f-6239-4c25-92e5-8e009e085458"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <association from="\TuricaneTfts\Entity\Lfg" to="\TuricaneTfts\Entity\Game" owner-alias="lfgs" inverse-alias="game" many-owner="true" many-inverse="false" uuid="46279c5f-0ab5-4675-b6bb-728df3652cba">
+    <association from="\TuricaneTfts\Lfg" to="\TuricaneTfts\Game" owner-alias="lfgs" inverse-alias="game" many-owner="true" many-inverse="false" uuid="46279c5f-0ab5-4675-b6bb-728df3652cba">
       <association-field from="game_id" to="game_id" uuid="f0c71d39-b851-4263-ba2d-d21d4168a370"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <association from="\TuricaneTfts\Entity\Lfg" to="\User" owner-alias="" inverse-alias="user" many-owner="true" many-inverse="false" uuid="c9bd805d-e1b7-4f2e-8027-f19cf69dfde8">
+    <association from="\TuricaneTfts\Lfg" to="\User" owner-alias="" inverse-alias="user" many-owner="true" many-inverse="false" uuid="c9bd805d-e1b7-4f2e-8027-f19cf69dfde8">
       <association-field from="owner_id" to="uID" uuid="85d18745-5701-48f5-9fa7-b5adc8de231b"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <entity name="\TuricaneTfts\Entity\Match" local-name="Match" namespace="\TuricaneTfts\Entity" uuid="1a743ea8-00ec-4730-a7f9-8e42392efc64">
+    <entity name="\TuricaneTfts\Match" local-name="Match" namespace="\TuricaneTfts" uuid="1a743ea8-00ec-4730-a7f9-8e42392efc64">
       <field name="match_id" type="integer" size="10" required="true" primary="true" uuid="db9f0c75-d5fb-49a0-9922-94d57ef5218a">
         <orm-attributes>
           <attribute name="generator">
@@ -121,14 +121,14 @@
         <attribute name="export-file-name">Match.php</attribute>
       </orm-attributes>
     </entity>
-    <association from="\TuricaneTfts\Entity\Match" to="\TuricaneTfts\Entity\Game" owner-alias="matches" inverse-alias="game" many-owner="true" many-inverse="false" uuid="3c02e606-423c-42c5-8e90-1449b75a7f0e">
+    <association from="\TuricaneTfts\Match" to="\TuricaneTfts\Game" owner-alias="matches" inverse-alias="game" many-owner="true" many-inverse="false" uuid="3c02e606-423c-42c5-8e90-1449b75a7f0e">
       <association-field from="match_game_id" to="game_id" uuid="bee1f5c8-0d54-4de2-b965-a780adcee79c"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <entity name="\TuricaneTfts\Entity\MatchPlayer" local-name="MatchPlayer" namespace="\TuricaneTfts\Entity" uuid="4b4c87d8-61a1-4f7a-8d95-0bbb7ec921c7">
+    <entity name="\TuricaneTfts\MatchPlayer" local-name="MatchPlayer" namespace="\TuricaneTfts" uuid="4b4c87d8-61a1-4f7a-8d95-0bbb7ec921c7">
       <field name="user_id" type="integer" size="10" default="0" required="true" primary="true" uuid="576c1e9e-acf2-4b4a-8a44-2868cd6e0e93"/>
       <field name="match_id" required="true" primary="true" uuid="b93ec4ba-6efd-4580-85a6-c7e23bff9b20"/>
       <field name="team_id" required="true" primary="true" uuid="fe428743-d7b0-4af5-8120-471f6ba56b33"/>
@@ -142,21 +142,21 @@
         <attribute name="export-file-name">MatchPlayer.php</attribute>
       </orm-attributes>
     </entity>
-    <association from="\TuricaneTfts\Entity\MatchPlayer" to="\TuricaneTfts\Entity\Match" owner-alias="matchPlayers" inverse-alias="match" many-owner="true" many-inverse="false" parent-required="true" uuid="92aa3a06-6b1c-46b7-ac49-659f5b937b79">
+    <association from="\TuricaneTfts\MatchPlayer" to="\TuricaneTfts\Match" owner-alias="matchPlayers" inverse-alias="match" many-owner="true" many-inverse="false" parent-required="true" uuid="92aa3a06-6b1c-46b7-ac49-659f5b937b79">
       <association-field from="match_id" to="match_id" uuid="633c7c07-95f1-4380-a8c4-3bb4ddd8ce20"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <association from="\TuricaneTfts\Entity\MatchPlayer" to="\TuricaneTfts\Entity\Team" owner-alias="matchPlayers" inverse-alias="team" many-owner="true" many-inverse="false" parent-required="true" uuid="3d6c7135-0a76-4718-9daa-924573684591">
+    <association from="\TuricaneTfts\MatchPlayer" to="\TuricaneTfts\Team" owner-alias="matchPlayers" inverse-alias="team" many-owner="true" many-inverse="false" parent-required="true" uuid="3d6c7135-0a76-4718-9daa-924573684591">
       <association-field from="team_id" to="team_id" uuid="2756f315-b705-4b54-8e9e-c9039f55e5c7"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <entity name="\TuricaneTfts\Entity\Pool" local-name="Pool" namespace="\TuricaneTfts\Entity" uuid="b00784d9-6348-478f-b02d-bcc0d7fd829c">
+    <entity name="\TuricaneTfts\Pool" local-name="Pool" namespace="\TuricaneTfts" uuid="b00784d9-6348-478f-b02d-bcc0d7fd829c">
       <field name="pool_id" type="integer" size="10" required="true" primary="true" uuid="17641c0e-0e45-4199-bc34-27064b2725ee">
         <orm-attributes>
           <attribute name="generator">
@@ -174,14 +174,14 @@
         <attribute name="export-file-name">Pool.php</attribute>
       </orm-attributes>
     </entity>
-    <association from="\TuricaneTfts\Entity\Pool" to="\TuricaneTfts\Entity\Game" owner-alias="pools" inverse-alias="game" many-owner="true" many-inverse="false" uuid="725dc0c5-211f-46ed-aef2-daf2511c24d2">
+    <association from="\TuricaneTfts\Pool" to="\TuricaneTfts\Game" owner-alias="pools" inverse-alias="game" many-owner="true" many-inverse="false" uuid="725dc0c5-211f-46ed-aef2-daf2511c24d2">
       <association-field from="game_id" to="game_id" uuid="7638074e-d7e2-45cf-82cb-a4ee752ef5b9"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <entity name="\TuricaneTfts\Entity\PoolAllocation" local-name="PoolAllocation" namespace="\TuricaneTfts\Entity" uuid="bef56e9f-03b8-417e-a845-d845936f66c9">
+    <entity name="\TuricaneTfts\PoolAllocation" local-name="PoolAllocation" namespace="\TuricaneTfts" uuid="bef56e9f-03b8-417e-a845-d845936f66c9">
       <field name="pool_id" required="true" primary="true" uuid="5590aed8-aef3-41b1-b543-cf3a44845a72"/>
       <field name="user_id" required="true" primary="true" uuid="5bc85943-bff5-4730-b319-27214530661e"/>
       <field name="rank" type="integer" size="10" default="0" required="true" uuid="e4d9a4ee-26e1-4742-9de0-5d42e097ff6c"/>
@@ -194,21 +194,21 @@
         <attribute name="export-file-name">PoolAllocation.php</attribute>
       </orm-attributes>
     </entity>
-    <association from="\TuricaneTfts\Entity\PoolAllocation" to="\TuricaneTfts\Entity\Pool" owner-alias="poolAllocations" inverse-alias="pool" many-owner="true" many-inverse="false" parent-required="true" uuid="1e68f2cf-8e8d-4fee-86ec-68e577b7237f">
+    <association from="\TuricaneTfts\PoolAllocation" to="\TuricaneTfts\Pool" owner-alias="poolAllocations" inverse-alias="pool" many-owner="true" many-inverse="false" parent-required="true" uuid="1e68f2cf-8e8d-4fee-86ec-68e577b7237f">
       <association-field from="pool_id" to="pool_id" uuid="f16c5bff-91b8-4dc4-b847-9235301b6752"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <association from="\TuricaneTfts\Entity\PoolAllocation" to="\User" owner-alias="" inverse-alias="user" many-owner="true" many-inverse="false" parent-required="true" uuid="c6e1689b-96ec-45ab-bbad-84534db18398">
+    <association from="\TuricaneTfts\PoolAllocation" to="\User" owner-alias="" inverse-alias="user" many-owner="true" many-inverse="false" parent-required="true" uuid="c6e1689b-96ec-45ab-bbad-84534db18398">
       <association-field from="user_id" to="uID" uuid="54a22b19-a021-4149-be08-631245bf7318"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <entity name="\TuricaneTfts\Entity\Ranking" local-name="Ranking" namespace="\TuricaneTfts\Entity" uuid="3abc8bbb-9cd0-447c-b59e-ca5848cf4c52">
+    <entity name="\TuricaneTfts\Ranking" local-name="Ranking" namespace="\TuricaneTfts" uuid="3abc8bbb-9cd0-447c-b59e-ca5848cf4c52">
       <field name="user_id" type="integer" default="0" primary="true" uuid="72d04ffe-fd7f-4404-a415-195dcac2028a"/>
       <field name="lan_id" type="integer" default="0" primary="true" uuid="b52aedd1-3521-4ef9-a2ec-e9943ccea026"/>
       <field name="points" type="integer" size="10" default="0" uuid="8edc68c3-62f0-4ddc-b07f-057fb76b5b8f"/>
@@ -221,13 +221,13 @@
         <attribute name="export-file-name">Ranking.php</attribute>
       </orm-attributes>
     </entity>
-    <association from="\TuricaneTfts\Entity\Ranking" to="\User" caption="User Rankings" owner-alias="rankings" inverse-alias="user" many-owner="true" many-inverse="false" uuid="a9f0daa1-b401-4093-b010-60e9a6ab5230">
+    <association from="\TuricaneTfts\Ranking" to="\User" caption="User Rankings" owner-alias="rankings" inverse-alias="user" many-owner="true" many-inverse="false" uuid="a9f0daa1-b401-4093-b010-60e9a6ab5230">
       <association-field from="user_id" to="uID" uuid="bd74358e-e285-4f9b-8b91-65f513e2458d"/>
     </association>
-    <association from="\TuricaneTfts\Entity\Ranking" to="\TuricaneTfts\Entity\Lan" caption="Lan Rankings" owner-alias="rankings" inverse-alias="lan" many-owner="true" many-inverse="false" uuid="059edd66-5dff-4045-93c2-432ae05b9650">
+    <association from="\TuricaneTfts\Ranking" to="\TuricaneTfts\Lan" caption="Lan Rankings" owner-alias="rankings" inverse-alias="lan" many-owner="true" many-inverse="false" uuid="059edd66-5dff-4045-93c2-432ae05b9650">
       <association-field from="lan_id" to="lan_id" uuid="2f76c75e-faf9-4184-815b-ede5b4cba065"/>
     </association>
-    <entity name="\TuricaneTfts\Entity\RankingSnapshot" local-name="RankingSnapshot" namespace="\TuricaneTfts\Entity" uuid="0333bd08-159d-49f9-81f1-1623bf000986">
+    <entity name="\TuricaneTfts\RankingSnapshot" local-name="RankingSnapshot" namespace="\TuricaneTfts" uuid="0333bd08-159d-49f9-81f1-1623bf000986">
       <field name="timestamp" type="datetime" default="CURRENT_TIMESTAMP" required="true" primary="true" uuid="731026d5-562b-486f-b152-015253dc935f"/>
       <field name="user_id" required="true" primary="true" uuid="20c5d69c-e427-4e25-8762-524ed5b100eb"/>
       <field name="lan_id" required="true" primary="true" uuid="85055eef-ccd6-47be-bec5-955c8190da7b"/>
@@ -237,21 +237,21 @@
         <attribute name="export-file-name">RankingSnapshot.php</attribute>
       </orm-attributes>
     </entity>
-    <association from="\TuricaneTfts\Entity\RankingSnapshot" to="\User" owner-alias="" inverse-alias="user" many-owner="true" many-inverse="false" parent-required="true" uuid="2e954fe9-958f-4603-a2f5-5021aa7f86d5">
+    <association from="\TuricaneTfts\RankingSnapshot" to="\User" owner-alias="" inverse-alias="user" many-owner="true" many-inverse="false" parent-required="true" uuid="2e954fe9-958f-4603-a2f5-5021aa7f86d5">
       <association-field from="user_id" to="uID" uuid="807a9cb9-c356-42ea-b611-6669a85ebf86"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <association from="\TuricaneTfts\Entity\RankingSnapshot" to="\TuricaneTfts\Entity\Lan" owner-alias="rankingSnapshots" inverse-alias="lan" many-owner="true" many-inverse="false" parent-required="true" uuid="1edc77b4-49ed-4153-a420-dc3447622668">
+    <association from="\TuricaneTfts\RankingSnapshot" to="\TuricaneTfts\Lan" owner-alias="rankingSnapshots" inverse-alias="lan" many-owner="true" many-inverse="false" parent-required="true" uuid="1edc77b4-49ed-4153-a420-dc3447622668">
       <association-field from="lan_id" to="lan_id" uuid="2f8aad40-082e-4c3a-8536-4e2040278197"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <entity name="\TuricaneTfts\Entity\Registration" local-name="Registration" namespace="\TuricaneTfts\Entity" uuid="672f9dae-fb0c-413a-b11c-eeea13f63930">
+    <entity name="\TuricaneTfts\Registration" local-name="Registration" namespace="\TuricaneTfts" uuid="672f9dae-fb0c-413a-b11c-eeea13f63930">
       <field name="game_id" required="true" primary="true" uuid="dae03114-ae5b-4aa9-8a13-cf6d07852bcb"/>
       <field name="team_id" required="true" primary="true" uuid="ee14643b-0b61-4ff9-aa28-fa7525255c50"/>
       <field name="lan_id" required="true" primary="true" uuid="bba7e041-479a-444e-a95b-12d008b75743"/>
@@ -268,35 +268,35 @@
         <attribute name="export-file-name">Registration.php</attribute>
       </orm-attributes>
     </entity>
-    <association from="\TuricaneTfts\Entity\Registration" to="\TuricaneTfts\Entity\Game" owner-alias="registrations" inverse-alias="game" many-owner="true" many-inverse="false" parent-required="true" uuid="14903735-6afd-4827-b885-fdad721b53b0">
+    <association from="\TuricaneTfts\Registration" to="\TuricaneTfts\Game" owner-alias="registrations" inverse-alias="game" many-owner="true" many-inverse="false" parent-required="true" uuid="14903735-6afd-4827-b885-fdad721b53b0">
       <association-field from="game_id" to="game_id" uuid="4dbe2e57-a9d9-4a5b-8c63-71d2332cec66"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <association from="\TuricaneTfts\Entity\Registration" to="\TuricaneTfts\Entity\Team" owner-alias="registrations" inverse-alias="team" many-owner="true" many-inverse="false" parent-required="true" uuid="cc60a2a3-05ff-4de2-ab25-1aa3111f27c1">
+    <association from="\TuricaneTfts\Registration" to="\TuricaneTfts\Team" owner-alias="registrations" inverse-alias="team" many-owner="true" many-inverse="false" parent-required="true" uuid="cc60a2a3-05ff-4de2-ab25-1aa3111f27c1">
       <association-field from="team_id" to="team_id" uuid="f6de8adf-b937-413a-9d23-fe2554f7e061"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <association from="\TuricaneTfts\Entity\Registration" to="\TuricaneTfts\Entity\Lan" owner-alias="registrations" inverse-alias="lan" many-owner="true" many-inverse="false" parent-required="true" uuid="9d118e10-c9f0-4397-b9bd-35a2f04d9fb3">
+    <association from="\TuricaneTfts\Registration" to="\TuricaneTfts\Lan" owner-alias="registrations" inverse-alias="lan" many-owner="true" many-inverse="false" parent-required="true" uuid="9d118e10-c9f0-4397-b9bd-35a2f04d9fb3">
       <association-field from="lan_id" to="lan_id" uuid="6b17b885-1515-42c3-9c8f-59cd4bac55fd"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <association from="\TuricaneTfts\Entity\Registration" to="\User" owner-alias="" inverse-alias="user" many-owner="true" many-inverse="false" parent-required="true" uuid="a6f7c106-0f35-43f6-a08c-19de9a2cb700">
+    <association from="\TuricaneTfts\Registration" to="\User" owner-alias="" inverse-alias="user" many-owner="true" many-inverse="false" parent-required="true" uuid="a6f7c106-0f35-43f6-a08c-19de9a2cb700">
       <association-field from="user_id" to="uID" uuid="cf7e12db-5a46-41ca-a175-6197a7075a1d"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <entity name="\TuricaneTfts\Entity\Special" local-name="Special" namespace="\TuricaneTfts\Entity" uuid="e9df5157-33ee-4ad1-b958-2b7496b0b2cb">
+    <entity name="\TuricaneTfts\Special" local-name="Special" namespace="\TuricaneTfts" uuid="e9df5157-33ee-4ad1-b958-2b7496b0b2cb">
       <field name="special_id" type="integer" size="10" required="true" primary="true" uuid="5c2353a7-ae05-4a17-8ed8-f63aada756d4">
         <orm-attributes>
           <attribute name="generator">
@@ -313,21 +313,21 @@
         <attribute name="export-file-name">Special.php</attribute>
       </orm-attributes>
     </entity>
-    <association from="\TuricaneTfts\Entity\Special" to="\User" owner-alias="" inverse-alias="user" many-owner="true" many-inverse="false" uuid="7dafeb5b-283c-416c-8ff0-0cbe6ea215cc">
+    <association from="\TuricaneTfts\Special" to="\User" owner-alias="" inverse-alias="user" many-owner="true" many-inverse="false" uuid="7dafeb5b-283c-416c-8ff0-0cbe6ea215cc">
       <association-field from="user_id" to="uID" uuid="07b032a6-330a-49ba-bc8b-54a45e4b5474"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <association from="\TuricaneTfts\Entity\Special" to="\TuricaneTfts\Entity\Lan" owner-alias="specials" inverse-alias="lan" many-owner="true" many-inverse="false" uuid="604708e3-35db-43f6-a97a-352af80681b9">
+    <association from="\TuricaneTfts\Special" to="\TuricaneTfts\Lan" owner-alias="specials" inverse-alias="lan" many-owner="true" many-inverse="false" uuid="604708e3-35db-43f6-a97a-352af80681b9">
       <association-field from="lan_id" to="lan_id" uuid="437c3e89-3dce-4466-95e8-fb3eca93f9e5"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <entity name="\TuricaneTfts\Entity\Team" local-name="Team" namespace="\TuricaneTfts\Entity" uuid="c86fe87a-82f3-4eab-a298-6f22e087f066">
+    <entity name="\TuricaneTfts\Team" local-name="Team" namespace="\TuricaneTfts" uuid="c86fe87a-82f3-4eab-a298-6f22e087f066">
       <field name="team_id" type="integer" size="10" required="true" primary="true" uuid="b414662d-e4b3-44ca-bd58-d3fe40dd081e">
         <orm-attributes>
           <attribute name="generator">
@@ -347,23 +347,23 @@
         <attribute name="export-file-name">Team.php</attribute>
       </orm-attributes>
     </entity>
-    <association from="\TuricaneTfts\Entity\Team" to="\User" caption="User Teams" owner-alias="teams" inverse-alias="user" many-owner="true" many-inverse="false" uuid="d8a82970-d47b-4dbd-84fc-a77f3fddbd68">
+    <association from="\TuricaneTfts\Team" to="\User" caption="User Teams" owner-alias="teams" inverse-alias="user" many-owner="true" many-inverse="false" uuid="d8a82970-d47b-4dbd-84fc-a77f3fddbd68">
       <association-field from="owner_id" to="uID" uuid="d84eb956-3228-4fce-852e-fdef714c8bc0"/>
     </association>
-    <entity name="\TuricaneTfts\Entity\tftsTeamAllocations" local-name="tftsTeamAllocations" namespace="\TuricaneTfts\Entity" uuid="0e36752f-58eb-42e5-94d9-b2040e752e01">
+    <entity name="\TuricaneTfts\tftsTeamAllocations" local-name="tftsTeamAllocations" namespace="\TuricaneTfts" uuid="0e36752f-58eb-42e5-94d9-b2040e752e01">
       <field name="id" type="integer" required="true" unique="true" primary="true" uuid="e89a4edc-89e7-4655-a68d-0db6e9790410"/>
       <field name="team_id" required="true" uuid="080cbe10-7bc3-4558-a240-52e0c15854e3"/>
       <field name="user_id" required="true" uuid="c4f4900f-3c4b-454e-979d-2f003e1398b8"/>
     </entity>
-    <many-to-many mn-entity="\TuricaneTfts\Entity\tftsTeamAllocations" uuid="e97f9275-7fa5-46b9-8a40-c724050649d9">
-      <many-to-many-entity name="\TuricaneTfts\Entity\Team" owning-side="true" uuid="e6232b5b-26f3-41b4-a37a-6ef8e2def249">
+    <many-to-many mn-entity="\TuricaneTfts\tftsTeamAllocations" uuid="e97f9275-7fa5-46b9-8a40-c724050649d9">
+      <many-to-many-entity name="\TuricaneTfts\Team" owning-side="true" uuid="e6232b5b-26f3-41b4-a37a-6ef8e2def249">
         <many-to-many-field from="team_id" to="team_id" uuid="e37f3d28-9f1d-4eb7-958d-198a7b4b42e6"/>
       </many-to-many-entity>
       <many-to-many-entity name="\User" owning-side="false" alias="users" uuid="e6f294dd-6d6e-4a18-ad1b-e3f574ee843e">
         <many-to-many-field from="user_id" to="uID" uuid="c7dc2c67-9591-4ef7-a1a3-87bda0006842"/>
       </many-to-many-entity>
     </many-to-many>
-    <entity name="\TuricaneTfts\Entity\Trackmania" local-name="Trackmania" namespace="\TuricaneTfts\Entity" uuid="2d2d7a19-f314-4bb7-af31-dd217b6b3c83">
+    <entity name="\TuricaneTfts\Trackmania" local-name="Trackmania" namespace="\TuricaneTfts" uuid="2d2d7a19-f314-4bb7-af31-dd217b6b3c83">
       <field name="map" type="string" size="100" required="true" primary="true" uuid="d957fca5-22d5-4e9d-abce-0ef1889a56c0"/>
       <field name="user_id" required="true" primary="true" uuid="de7fcb2a-d43b-4fba-b9ae-d489d55d982b"/>
       <field name="lan_id" required="true" primary="true" uuid="b220f11a-8b9b-485b-b3f2-84be8c0f7884"/>
@@ -375,14 +375,14 @@
         <attribute name="export-file-name">Trackmania.php</attribute>
       </orm-attributes>
     </entity>
-    <association from="\TuricaneTfts\Entity\Trackmania" to="\User" owner-alias="" inverse-alias="user" many-owner="true" many-inverse="false" parent-required="true" uuid="0bff1066-12d2-4f85-b660-f8f9c3d9886c">
+    <association from="\TuricaneTfts\Trackmania" to="\User" owner-alias="" inverse-alias="user" many-owner="true" many-inverse="false" parent-required="true" uuid="0bff1066-12d2-4f85-b660-f8f9c3d9886c">
       <association-field from="user_id" to="uID" uuid="5b12a3bd-35d2-4b41-bd1b-aba4d570f383"/>
       <orm-attributes>
         <attribute name="side-owning"/>
         <attribute name="side-inverse"/>
       </orm-attributes>
     </association>
-    <association from="\TuricaneTfts\Entity\Trackmania" to="\TuricaneTfts\Entity\Lan" owner-alias="trackmanias" inverse-alias="lan" many-owner="true" many-inverse="false" parent-required="true" uuid="24ba4ceb-3ffb-43f6-8523-2bfc7c9c0201">
+    <association from="\TuricaneTfts\Trackmania" to="\TuricaneTfts\Lan" owner-alias="trackmanias" inverse-alias="lan" many-owner="true" many-inverse="false" parent-required="true" uuid="24ba4ceb-3ffb-43f6-8523-2bfc7c9c0201">
       <association-field from="lan_id" to="lan_id" uuid="4aa9ed74-60cf-43b7-a6ca-edeed908a3f6"/>
       <orm-attributes>
         <attribute name="side-owning"/>

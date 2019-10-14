@@ -48,19 +48,18 @@ class Controller extends BlockController
         $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
         $em = $app->make('Doctrine\ORM\EntityManager');
         $me = new User();
-        $this->requireAsset('javascript', 'tfts');
 
         $page = Page::getCurrentPage();
         $this->set('is_pool', $page->getAttribute('tfts_game_is_pool'));
 
-        $game = $em->getRepository('Tfts\Entity\Game')->findOneBy(['game_page_id'=>$page->getCollectionId()]);
-        $myRegistration = $em->getRepository('Tfts\Entity\Registration')->findOneBy(['user'=>$me->getUserId()]);
+        $game = $em->getRepository('Tfts\Game')->findOneBy(['game_page_id'=>$page->getCollectionId()]);
+        $myRegistration = $em->getRepository('Tfts\Registration')->findOneBy(['user'=>$me->getUserId()]);
         $tfts = new Tfts();
         $this->set('tfts_game_id', $game->getId());
         $this->set('in_pool', (is_object($myRegistration)?true:false));
         $this->set('me', $me);
         $this->set('registrations', $tfts->getRegistrations($game));
-        $this->set('openChallenges', $tfts->getOpenChallenges($game));
+        $this->set('openChallenges', $tfts->getOpenGameChallenges($game));
         $this->set('openMatches', $tfts->getOpenMatches($game));
         $this->set('closedMatches', $tfts->getClosedMatches($game));
     }
