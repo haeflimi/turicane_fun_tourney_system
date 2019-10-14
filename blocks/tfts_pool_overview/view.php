@@ -42,12 +42,14 @@ endif;?>
         <tr>
             <td><?=$om->getUser1()->getUserName()?> vs. <?=$om->getUser2()->getUserName()?></td>
             <td>
-                <?php if(1):?>
-                <form id="resultForm" class="form-inline pull-right">
+                <?php if($om->getUser1()->getUserID() == $me->getUserID() || $om->getUser2()->getUserID() == $me->getUserID()):?>
+                <form id="resultForm" class="form-inline pull-right" method="POST">
+                    <input type="hidden" name="ccm_token" value="<?=Core::make('token')->generate('reportResultUserMatch');?>"/>&nbsp;
                     <input class="form-control form-control-sm" type="number" placeholder="<?=$om->getUser1()->getUserName()?> Score" name="user1_score"/>&nbsp;
                     <input class="form-control form-control-sm" type="number" placeholder="<?=$om->getUser2()->getUserName()?> Score" name="user2_score"/>&nbsp;
-                    <button class="btn btn-transparent btn-sm pull-right" onclick="Tfts.reportMatchResults();"><?=t('Report Result')?></button>
+                    <button type="button" class="btn btn-transparent btn-sm pull-right" onclick="Tfts.reportResultUserMatch(<?=$om->getId()?>,<?=$me->getUserID()?>);"><?=t('Report Result')?></button>
                 </form>
+
                 <?php endif;?>
             </td>
         </tr>
@@ -55,12 +57,12 @@ endif;?>
     </tbody>
 </table>
 <hr/>
-<h2>Closed Matches</h2>
+<h2>Match History</h2>
 <table class="table table-striped table-condensed">
     <tbody>
-    <?php foreach($closedMatches as $om):?>
+    <?php foreach($closedMatches as $cm):?>
         <tr>
-            <td><?=$om->getUser1()->getUserName()?> vs. <?=$om->getUser2()->getUserName()?></td>
+            <td><?=$cm->getUser1()->getUserName()?> vs. <?=$cm->getUser2()->getUserName()?></td>
             <td>
             </td>
         </tr>

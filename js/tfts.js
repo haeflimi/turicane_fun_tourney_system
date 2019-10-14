@@ -14,16 +14,10 @@ var Tfts = {
                 ccm_token: ccm_token,
                 action: 'joinUserPool'
             }, function () {
-                new PNotify({
-                    type: 'success',
-                    icon: 'fa fa-thumbs-up',
-                    title: 'Success',
-                    text: 'You are now subscribed to this TFTS Pool',
-                    hide: true,
-                });
+                Tfts.success('You are now subscribed to this TFTS Pool');
                 window.location.reload();
-            }).fail(function () {
-            this.error();
+            }).fail(function ( response ) {
+            Tfts.error(response.responseJSON.error.message);
         });
     },
     leaveUserPool: function (user_id, game_id, ccm_token) {
@@ -34,71 +28,110 @@ var Tfts = {
                 ccm_token: ccm_token,
                 action: 'leaveUserPool'
             }, function () {
-                this.success('You are now unsubscribed from this TFTS Pool');
+                Tfts.success('You are now unsubscribed from this TFTS Pool');
                 window.location.reload();
-            }).fail(function () {
-                this.error('test');
+            }).fail(function ( response ) {
+            Tfts.error(response.responseJSON.error.message);
         });
     },
     challengeUser: function (challanger_id, challenged_id, game_id, ccm_token, challenged_name) {
         $.post(
             "/tfts/api/action", {
-                challanger_id: challanger_id,
+                challenger_id: challanger_id,
                 challenged_id: challenged_id,
                 game_id: game_id,
                 ccm_token: ccm_token,
                 action: 'challengeUser'
             }, function () {
-                this.success('You a challenge has been sent to '+challenged_name);
-                window.location.reload();
-            }).fail(function () {
-                this.error();
+                Tfts.success('You a challenge has been sent to '+challenged_name);
+                //window.location.reload();
+            }).fail(function ( response ) {
+                Tfts.error(response.responseJSON.error.message);
         });
     },
-    acceptUserChallenge: function ( match_id, challenged_id, ccm_token ) {
+    acceptUserChallenge: function ( match_id, challenged_id ) {
         $.post(
             "/tfts/api/action", {
-                matchi_id: match_id,
+                match_id: match_id,
                 challenged_id: challenged_id,
-                ccm_token: ccm_token,
+                ccm_token: $('#acceptUserChallengeToken').val(),
                 action: 'acceptUserChallenge'
-            }, function () {
+            }, function ( data ) {
                 PNotify.removeAll()
-                this.success('Challenge Accepted');
+                Tfts.success('Challenge Accepted');
                 window.location.reload();
-            }).fail(function () {
-            this.error();
+            }).fail(function ( response ) {
+            Tfts.error(response.responseJSON.error.message);
         });
     },
-    declineUserChallenge: function ( match_id, challenged_id, ccm_token ) {
+    declineUserChallenge: function ( match_id, challenged_id ) {
         $.post(
             "/tfts/api/action", {
-                matchi_id: match_id,
+                match_id: match_id,
                 challenged_id: challenged_id,
-                ccm_token: ccm_token,
+                ccm_token: $('#declineUserChallengeToken').val(),
                 action: 'declineUserChallenge'
             }, function () {
                 PNotify.removeAll()
-                this.success('Challenge Declined');
+                Tfts.success('Challenge Declined');
                 window.location.reload();
-            }).fail(function () {
-            this.error();
+            }).fail(function ( response ) {
+            Tfts.error(response.responseJSON.error.message);
         });
     },
-    reportMatchResults: function () {
+    reportResultUserMatch: function ( match_id, user_id ) {
+        var data = new FormData(document.querySelector('#resultForm'));
+        if(data.get('user1_score').length == 0 || data.get('user1_score').length == 0){
+            Tfts.error('Score can not be empty');
+            return;
+        }
         $.post(
             "/tfts/api/action", {
-                matchi_id: match_id,
-                challenged_id: challenged_id,
-                ccm_token: ccm_token,
-                action: 'reportMatchResults'
+                match_id: match_id,
+                user_id: user_id,
+                ccm_token: data.get('ccm_token'),
+                user1_score: data.get('user1_score'),
+                user2_score: data.get('user2_score'),
+                action: 'reportResultUserMatch'
             }, function () {
                 PNotify.removeAll()
-                this.success('Results reported.');
+                Tfts.success('Result reported');
                 window.location.reload();
-            }).fail(function () {
-            this.error();
+            }).fail(function ( response ) {
+            Tfts.error(response.responseJSON.error.message);
         });
+    },
+    confirmResultUserMatch: function( match_id, user_id) {
+        $.post(
+            "/tfts/api/action", {
+                match_id: match_id,
+                user_id: user_id,
+                ccm_token: $('#confirmResultUserMatchToken').val(),
+                action: 'confirmResultUserMatch'
+            }, function () {
+                PNotify.removeAll()
+                Tfts.success('Result confirmed');
+                window.location.reload();
+            }).fail(function ( response ) {
+            Tfts.error(response.responseJSON.error.message);
+        });
+    },
+    declineResultUserMatch: function( match_id, user_id) {
+        Tfts.error('Not implemented yet');
+        return;
+        /*$.post(
+            "/tfts/api/action", {
+                match_id: match_id,
+                user_id: user_id,
+                ccm_token: $('#declineResultUserMatchToken').val(),
+                action: 'declineResultUserMatch'
+            }, function () {
+                PNotify.removeAll()
+                Tfts.success('Result reported');
+                window.location.reload();
+            }).fail(function ( response ) {
+            Tfts.error(response.responseJSON.error.message);
+        });*/
     },
     /*
     Helper Methods
@@ -119,7 +152,7 @@ var Tfts = {
         };
     },
     error: function ( text = false ) {
-        if(texth.length == 0){
+        if(text.length == 0){
             text = 'Something went wrong.';
         }
         new PNotify({
@@ -144,6 +177,18 @@ var Tfts = {
             type: 'info',
             icon: 'fa fa-gamepad',
             title: 'Challenge',
+            text: text,
+            hide: false,
+            buttons: {
+                close: false
+            }
+        });
+    },
+    confirm: function( text ) {
+        var notice = new PNotify({
+            type: 'info',
+            icon: 'fa fa-tick',
+            title: 'Confirm',
             text: text,
             hide: false,
             buttons: {

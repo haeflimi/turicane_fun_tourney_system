@@ -239,4 +239,11 @@ class Match {
     return $this->match_compute2;
   }
 
+  public function getWinner():  User {
+      if($this->getScore1() > $this->getScore2()){
+          return $this->getUser1();
+      } else {
+          return $this->getUser2();
+      }
+  }
 }

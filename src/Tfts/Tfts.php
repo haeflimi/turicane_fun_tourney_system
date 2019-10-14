@@ -10,19 +10,7 @@ use Concrete\Core\User\UserList;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Tfts\Lan;
-use Tfts\Game;
-use Tfts\Registration;
-use Tfts\Match;
-use Tfts\MatchGroupUser;
-use Tfts\Ranking;
-use Tfts\RankingSnapshot;
-use Tfts\Snapshot;
-use Tfts\Map;
-use Tfts\Trackmania;
-use Tfts\Special;
-use Tfts\Pool;
-use Tfts\PoolUser;
+use Exception;
 
 /**
  * This Class wraps all the important Functionality of the Turicane Fun Tourney System
@@ -77,15 +65,22 @@ class Tfts {
    * @param User $user
    * @return Match a list of open challenges for the given user.
    */
-    public function getOpenUserChallenges(User $user): Collection
+    public function getOpenUserChallenges(User $user): Array
     {
-        $qb = $this->em->createQueryBuilder();
-        $qb->select('m')
-            ->from('Tfts\Match', 'm')
-            ->where('m.user2_id = ?')
-            ->andWhere('m.match_accepted = 0')
-            ->setParameter(0,$user->getUserID());
-        return $qb->getQuery()->getResult();
+        $repo = $this->em->getRepository('Tfts\Match');
+        return $repo->findBy(['user2'=>$user->getUserID(),'match_accepted'=>0]);
+    }
+
+    /**
+     * @param User $user
+     * @return Match a list of open challenges for the given user.
+     */
+    public function getOpenUserConfirmations(User $user): Array
+    {
+        $repo = $this->em->getRepository('Tfts\Match');
+        $challenger = $repo->findBy(['user1'=>$user->getUserID(),'match_accepted'=>1,'match_confirmed1'=>0,'match_confirmed2'=>1]);
+        $challenged = $repo->findBy(['user2'=>$user->getUserID(),'match_accepted'=>1,'match_confirmed1'=>1,'match_confirmed2'=>0]);
+        return array_merge($challenger, $challenged);
     }
 
   /**
@@ -140,7 +135,10 @@ class Tfts {
    * @param User $user
    * @return bool true if the join was successful, false otherwise.
    */
-  public function joinUserPool(Game $game, User $user): bool {
+  public function joinUserPool($game_id, $user_id): bool {
+
+      $user = User::getByUserID($user_id);
+      $game = $this->em->find(Game::class, $game_id);
 
     // verify system is active
     if (!$this->isSystemActive()) {
@@ -173,7 +171,11 @@ class Tfts {
    * @param User $user
    * @return bool true if the leave was successful, false otherwise.
    */
-  public function leaveUserPool(Game $game, User $user): bool {
+  public function leaveUserPool($game_id, $user_id): bool {
+
+      $user = User::getByUserID($user_id);
+      $game = $this->em->find(Game::class, $game_id);
+
     // verify system is active
     if (!$this->isSystemActive()) {
       throw new Exception("Something bad happened"); //@TODO: let me know hat happened
@@ -192,47 +194,52 @@ class Tfts {
     return true;
   }
 
-  /**
-   * A user challenges another user for a match.
-   *
-   * @param \Tfts\Game $game
-   * @param User $challenger
-   * @param User $challenged
-   * @return Match null if an exception occured, the created match otherwise.
-   */
-  public function challengeUser(Game $game, User $challenger, User $challenged): ?Match {
-    // verify system is active
-    if (!$this->isSystemActive()) {
-      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
-      return null;
-    }
+    /**
+     * A user challenges another user for a match.
+     *
+     * @param \Tfts\Game $game
+     * @param User $challenger
+     * @param User $challenged
+     * @return Match null if an exception occured, the created match otherwise.
+     */
+    public function challengeUser($game_id, $challenger_id, $challenged_id): Match
+    {
+        $game = $this->em->find(Game::class, $game_id);
+        $challenger = User::getByUserID($challenger_id);
+        $challenged = User::getByUserID($challenged_id);
 
-    // @TODO: check max games against another player
-    // verify both users are registered for that game
-    if (is_null($this->findRegistration($game, $challenger)) || is_null($this->findRegistration($game, $challenged))) {
-      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
-      return null;
-    }
+        // verify system is active
+        if (!$this->isSystemActive()) {
+            throw new Exception("Something bad happened"); //@TODO: let me know hat happened
+            return null;
+        }
 
-    $repository = $this->em->getRepository(Match::class);
-    // verify challenge cannot be triggered twice
-    if (!is_null($repository->findOneBy(['user1' => $challenger->getUserId(), 'user2' => $challenged->getUserId(), 'match_finish_date' => null]))) {
-      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
-      return null;
-    }
+        // @TODO: check max games against another player
+        // verify both users are registered for that game
+        if (is_null($this->findRegistration($game, $challenger)) || is_null($this->findRegistration($game, $challenged))) {
+            throw new Exception("Something bad happened"); //@TODO: let me know hat happened
+            return null;
+        }
 
-    // verify challenged hasn't already challenged the challenger
-    if (!is_null($repository->findOneBy(['user1' => $challenged->getUserId(), 'user2' => $challenger->getUserId(), 'match_finish_date' => null]))) {
-      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
-      return null;
-    }
+        $repository = $this->em->getRepository(Match::class);
+        // verify challenge cannot be triggered twice
+        if (!is_null($repository->findOneBy(['user1' => $challenger->getUserId(), 'user2' => $challenged->getUserId(), 'match_finish_date' => null]))) {
+            throw new Exception("You already have a open Match with this Player"); //@TODO: let me know hat happened
+            return null;
+        }
 
-    $match = new Match($game);
-    $match->setUsers($this->userToEntity($challenger), $this->userToEntity($challenged));
-    $this->em->persist($match);
-    $this->em->flush();
-    return $match;
-  }
+        // verify challenged hasn't already challenged the challenger
+        if (!is_null($repository->findOneBy(['user1' => $challenged->getUserId(), 'user2' => $challenger->getUserId(), 'match_finish_date' => null]))) {
+            throw new Exception("You have already challenged that Player"); //@TODO: let me know hat happened
+            return null;
+        }
+
+        $match = new Match($game);
+        $match->setUsers($this->userToEntity($challenger), $this->userToEntity($challenged));
+        $this->em->persist($match);
+        $this->em->flush();
+        return $match;
+    }
 
   /**
    * The challenger withdraws the challenge.
@@ -260,32 +267,28 @@ class Tfts {
     return true;
   }
 
-  /**
-   * The challenged accepts the challenge.
-   *
-   * @param \Tfts\Match $match
-   * @param User $challenged
-   * @return bool true if the accept was successful, false otherwise.
-   */
-  public function acceptUserChallenge(Match $match, User $challenged): bool {
-    // verify system is active
-    if (!$this->isSystemActive()) {
-      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
-      return false;
-    }
+    /**
+     * The challenged accepts the challenge.
+     *
+     * @param \Tfts\Match $match
+     * @param User $challenged
+     * @return bool true if the accept was successful, false otherwise.
+     */
+    public function acceptUserChallenge($match_id, $user_id): bool
+    {
+        // verify system is active
+        if (!$this->isSystemActive()) {
+            throw new Exception("Something bad happened"); //@TODO: let me know hat happened
+            return false;
+        }
 
-    $repository = $this->em->getRepository(Match::class);
-    // verify match exists and user is challenged
-    if (is_null($repository->findOneBy(['match_id' => $match, 'user2' => $challenged->getUserId()]))) {
-      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
-      return false;
-    }
+        $match = $this->em->find('Tfts\Match', $match_id);
 
-    $match->setAccepted(true);
-    $this->em->persist($match);
-    $this->em->flush();
-    return true;
-  }
+        $match->setAccepted(true);
+        $this->em->persist($match);
+        $this->em->flush();
+        return true;
+    }
 
   /**
    * The challenged declines the challenge.
@@ -294,17 +297,17 @@ class Tfts {
    * @param User $challenged
    * @return bool true if the decline was successful, false otherwise.
    */
-  public function declineUserChallenge(Match $match, User $challenged): bool {
+  public function declineUserChallenge($match_id, $user_id): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
       throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
 
-    $repository = $this->em->getRepository(Match::class);
+    $match = $this->em->find(Match::class, $match_id);
     // verify match exists and user is challenged
-    if (is_null($repository->findOneBy(['match_id' => $match, 'user2' => $challenged->getUserId()]))) {
-      throw new Exception("Something bad happened"); //@TODO: let me know hat happened
+    if ($match->getUser2()->getUserID() != $user_id) {
+      throw new Exception($match->getUser2()->getUserID()." - Something bad happened ".$user_id); //@TODO: let me know hat happened
       return false;
     }
 
@@ -322,7 +325,10 @@ class Tfts {
    * @param type $score2 Score of the challenged.
    * @return bool true if the report was successful, false otherwise.
    */
-  public function reportResultUserMatch(Match $match, User $user, $score1, $score2): bool {
+  public function reportResultUserMatch($match_id, $user_id, $user1_score, $user2_score): bool {
+      $user = User::getByUserID($user_id);;
+      $match = $this->em->find('Tfts\Match', $match_id);
+
     // verify system is active
     if (!$this->isSystemActive()) {
       throw new Exception("Something bad happened"); //@TODO: let me know hat happened
@@ -337,12 +343,36 @@ class Tfts {
     $is_challenger = $match->getUser1()->getUserId() == $user->getUserId();
     $is_challenged = $match->getUser2()->getUserId() == $user->getUserId();
 
-    $this->updateMatch($db_match, $is_challenger, $is_challenged, $score1, $score2);
+    $this->updateMatch($match, $is_challenger, $is_challenged, $user1_score, $user2_score);
     $this->processMatch($db_match);
     $this->em->persist($db_match);
     $this->em->flush();
     return true;
   }
+
+  public function confirmResultUserMatch($match_id, $user_id): bool {
+      $match = $this->em->find('Tfts\Match', $match_id);
+
+      $is_challenger = $match->getUser1()->getUserId() == $user_id;
+      $is_challenged = $match->getUser2()->getUserId() == $user_id;
+
+      $this->updateMatch($match, $is_challenger, $is_challenged, $match->getScore1(), $match->getScore2());
+      $this->processMatch($match);
+      $this->em->persist($match);
+      $this->em->flush();
+      return truen;
+  }
+
+    /**
+     * What to do if a user does not confirm a match result
+     *
+     * @param $match_id
+     * @param $user_id
+     * @return bool
+     */
+    public function declineResultUserMatch($match_id, $user_id): bool {
+        //@todo What to do here?
+    }
 
   /**
    * The open match is cancelled by the given user (can be done by both players).
