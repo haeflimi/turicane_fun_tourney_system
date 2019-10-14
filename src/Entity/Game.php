@@ -59,6 +59,7 @@ class Game {
     $app = Application::getFacadeApplication();
     $this->em = $app->make('Doctrine\ORM\EntityManager');
     $game = $this->em->getRepository(Game::class)->findOneBy(['game_handle' => $game_handle]);
+    return $game;
   }
 
   public static function getById($id): Game {
