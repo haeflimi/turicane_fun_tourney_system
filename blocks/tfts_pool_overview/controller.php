@@ -12,6 +12,7 @@ use Page;
 use Permissions;
 use \DateTime;
 use Tfts\Tfts;
+use Concrete\Core\User\Group\GroupList;
 
 class Controller extends BlockController
 {
@@ -64,6 +65,17 @@ class Controller extends BlockController
         //if its a team game we can get our team from there
         //@todo this does not yet work bc. findRegistration doesnt find our team registration yet hardcode for now
         $this->set('myTeam', (is_object($myRegistration)?$myRegistration->getGroup():Group::getByID(70)));
+
+        //get the current users groups to have them available for team signups
+        $gl = new GroupList();
+        $gl->filterByUserID($me->getUserID());
+        $groups = [];
+        foreach($gl->getResults() as $key => $g){
+            if(strpos($g->getGroupPath(), '/Team Manager/') !== false){
+                $groups[] = $g;
+            }
+        }
+        $this->set('groups',$groups);
 
         $this->set('me', $me);
         $this->set('registrations', $tfts->getRegistrations($game));

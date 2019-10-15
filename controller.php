@@ -115,11 +115,19 @@ class Controller extends Package
                 try {
                     switch ($_POST['action']) {
                         case 'joinUserPool':
-                            $resp = $tfts->joinUserPool($_POST['game_id'], $_POST['user_id']);
+                            if($_POST['is_team']){
+                                $resp = $tfts->joinGroupPool($_POST['game_id'], $_POST['user_id']);
+                            } else {
+                                $resp = $tfts->joinUserPool($_POST['game_id'], $_POST['user_id']);
+                            }
                             break;
 
                         case 'leaveUserPool':
-                            $resp = $tfts->leaveUserPool($_POST['game_id'], $_POST['user_id']);
+                            if($_POST['is_team']){
+                                $resp = $tfts->leaveGroupPool($_POST['game_id'], $_POST['user_id']);
+                            } else {
+                                $resp = $tfts->leaveUserPool($_POST['game_id'], $_POST['user_id']);
+                            }
                             break;
 
                         case 'challengeUser':

@@ -13,11 +13,37 @@ endif;?>
 
 
 <h2>Participants
-<?php if($in_pool):?>
-    <button class="btn btn-danger pull-right" onClick="Tfts.leaveUserPool(<?=$me->getUserId();?>,<?=$tfts_game_id;?>,'<?=Core::make('token')->generate('leaveUserPool');?>');">Turnierpool verlassen</button>
-<?php else:?>
-    <button class="btn btn-success pull-right" onClick="Tfts.joinUserPool(<?=$me->getUserId();?>,<?=$tfts_game_id;?>,'<?=Core::make('token')->generate('joinUserPool');?>');">Turnierpool beitreten</button>
-<?php endif; ?>
+    <?php if ($is_team):
+        if ($in_pool):?>
+            <button class="btn btn-danger pull-right"
+                    onClick="Tfts.leaveUserPool(<?= $myTeam->getGroupID() ?>,<?= $tfts_game_id; ?>,'<?= Core::make('token')->generate('leaveUserPool'); ?>',<?=$is_team?>);">
+                <?=t('Leave Pool with %s',$myTeam->getGroupName())?>
+            </button>
+        <?php else: ?>
+            <div class="dropdown">
+                <button class="btn btn-success dropdown-toggle pull-right" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <?=t('Join Pool with Team')?>
+                </button>
+                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <?php foreach($groups as $g):?>
+                    <a class="dropdown-item" onClick="Tfts.joinUserPool(<?= $g->getGroupID(); ?>,<?= $tfts_game_id; ?>,'<?= Core::make('token')->generate('joinUserPool'); ?>',<?=$is_team?>);"><?=$g->getGroupName()?></a>
+                    <?php endforeach;?>
+                </div>
+            </div>
+        <?php endif;
+    else:
+        if ($in_pool):?>
+            <button class="btn btn-danger pull-right"
+                    onClick="Tfts.leaveUserPool(<?= $me->getUserId(); ?>,<?= $tfts_game_id; ?>,'<?= Core::make('token')->generate('leaveUserPool'); ?>',<?=$is_team?>);">
+                <?=t('Leave Pool')?>
+            </button>
+        <?php else: ?>
+            <button class="btn btn-success pull-right"
+                    onClick="Tfts.joinUserPool(<?= $me->getUserId(); ?>,<?= $tfts_game_id; ?>,'<?= Core::make('token')->generate('joinUserPool'); ?>',<?=$is_team?>);">
+                <?=t('Join Pool')?>
+            </button>
+        <?php endif;
+    endif; ?>
 </h2>
 
 <table class="table table-striped table-condensed">

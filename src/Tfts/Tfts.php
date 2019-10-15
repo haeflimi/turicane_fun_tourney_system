@@ -409,7 +409,10 @@ class Tfts {
    * @param Group $group
    * @return bool true if the join was successful, false otherwise.
    */
-  public function joinGroupPool(Game $game, Group $group): bool {
+  public function joinGroupPool($game_id, $group_id): bool {
+      $game = $this->em->find('Tfts\Game', $game_id);
+      $group = Group::getByID($group_id);
+
     // verify system is active
     if (!$this->isSystemActive()) {
       throw new Exception("Something bad happened"); //@TODO: let me know hat happened
@@ -447,7 +450,10 @@ class Tfts {
    * @param Group $group
    * @return bool true if the leave was successful, false otherwise.
    */
-  public function leaveGroupPool(Game $game, Group $group): bool {
+  public function leaveGroupPool($game_id, $group_id): bool {
+      $game = $this->em->find('Tfts\Game', $game_id);
+      $group = Group::getByID($group_id);
+
     // verify system is active
     if (!$this->isSystemActive()) {
       throw new Exception("Something bad happened"); //@TODO: let me know hat happened

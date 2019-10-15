@@ -6,12 +6,13 @@ $(function () {
 });
 
 var Tfts = {
-    joinUserPool: function (user_id, game_id, ccm_token) {
+    joinUserPool: function (user_id, game_id, ccm_token, is_team) {
         $.post(
             "/tfts/api/action", {
                 game_id: game_id,
                 user_id: user_id,
                 ccm_token: ccm_token,
+                is_team: is_team,
                 action: 'joinUserPool'
             }, function () {
                 Tfts.success('You are now subscribed to this TFTS Pool');
@@ -20,12 +21,13 @@ var Tfts = {
             Tfts.error(response.responseJSON.error.message);
         });
     },
-    leaveUserPool: function (user_id, game_id, ccm_token) {
+    leaveUserPool: function (user_id, game_id, ccm_token, is_team) {
         $.post(
             "/tfts/api/action", {
                 game_id: game_id,
                 user_id: user_id,
                 ccm_token: ccm_token,
+                is_team: is_team,
                 action: 'leaveUserPool'
             }, function () {
                 Tfts.success('You are now unsubscribed from this TFTS Pool');
