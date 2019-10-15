@@ -3,6 +3,7 @@
 namespace Tfts;
 
 use Concrete\Core\Entity\User\User;
+use Concrete\Core\User\Group\Group;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -74,4 +75,24 @@ class Registration {
     return $registration1->getRandomNumber() <=> $registration2->getRandomNumber();
   }
 
+  public function getGroup(){
+      return Group::getByID($this->group_id);
+  }
+
+  /**
+   * Get iformation for the registered party, be it User or group
+   */
+  public function getName(){
+      if($this->group_id){
+          return $this->getGroup()->getGroupName();
+      }
+      return $this->getUser()->getUserName();
+  }
+
+  public function getParticipantId(){
+      if($this->group_id){
+          return $this->getGroup()->getGroupID();
+      }
+      return $this->getUser()->getUserID();
+  }
 }

@@ -34,11 +34,12 @@ var Tfts = {
             Tfts.error(response.responseJSON.error.message);
         });
     },
-    challengeUser: function (challanger_id, challenged_id, game_id, ccm_token, challenged_name) {
+    challengeUser: function (challanger_id, challenged_id, game_id, ccm_token, challenged_name, is_team) {
         $.post(
             "/tfts/api/action", {
                 challenger_id: challanger_id,
                 challenged_id: challenged_id,
+                is_team: is_team,
                 game_id: game_id,
                 ccm_token: ccm_token,
                 action: 'challengeUser'
@@ -79,7 +80,7 @@ var Tfts = {
             Tfts.error(response.responseJSON.error.message);
         });
     },
-    reportResultUserMatch: function ( match_id, user_id ) {
+    reportResultUserMatch: function ( match_id, user_id, is_team ) {
         var data = new FormData(document.querySelector('#resultForm'));
         if(data.get('user1_score').length == 0 || data.get('user1_score').length == 0){
             Tfts.error('Score can not be empty');
@@ -92,6 +93,7 @@ var Tfts = {
                 ccm_token: data.get('ccm_token'),
                 user1_score: data.get('user1_score'),
                 user2_score: data.get('user2_score'),
+                is_team: is_team,
                 action: 'reportResultUserMatch'
             }, function () {
                 PNotify.removeAll()

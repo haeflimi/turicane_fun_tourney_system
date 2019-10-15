@@ -48,15 +48,23 @@ class Controller extends BlockController
         $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
         $em = $app->make('Doctrine\ORM\EntityManager');
         $me = new User();
+        $tfts = new Tfts();
 
         $page = Page::getCurrentPage();
         $this->set('is_pool', $page->getAttribute('tfts_game_is_pool'));
+        $this->set('is_team', $is_team = $page->getAttribute('tfts_game_is_team'));
 
+        //get the game from the page the block is inserted in
         $game = $em->getRepository('Tfts\Game')->findOneBy(['game_page_id'=>$page->getCollectionId()]);
-        $myRegistration = $em->getRepository('Tfts\Registration')->findOneBy(['user'=>$me->getUserId()]);
-        $tfts = new Tfts();
         $this->set('tfts_game_id', $game->getId());
+
+        //determine if i am member of the pool
+        $myRegistration = $tfts->findRegistration($game,$me);
         $this->set('in_pool', (is_object($myRegistration)?true:false));
+        //if its a team game we can get our team from there
+        //@todo this does not yet work bc. findRegistration doesnt find our team registration yet hardcode for now
+        $this->set('myTeam', (is_object($myRegistration)?$myRegistration->getGroup():Group::getByID(70)));
+
         $this->set('me', $me);
         $this->set('registrations', $tfts->getRegistrations($game));
         $this->set('openChallenges', $tfts->getOpenGameChallenges($game));

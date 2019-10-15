@@ -67,6 +67,7 @@ class Tfts {
    */
     public function getOpenUserChallenges(User $user): Array
     {
+        //@todo this also needs to include the challanges to the teams the user is a member of
         $repo = $this->em->getRepository('Tfts\Match');
         return $repo->findBy(['user2'=>$user->getUserID(),'match_accepted'=>0]);
     }
@@ -77,6 +78,7 @@ class Tfts {
      */
     public function getOpenUserConfirmations(User $user): Array
     {
+        //@todo this also needs to include the confirmation request to the teams the user is a member of
         $repo = $this->em->getRepository('Tfts\Match');
         $challenger = $repo->findBy(['user1'=>$user->getUserID(),'match_accepted'=>1,'match_confirmed1'=>0,'match_confirmed2'=>1]);
         $challenged = $repo->findBy(['user2'=>$user->getUserID(),'match_accepted'=>1,'match_confirmed1'=>1,'match_confirmed2'=>0]);
@@ -472,7 +474,11 @@ class Tfts {
    * @param User $challenged
    * @return Match null if an exception occured, the created match otherwise.
    */
-  public function challengeGroup(Game $game, Group $challenger, Group $challenged): ?Match {
+  public function challengeGroup($game_id, $challenger_id, $challenged_id): ?Match {
+      $game = $this->em->find('Tfts\Game', $game_id);
+      $challenger = Group::getByID($challenger_id);
+      $challenged = Group::getByID($challenged_id);
+
     // verify system is active
     if (!$this->isSystemActive()) {
       throw new Exception("Something bad happened"); //@TODO: let me know hat happened
@@ -539,16 +545,17 @@ class Tfts {
    * @param Group $challenged
    * @return bool true if the accept was successful, false otherwise.
    */
-  public function acceptGroupChallenge(Match $match, Group $challenged): bool {
+  public function acceptGroupChallenge($match_id, $challenged_id): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
       throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
-
+    $match = $this->em->find('Match', $match_id);
     $repository = $this->em->getRepository(Match::class);
+
     // verify match exists and group is challenged
-    if (is_null($repository->findOneBy(['match_id' => $match, 'group2_id' => $challenged->getGroupId()]))) {
+    if (is_null($repository->findOneBy(['match_id' => $match_id, 'group2_id' => $challenged_id]))) {
       throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
@@ -566,16 +573,16 @@ class Tfts {
    * @param Group $challenged
    * @return bool true if the decline was successful, false otherwise.
    */
-  public function declineGroupChallenge(Match $match, Group $challenged): bool {
+  public function declineGroupChallenge($match_id, $challenged_id): bool {
     // verify system is active
     if (!$this->isSystemActive()) {
       throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
-
+      $match = $this->em->find('Match', $match_id);
     $repository = $this->em->getRepository(Match::class);
     // verify match exists and group is challenged
-    if (is_null($repository->findOneBy(['match_id' => $match, 'group2_id' => $challenged->getGroupId()]))) {
+    if (is_null($repository->findOneBy(['match_id' => $match_id, 'group2_id' => $challenged_id]))) {
       throw new Exception("Something bad happened"); //@TODO: let me know hat happened
       return false;
     }
@@ -596,7 +603,11 @@ class Tfts {
    * @param type $score2 Score of the challenged.
    * @return bool true if the report was successful, false otherwise.
    */
-  public function reportResultGroupMatch(Match $match, Group $group, Collection $users, $score1, $score2): bool {
+  public function reportResultGroupMatch($match_id, $group_id, $score1, $score2): bool {
+      $match = $this->em->find('Tfts\Match',$match_id);
+      $group = Group::getByID($group_id);
+      $users = $group->getGroupMembers();
+
     // verify system is active
     if (!$this->isSystemActive()) {
       throw new Exception("Something bad happened"); //@TODO: let me know hat happened
@@ -1106,7 +1117,8 @@ class Tfts {
    * @param Group $group
    * @return Registration
    */
-  private function findRegistration(Game $game, User $user = null, Group $group = null): ?Registration {
+  public function findRegistration(Game $game, User $user = null, Group $group = null): ?Registration {
+      //@Todo This should work without supplying a Group Parameter to do the find prefix justice and is not very useful like this
     $repository = $this->em->getRepository(Registration::class);
 
     // verify that only one and one only of user and group is set

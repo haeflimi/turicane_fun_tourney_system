@@ -123,27 +123,52 @@ class Controller extends Package
                             break;
 
                         case 'challengeUser':
-                            $resp = $tfts->challengeUser($_POST['game_id'], $_POST['challenger_id'], $_POST['challenged_id']);
+                            if($_POST['is_team']){
+                                $resp = $tfts->challengeGroup($_POST['game_id'], $_POST['challenger_id'], $_POST['challenged_id']);
+                            } else {
+                                $resp = $tfts->challengeUser($_POST['game_id'], $_POST['challenger_id'], $_POST['challenged_id']);
+                            }
                             break;
 
                         case 'acceptUserChallenge':
-                            $resp = $tfts->acceptUserChallenge($_POST['match_id'], $_POST['challenged_id']);
+                            if($_POST['is_team']){
+                                $resp = $tfts->acceptGroupChallenge($_POST['match_id'], $_POST['challenged_id']);
+                            } else {
+                                $resp = $tfts->acceptUserChallenge($_POST['match_id'], $_POST['challenged_id']);
+                            }
                             break;
 
                         case 'declineUserChallenge':
-                            $resp = $tfts->declineUserChallenge($_POST['match_id'], $_POST['challenged_id']);
+                            if($_POST['is_team']){
+                                $resp = $tfts->declineGroupChallenge($_POST['match_id'], $_POST['challenged_id']);
+                            } else {
+                                $resp = $tfts->declineUserChallenge($_POST['match_id'], $_POST['challenged_id']);
+                            }
                             break;
 
                         case 'reportResultUserMatch':
-                            $resp = $tfts->reportResultUserMatch($_POST['match_id'], $_POST['user_id'], $_POST['user1_score'], $_POST['user2_score']);
+                            if($_POST['is_team']){
+                                $resp = $tfts->reportResultGroupMatch($_POST['match_id'], $_POST['user_id'], $_POST['user1_score'], $_POST['user2_score']);
+                            } else {
+                                $resp = $tfts->reportResultUserMatch($_POST['match_id'], $_POST['user_id'], $_POST['user1_score'], $_POST['user2_score']);
+                            }
+
                             break;
 
                         case 'confirmResultUserMatch':
-                            $resp = $tfts->confirmResultUserMatch($_POST['match_id'], $_POST['user_id']);
+                            if($_POST['is_team']){
+                                //@todo there is no method for team games yet
+                            } else {
+                                $resp = $tfts->confirmResultUserMatch($_POST['match_id'], $_POST['user_id']);
+                            }
                             break;
 
                         case 'declineResultUserMatch':
-                            $resp = $tfts->declineResultUserMatch($_POST['match_id'], $_POST['user_id']);
+                            if($_POST['is_team']){
+                                //@todo there is no method for team games yet
+                            } else {
+                                $resp = $tfts->declineResultUserMatch($_POST['match_id'], $_POST['user_id']);
+                            }
                             break;
                     }
                     if ($resp) {

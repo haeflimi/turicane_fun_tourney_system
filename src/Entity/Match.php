@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Tfts\Game;
+use Concrete\Core\User\Group\Group;
 
 /**
  * @ORM\Entity
@@ -191,13 +192,21 @@ class Match {
     return $this->user2;
   }
 
-  public function getGroup1Id(): int {
+  public function getGroup1Id() {
     return $this->group1_id;
   }
 
-  public function getGroup2Id(): int {
+  public function getGroup2Id() {
     return $this->group2_id;
   }
+
+  public function getGroup1(){
+      return Group::getByID($this->getGroup1Id());
+  }
+
+    public function getGroup2(){
+        return Group::getByID($this->getGroup2Id());
+    }
 
   public function getMatchGroupUsers(): Collection {
     return $this->matchGroupUsers;
@@ -241,9 +250,50 @@ class Match {
 
   public function getWinner():  User {
       if($this->getScore1() > $this->getScore2()){
+          if($this->getGroup1Id()){
+              return Group::getByID($this->getGroup1Id());
+          }
           return $this->getUser1();
       } else {
+          if($this->getGroup2Id()){
+              return Group::getByID($this->getGroup2Id());
+          }
           return $this->getUser2();
       }
   }
+
+    /**
+     * Get iformation for the registered parties, be it User or group
+     */
+    public function getOpponent1Name()
+    {
+        if($this->getGroup1Id()){
+            return Group::getByID($this->getGroup1Id())->getGroupName();
+        }
+        return $this->getUser1()->getUserName();
+    }
+
+    public function getOpponent1Id()
+    {
+        if($this->getGroup1Id()){
+            return $this->getGroup1Id();
+        }
+        return $this->getUser1()->getUserID();
+    }
+
+    public function getOpponent2Name()
+    {
+        if($this->getGroup2Id()){
+            return Group::getByID($this->getGroup2Id())->getGroupName();
+        }
+        return $this->getUser2()->getUserName();
+    }
+
+    public function getOpponent2Id()
+    {
+        if($this->getGroup2Id()){
+            return $this->getGroup2Id();
+        }
+        return $this->getUser2()->getUserID();
+    }
 }
