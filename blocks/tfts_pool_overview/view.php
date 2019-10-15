@@ -60,11 +60,16 @@ endif;?>
 <h2>Match History</h2>
 <table class="table table-striped table-condensed">
     <tbody>
-    <?php foreach($closedMatches as $cm):?>
+    <?php foreach($closedMatches as $cm):
+        $class1 = ($cm->getWinner()->getUserID() == $cm->getUser1()->getUserID())?'class="bg-success"':'class="bg-danger"';
+        $class2 = ($cm->getWinner()->getUserID() == $cm->getUser2()->getUserID())?'class="bg-success"':'class="bg-danger"';?>
         <tr>
-            <td><?=$cm->getUser1()->getUserName()?> vs. <?=$cm->getUser2()->getUserName()?></td>
-            <td>
-            </td>
+            <td <?=$class1;?>><?=$cm->getUser1()->getUserName()?></td>
+            <td <?=$class1;?>><strong><?=$cm->getScore1()?></strong></td>
+            <td <?=$class1;?>><strong>+<?=$cm->getCompute1()?> p.</strong></td>
+            <td <?=$class2;?>><?=$cm->getUser2()->getUserName()?></td>
+            <td <?=$class2;?>><strong><?=$cm->getScore2()?></strong></td>
+            <td <?=$class2;?>><strong>+<?=$cm->getCompute2()?> p.</strong></td>
         </tr>
     <?php endforeach; ?>
     </tbody>
