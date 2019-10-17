@@ -500,8 +500,8 @@ class Tfts {
     $match = Match::getById($match_id);
     $group = Group::getByID($group_id);
 
-    if ($match->getGame()->getGroupSize() != sizeof($users)) {
-      throw new Exception($match->getGame()->getName() . ' requires ' . $match->getGame()->getGroupSize() . ' users but was ' . sizeof($users));
+    if ($match->getGame()->getGroupSize() != sizeof($user_ids)) {
+      throw new Exception($match->getGame()->getName() . ' requires ' . $match->getGame()->getGroupSize() . ' users but was ' . sizeof($user_ids));
     }
 
     foreach ($user_ids as $user_id) {
@@ -520,7 +520,8 @@ class Tfts {
     $this->em->flush();
 
     // create new group match users
-    foreach ($users as $user) {
+    foreach ($user_ids as $user_id) {
+      $user = User::getByUserID($user_id);
       $this->em->persist(new MatchGroupUser($match, $this->userToEntity($user), $group->getGroupId()));
     }
     $this->em->flush();
