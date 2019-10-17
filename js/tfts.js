@@ -228,7 +228,7 @@ var Tfts = {
             "/tfts/api/action", {
               match_id: match_id,
               group_id: group_id,
-              user_ids: data.get('user_ids'),
+              user_ids: data.getAll('user_ids'),
               ccm_token: data.get('ccm_token'),
               score1: data.get('score1'),
               score2: data.get('score2'),

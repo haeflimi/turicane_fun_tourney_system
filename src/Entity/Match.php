@@ -8,6 +8,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Tfts\Game;
+use Concrete\Core\User\User as UserObj;
 use Concrete\Core\User\Group\Group;
 
 /**
@@ -303,4 +304,14 @@ class Match {
     return $this->getUser2()->getUserID();
   }
 
+  public function getMyTeam(){
+      $u = new UserObj();
+      if($u->inGroup($this->getGroup1())){
+          return $this->getGroup1();
+      }
+      if($u->inGroup($this->getGroup2())){
+          return $this->getGroup2();
+      }
+      return false;
+  }
 }

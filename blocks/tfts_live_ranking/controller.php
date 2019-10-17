@@ -1,5 +1,5 @@
 <?php
-namespace Concrete\Package\TuricaneFunTourneySystem\Block\TftsLiveResults;
+namespace Concrete\Package\TuricaneFunTourneySystem\Block\TftsLiveRanking;
 
 use Concrete\Core\Block\BlockController;
 use Concrete\Core\Page\PageList;
@@ -19,7 +19,7 @@ class Controller extends BlockController
     protected $btCacheBlockOutputOnPost = true;
     protected $btCacheBlockOutputForRegisteredUsers = false;
     protected $btCacheBlockOutputLifetime = 300;
-    protected $btHandle = 'tfts_live_results';
+    protected $btHandle = 'tfts_live_ranking';
 
     public function __construct($obj = null)
     {
@@ -33,7 +33,7 @@ class Controller extends BlockController
 
     public function getBlockTypeName()
     {
-        return t("TFTS Live Results");
+        return t("TFTS Live Ranking");
     }
 
     public function save($args)

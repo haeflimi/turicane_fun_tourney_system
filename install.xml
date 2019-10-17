@@ -1,17 +1,37 @@
 <?xml version="1.0"?>
 <concrete5-cif version="1.0">
     <blocktypes>
-        <blocktype handle="tfts_ranking_list" package="turicane_fun_tourney_system"/>
+        <blocktype handle="tfts_live_ranking" package="turicane_fun_tourney_system"/>
         <blocktype handle="tfts_pool_overview" package="turicane_fun_tourney_system"/>
-        <blocktype handle="tfts_live_results" package="turicane_fun_tourney_system"/>
+        <blocktype handle="tfts_massgame_overview" package="turicane_fun_tourney_system"/>
+        <blocktype handle="tfts_trackmania_results" package="turicane_fun_tourney_system"/>
     </blocktypes>
     <blocktypesets>
         <blocktypeset handle="tfts" name="Turicane TFTS" package="turicane_fun_tourney_system">
-            <blocktype handle="tfts_ranking_list"/>
+            <blocktype handle="tfts_live_ranking"/>
             <blocktype handle="tfts_pool_overview"/>
-            <blocktype handle="tfts_live_results"/>
+            <blocktype handle="tfts_massgame_overview"/>
+            <blocktype handle="tfts_trackmania_results"/>
         </blocktypeset>
     </blocktypesets>
+    <pagetypes>
+        <pagetype name="TFTS Pool Game" handle="tfts_game" package="turicane_fun_tourney_system" is-frequently-added="1" launch-in-composer="1">
+            <pagetemplates type="all" default="full"/>
+            <target handle="all" package="turicane_fun_tourney_system"/>
+            <composer>
+                <formlayout>
+                    <set name="TFTS">
+                        <control type="collection_attribute" handle="tfts_game_is_pool"/>
+                        <control type="collection_attribute" handle="tfts_game_is_mass"/>
+                        <control type="collection_attribute" handle="tfts_game_is_team"/>
+                        <control type="collection_attribute" handle="tfts_game_players"/>
+                        <control type="collection_attribute" handle="tfts_game_points_win"/>
+                        <control type="collection_attribute" handle="tfts_game_points_loss"/>
+                    </set>
+                </formlayout>
+            </composer>
+        </pagetype>
+    </pagetypes>
     <singlepages>
         <page name="Games" path="/dashboard/tfts/games" filename="/dashboard/tfts/games.php" package="turicane_fun_tourney_system">
         </page>

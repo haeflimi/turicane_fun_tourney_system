@@ -16,6 +16,7 @@ use Concrete\Core\View\View;
 use Tfts\Game;
 use Tfts\Match;
 use Concrete\Core\Foundation\ClassLoader;
+use Concrete\Core\Support\Facade\Events;
 use Tfts\Tfts;
 use Core;
 
@@ -23,7 +24,7 @@ class Controller extends Package {
 
   protected $pkgHandle = 'turicane_fun_tourney_system';
   protected $appVersionRequired = '8.4';
-  protected $pkgVersion = '0.120.33';
+  protected $pkgVersion = '0.120.36';
   protected $em;
   protected $pkgAutoloaderRegistries = array(
       'src/Tfts' => '\Tfts',
@@ -48,6 +49,10 @@ class Controller extends Package {
     $view = new View();
     $al = AssetList::getInstance();
     $pkg = Package::getByHandle($this->pkgHandle);
+
+    Events::addListener('tfts_on_match_finsh', function($match) {
+          //@todo: Do stuff like sending the event to pusher for UI Refreshes, trigger Popups and so on.
+    });
 
     // Register JS Assets for TFTS and c5 Backend Stuff for Notifications
     $al->register('javascript', 'tfts', 'js/tfts.js',
@@ -171,7 +176,7 @@ class Controller extends Package {
               $tfts->cancelGroupMatch($_POST['match_id'], $_POST['group_id']);
               break;
           }
-          return new Response('success');
+          return new Response('Success');
         } catch (Exception $e) {
           return new Response('Error', 500);
         }
