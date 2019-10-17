@@ -16,11 +16,12 @@ endif;
 ?>
     <h2>Participants
         <?php
-        if ($is_team):
-            if (sizeof($registeredGroups) > 0) :
+        if ($is_team):?>
+            <div class="btn-group pull-right">
+            <?php if (sizeof($registeredGroups) > 0) :
                 ?>
                 <div class="dropdown">
-                    <button class="btn btn-danger dropdown-toggle pull-right" type="button" id="dropdownMenuButton"
+                    <button class="btn btn-danger dropdown-toggle" type="button" id="dropdownMenuButton"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <?= t('Leave pool with team') ?>
                     </button>
@@ -30,13 +31,13 @@ endif;
                                onClick="Tfts.leaveGroupPool(<?= $group->getGroupId(); ?>, <?= $tfts_game_id; ?>, '<?= Core::make('token')->generate('leaveGroupPool'); ?>');"><?= $group->getGroupName() ?></a>
                         <?php endforeach; ?>
                     </div>
-                </div>
+                </div>&nbsp;
             <?php
             endif;
             if (sizeof($unregisteredGroups) > 0) :
                 ?>
                 <div class="dropdown">
-                    <button class="btn btn-success dropdown-toggle pull-right" type="button" id="dropdownMenuButton"
+                    <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenuButton"
                             data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <?= t('Join pool with team') ?>
                     </button>
@@ -55,8 +56,9 @@ endif;
                     <?= t('No teams available') ?>
                 </div>
             <?php
-            endif;
-        else:
+            endif;?>
+            </div>
+        <?php else:
             if ($in_pool):
                 ?>
                 <button class="btn btn-danger pull-right"
