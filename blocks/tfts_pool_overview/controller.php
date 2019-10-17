@@ -3,17 +3,10 @@
 namespace Concrete\Package\TuricaneFunTourneySystem\Block\TftsPoolOverview;
 
 use Concrete\Core\Block\BlockController;
-use Concrete\Core\Page\PageList;
-use Concrete\Core\User\User;
-use Site;
-use Group;
-use Core;
-use Database;
-use Page;
-use Permissions;
-use \DateTime;
-use Tfts\Tfts;
 use Concrete\Core\User\Group\GroupList;
+use Concrete\Core\User\User;
+use Page;
+use Tfts\Tfts;
 
 class Controller extends BlockController {
 
@@ -73,9 +66,10 @@ class Controller extends BlockController {
       }
       $this->set('unregisteredGroups', $unregisteredGroups);
       $this->set('registeredGroups', $registeredGroups);
+      $this->set('in_pool', sizeof($registeredGroups) > 0);
     } else {
       //determine if user is am member of the pool
-      $this->set('user_in_pool', is_object($tfts->findUserRegistration($game, $current_user)));
+      $this->set('in_pool', is_object($tfts->findUserRegistration($game, $current_user)));
     }
 
     $this->set('current_user', $current_user);

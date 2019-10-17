@@ -60,23 +60,26 @@ class Controller extends Package {
   public function on_after_packages_start() {
     // Register Routes
     $this->registerRoutes();
-    // Load some stuff
-    $me = new User();
+    
+    $current_user = new User();
     $view = new View();
-    // Check TFTS for Open Challanges to display as Notifications
-    if ($me->isLoggedIn()) {
+    
+    // Check for open user challenges/confirmations to display
+    if ($current_user->isLoggedIn()) {
       $tfts = new Tfts();
-      $challenges = $tfts->getOpenUserChallenges($me);
+      $challenges = $tfts->getOpenUserChallenges($current_user);
       foreach ($challenges as $match) {
         $notification = Core::make('helper/tfts/ui')->showUserChallenge($match);
         $view->addFooterItem($notification);
       }
-      $confirmations = $tfts->getOpenUserConfirmations($me);
+      $confirmations = $tfts->getOpenUserConfirmations($current_user);
       foreach ($confirmations as $match) {
         $notification = Core::make('helper/tfts/ui')->confirmUserResult($match);
         $view->addFooterItem($notification);
       }
     }
+    
+    // @TODO: Check for open user challenges/confirmations to display
   }
 
   public function install() {

@@ -109,7 +109,7 @@ var Tfts = {
               score2: data.get('score2'),
               action: 'reportResultUserMatch'
             }, function () {
-      PNotify.removeAll()
+      PNotify.removeAll();
       Tfts.success('Result reported');
       window.location.reload();
     }).fail(function (response) {
@@ -169,7 +169,21 @@ var Tfts = {
               action: 'challengeGroup'
             }, function () {
       Tfts.success('Your challenge has been sent to ' + challenged_name);
-      //window.location.reload();
+      window.location.reload();
+    }).fail(function (response) {
+      Tfts.error(response.responseJSON.error.message);
+    });
+  },
+  withdrawGroupChallenge: function (match_id, challenger_id, ccm_token) {
+    $.post(
+            "/tfts/api/action", {
+              match_id: match_id,
+              challenger_id: challenger_id,
+              ccm_token: ccm_token,
+              action: 'withdrawGroupChallenge'
+            }, function () {
+      Tfts.success('Your challenge has been withdrawn');
+      window.location.reload();
     }).fail(function (response) {
       Tfts.error(response.responseJSON.error.message);
     });
@@ -199,6 +213,44 @@ var Tfts = {
             }, function () {
       PNotify.removeAll();
       Tfts.success('Challenge Declined');
+      window.location.reload();
+    }).fail(function (response) {
+      Tfts.error(response.responseJSON.error.message);
+    });
+  },
+  reportResultGroupMatch: function (match_id, group_id) {
+    var data = new FormData(document.querySelector('#resultForm'));
+    if (data.get('score1').length == 0 || data.get('score2').length == 0) {
+      Tfts.error('Score can not be empty');
+      return;
+    }
+    $.post(
+            "/tfts/api/action", {
+              match_id: match_id,
+              group_id: group_id,
+              user_ids: data.get('user_ids'),
+              ccm_token: data.get('ccm_token'),
+              score1: data.get('score1'),
+              score2: data.get('score2'),
+              action: 'reportResultGroupMatch'
+            }, function () {
+      PNotify.removeAll();
+      Tfts.success('Result reported');
+      window.location.reload();
+    }).fail(function (response) {
+      Tfts.error(response.responseJSON.error.message);
+    });
+  },
+  cancelGroupMatch: function (match_id, group_id) {
+    $.post(
+            "/tfts/api/action", {
+              match_id: match_id,
+              group_id: group_id,
+              ccm_token: $('#cancelGroupMatchToken').val(),
+              action: 'cancelGroupMatch'
+            }, function () {
+      PNotify.removeAll();
+      Tfts.success('Match cancelled');
       window.location.reload();
     }).fail(function (response) {
       Tfts.error(response.responseJSON.error.message);
