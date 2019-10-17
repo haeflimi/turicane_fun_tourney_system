@@ -125,7 +125,7 @@ endif;
         <td><?= $name ?></td>
         <td>
           <?php if (!$is_team && $can_challenge): ?>
-            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.challengeUser(<?= $active_id; ?>,<?= $challenged_id; ?>,<?= $tfts_game_id; ?>,'<?= Core::make('token')->generate('challengeUser'); ?>','<?= $name ?>');"><?= t('Challenge') ?></button>
+            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.challengeUser(<?= $active_id; ?>,<?= $challenged_id; ?>,<?= $tfts_game_id; ?>, '<?= Core::make('token')->generate('challengeUser'); ?>', '<?= $name ?>');"><?= t('Challenge') ?></button>
           <?php elseif ($is_team && $can_challenge): ?>
             <form id="resultForm" class="form-inline pull-right" method="POST">
               <div class="dropdown">
@@ -134,18 +134,18 @@ endif;
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
                   <?php foreach ($registeredGroups as $group): ?>
-                    <a class="dropdown-item" onClick="Tfts.challengeGroup(<?= $group->getGroupId(); ?>,<?= $challenged_id; ?>,<?= $tfts_game_id; ?>,'<?= Core::make('token')->generate('challengeGroup'); ?>','<?= $name ?>');"><?= $group->getGroupName() ?></a>
+                    <a class="dropdown-item" onClick="Tfts.challengeGroup(<?= $group->getGroupId(); ?>,<?= $challenged_id; ?>,<?= $tfts_game_id; ?>, '<?= Core::make('token')->generate('challengeGroup'); ?>', '<?= $name ?>');"><?= $group->getGroupName() ?></a>
                   <?php endforeach; ?>
                 </div>
               </div>
             </form>
           <?php endif; ?>
           <?php if ($open_challenge && $is_challenger): ?>
-            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.withdraw<?= $type; ?>Challenge(<?= $match_id; ?>,<?= $active_id; ?>,'<?= Core::make('token')->generate('withdraw' . $type . 'Challenge'); ?>');"><?= t('Cancel challenge') ?></button>
+            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.withdraw<?= $type; ?>Challenge(<?= $match_id; ?>,<?= $active_id; ?>, '<?= Core::make('token')->generate('withdraw' . $type . 'Challenge'); ?>');"><?= t('Cancel challenge') ?></button>
           <?php endif; ?>
           <?php if ($open_challenge && $is_challenged): ?>
-            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.decline<?= $type; ?>Challenge(<?= $match_id; ?>,<?= $active_id; ?>,'<?= Core::make('token')->generate('decline' . $type . 'Challenge'); ?>');"><?= t('Decline challenge') ?></button>&nbsp;
-            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.accept<?= $type; ?>Challenge(<?= $match_id; ?>,<?= $active_id; ?>,'<?= Core::make('token')->generate('accept' . $type . 'Challenge'); ?>');"><?= t('Accept challenge') ?></button>
+            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.decline<?= $type; ?>Challenge(<?= $match_id; ?>,<?= $active_id; ?>, '<?= Core::make('token')->generate('decline' . $type . 'Challenge'); ?>');"><?= t('Decline challenge') ?></button>&nbsp;
+            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.accept<?= $type; ?>Challenge(<?= $match_id; ?>,<?= $active_id; ?>, '<?= Core::make('token')->generate('accept' . $type . 'Challenge'); ?>');"><?= t('Accept challenge') ?></button>
           <?php endif; ?>
         </td>
       </tr>
@@ -166,22 +166,28 @@ if (count($openMatches) > 0):
           <td><?= $match->getChallengerName() ?> vs. <?= $match->getChallengedName() ?></td>
           <td>
             <?php
-            if ($is_team):
-
-            else:
-              $user_id = $current_user->getUserID();
-              $show_score_form = $match->getUser1()->getUserId() == $user_id || $match->getUser2()->getUserId() == $user_id;
-
-              if ($show_score_form):
-                ?>
-                <form id="resultForm" class="form-inline pull-right" method="POST">
-                  <input type="hidden" name="ccm_token" value="<?= Core::make('token')->generate('reportResultUserMatch'); ?>"/>&nbsp;
-                  <input class="form-control form-control-sm" type="number" placeholder="<?= $match->getChallengerName() ?> Score" name="score1"/>&nbsp;
-                  <input class="form-control form-control-sm" type="number" placeholder="<?= $match->getChallengedName() ?> Score" name="score2"/>&nbsp;
-                  <button type="button" class="btn btn-transparent btn-sm pull-right" onclick="Tfts.reportResultUserMatch(<?= $match->getId() ?>,<?= $user_id ?>);"><?= t('Report result') ?></button>&nbsp;
-                  <button type="button" class="btn btn-transparent btn-sm pull-right" onclick="Tfts.cancelUserMatch(<?= $match->getId() ?>,<?= $user_id ?>);"><?= t('Cancel match') ?></button>
-                </form>
-              <?php endif; ?>
+            if ($is_team) {
+              $type = 'Group';
+              foreach ($registeredGroups as $group) {
+                if ($match->getChallengerId() == $group->getGroupId() || $match->getChallengedId() == $group->getGroupId()) {
+                  $active_id = $group->getGroupId();
+                  break;
+                }
+              }
+            } else {
+              $type = 'User';
+              $active_id = $current_user->getUserID();
+            }
+            if ($match->getChallengerId() == $active_id || $match->getChallengedId() == $active_id):
+              ?>
+              <form id="resultForm" class="form-inline pull-right" method="POST">
+                <input type="hidden" name="ccm_token" value="<?= Core::make('token')->generate('reportResult' . $type . 'Match'); ?>"/>&nbsp;
+                <input class="form-control form-control-sm" type="number" placeholder="<?= $match->getChallengerName() ?>" name="score1"/>&nbsp;
+                <input class="form-control form-control-sm" type="number" placeholder="<?= $match->getChallengedName() ?>" name="score2"/>&nbsp;
+                <?php // @TODO: add component where users can be selected ?>
+                <button type="button" class="btn btn-transparent btn-sm pull-right" onclick="Tfts.reportResult<?= $type ?>Match(<?= $match->getId() ?>,<?= $active_id ?>);"><?= t('Report result') ?></button>&nbsp;
+                <button type="button" class="btn btn-transparent btn-sm pull-right" onclick="Tfts.cancel<?= $type ?>Match(<?= $match->getId() ?>,<?= $active_id ?>);"><?= t('Cancel match') ?></button>
+              </form>
             <?php endif; ?>
           </td>
         </tr>
