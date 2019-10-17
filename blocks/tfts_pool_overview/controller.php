@@ -44,7 +44,7 @@ class Controller extends BlockController {
   public function view() {
     $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
     $em = $app->make('Doctrine\ORM\EntityManager');
-    $me = new User();
+    $current_user = new User();
     $tfts = new Tfts();
 
     $page = Page::getCurrentPage();
@@ -58,7 +58,7 @@ class Controller extends BlockController {
     if ($is_team) {
       //get the current users groups to have them available for team signups
       $groupList = new GroupList();
-      $groupList->filterByUserID($me->getUserID());
+      $groupList->filterByUserID($current_user->getUserID());
       $unregisteredGroups = [];
       $registeredGroups = [];
       //filter groups to have only those where user is team manager
@@ -75,10 +75,10 @@ class Controller extends BlockController {
       $this->set('registeredGroups', $registeredGroups);
     } else {
       //determine if user is am member of the pool
-      $this->set('user_in_pool', is_object($tfts->findUserRegistration($game, $me)));
+      $this->set('user_in_pool', is_object($tfts->findUserRegistration($game, $current_user)));
     }
 
-    $this->set('me', $me);
+    $this->set('current_user', $current_user);
     $this->set('registrations', $tfts->getRegistrations($game));
     $this->set('openChallenges', $tfts->getOpenGameChallenges($game));
     $this->set('openMatches', $tfts->getOpenMatches($game));

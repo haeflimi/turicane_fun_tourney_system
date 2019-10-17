@@ -4,11 +4,11 @@ $fh = Core::make('helper/form');
 if (!$is_pool):
   ?>
   <div class="alert alert-danger">
-    <?= t('Only TFTS Games configured as Pool Games can use the Pool Overview Block') ?>
+    <?= t('Only TFTS Games configured as pool game can use the pool overview block') ?>
   </div>
-<?php elseif (!$me->isLoggedIn()): ?>
+<?php elseif (!$current_user->isLoggedIn()): ?>
   <div class="alert alert-danger">
-    <?= t('You need to be logged in to see Tournament details.') ?>
+    <?= t('You need to be logged in to see tournament details.') ?>
   </div>
   <?php
   return;
@@ -20,12 +20,12 @@ endif;
     if (sizeof($registeredGroups) > 0) :
       ?>
       <div class="dropdown">
-        <button class="btn btn-success dropdown-toggle pull-right" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <button class="btn btn-danger dropdown-toggle pull-right" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
           <?= t('Leave pool with team') ?>
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <?php foreach ($registeredGroups as $g): ?>
-            <a class="dropdown-item" onClick="Tfts.leaveGroupPool(<?= $g->getGroupID(); ?>, <?= $tfts_game_id; ?>, '<?= Core::make('token')->generate('leaveGroupPool'); ?>');"><?= $g->getGroupName() ?></a>
+          <?php foreach ($registeredGroups as $group): ?>
+            <a class="dropdown-item" onClick="Tfts.leaveGroupPool(<?= $group->getGroupId(); ?>, <?= $tfts_game_id; ?>, '<?= Core::make('token')->generate('leaveGroupPool'); ?>');"><?= $group->getGroupName() ?></a>
           <?php endforeach; ?>
         </div>
       </div>
@@ -38,8 +38,8 @@ endif;
           <?= t('Join pool with team') ?>
         </button>
         <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-          <?php foreach ($unregisteredGroups as $g): ?>
-            <a class="dropdown-item" onClick="Tfts.joinGroupPool(<?= $g->getGroupID(); ?>, <?= $tfts_game_id; ?>, '<?= Core::make('token')->generate('joinGroupPool'); ?>');"><?= $g->getGroupName() ?></a>
+          <?php foreach ($unregisteredGroups as $group): ?>
+            <a class="dropdown-item" onClick="Tfts.joinGroupPool(<?= $group->getGroupId(); ?>, <?= $tfts_game_id; ?>, '<?= Core::make('token')->generate('joinGroupPool'); ?>');"><?= $group->getGroupName() ?></a>
           <?php endforeach; ?>
         </div>
       </div>
@@ -55,12 +55,12 @@ endif;
     if ($user_in_pool):
       ?>
       <button class="btn btn-danger pull-right"
-              onClick="Tfts.leaveUserPool(<?= $me->getUserId(); ?>,<?= $tfts_game_id; ?>, '<?= Core::make('token')->generate('leaveUserPool'); ?>');">
+              onClick="Tfts.leaveUserPool(<?= $current_user->getUserId(); ?>,<?= $tfts_game_id; ?>, '<?= Core::make('token')->generate('leaveUserPool'); ?>');">
                 <?= t('Leave pool') ?>
       </button>
     <?php else: ?>
       <button class="btn btn-success pull-right"
-              onClick="Tfts.joinUserPool(<?= $me->getUserId(); ?>,<?= $tfts_game_id; ?>, '<?= Core::make('token')->generate('joinUserPool'); ?>');">
+              onClick="Tfts.joinUserPool(<?= $current_user->getUserId(); ?>,<?= $tfts_game_id; ?>, '<?= Core::make('token')->generate('joinUserPool'); ?>');">
                 <?= t('Join pool') ?>
       </button>
     <?php
@@ -76,9 +76,9 @@ endif;
       if ($is_team) {
         
       } else {
-        $my_id = $me->getUserID();
+        $user_id = $current_user->getUserId();
         $challenged_id = $registration->getUser()->getUserId();
-        $is_user = $challenged_id == $my_id;
+        $is_user = $challenged_id == $user_id;
 
         $open_challenge = false;
         $open_match = false;
@@ -86,16 +86,16 @@ endif;
         $is_challenged = false;
         $match_id = null;
         foreach ($openChallenges as $match) {
-          if (($match->getUser1()->getUserId() == $my_id && $match->getUser2()->getUserId() == $challenged_id) || ($match->getUser2()->getUserId() == $my_id && $match->getUser1()->getUserId() == $challenged_id)) {
+          if (($match->getUser1()->getUserId() == $user_id && $match->getUser2()->getUserId() == $challenged_id) || ($match->getUser2()->getUserId() == $user_id && $match->getUser1()->getUserId() == $challenged_id)) {
             $open_challenge = true;
             $match_id = $match->getId();
-            $is_challenger = $match->getUser1()->getUserId() == $my_id;
-            $is_challenged = $match->getUser2()->getUserId() == $my_id;
+            $is_challenger = $match->getUser1()->getUserId() == $user_id;
+            $is_challenged = $match->getUser2()->getUserId() == $user_id;
             break;
           }
         }
         foreach ($openMatches as $match) {
-          if (($match->getUser1()->getUserId() == $my_id && $match->getUser2()->getUserId() == $challenged_id) || ($match->getUser2()->getUserId() == $my_id && $match->getUser1()->getUserId() == $challenged_id)) {
+          if (($match->getUser1()->getUserId() == $user_id && $match->getUser2()->getUserId() == $challenged_id) || ($match->getUser2()->getUserId() == $user_id && $match->getUser1()->getUserId() == $challenged_id)) {
             $open_match = true;
             break;
           }
@@ -106,14 +106,14 @@ endif;
         <td><?= $name ?></td>
         <td>
           <?php if (!$is_user && !$open_challenge && !$open_match): ?>
-            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.challengeUser(<?= $my_id; ?>,<?= $challenged_id; ?>,<?= $tfts_game_id; ?>, '<?= Core::make('token')->generate('challengeUser'); ?>', '<?= $name ?>');"><?= t('Challenge') ?></button>
+            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.challengeUser(<?= $user_id; ?>,<?= $challenged_id; ?>,<?= $tfts_game_id; ?>, '<?= Core::make('token')->generate('challengeUser'); ?>', '<?= $name ?>');"><?= t('Challenge') ?></button>
           <?php endif; ?>
           <?php if ($open_challenge && $is_challenger): ?>
-            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.withdrawUserChallenge(<?= $match_id; ?>,<?= $my_id; ?>, '<?= Core::make('token')->generate('withdrawUserChallenge'); ?>');"><?= t('Cancel challenge') ?></button>
+            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.withdrawUserChallenge(<?= $match_id; ?>,<?= $user_id; ?>, '<?= Core::make('token')->generate('withdrawUserChallenge'); ?>');"><?= t('Cancel challenge') ?></button>
           <?php endif; ?>
           <?php if ($open_challenge && $is_challenged): ?>
-            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.declineUserChallenge(<?= $match_id; ?>,<?= $my_id; ?>, '<?= Core::make('token')->generate('declineUserChallenge'); ?>');"><?= t('Decline challenge') ?></button>&nbsp;
-            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.acceptUserChallenge(<?= $match_id; ?>,<?= $my_id; ?>, '<?= Core::make('token')->generate('acceptUserChallenge'); ?>');"><?= t('Accept challenge') ?></button>
+            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.declineUserChallenge(<?= $match_id; ?>,<?= $user_id; ?>, '<?= Core::make('token')->generate('declineUserChallenge'); ?>');"><?= t('Decline challenge') ?></button>&nbsp;
+            <button class="btn btn-transparent btn-sm pull-right" onClick="Tfts.acceptUserChallenge(<?= $match_id; ?>,<?= $user_id; ?>, '<?= Core::make('token')->generate('acceptUserChallenge'); ?>');"><?= t('Accept challenge') ?></button>
           <?php endif; ?>
         </td>
       </tr>
@@ -137,17 +137,17 @@ if (count($openMatches) > 0):
             if ($is_team):
 
             else:
-              $my_id = $me->getUserID();
-              $my_match = $match->getUser1()->getUserId() == $my_id || $match->getUser2()->getUserId() == $my_id;
+              $user_id = $current_user->getUserID();
+              $show_score_form = $match->getUser1()->getUserId() == $user_id || $match->getUser2()->getUserId() == $user_id;
 
-              if ($my_match):
+              if ($show_score_form):
                 ?>
                 <form id="resultForm" class="form-inline pull-right" method="POST">
                   <input type="hidden" name="ccm_token" value="<?= Core::make('token')->generate('reportResultUserMatch'); ?>"/>&nbsp;
                   <input class="form-control form-control-sm" type="number" placeholder="<?= $match->getChallengerName() ?> Score" name="score1"/>&nbsp;
                   <input class="form-control form-control-sm" type="number" placeholder="<?= $match->getChallengedName() ?> Score" name="score2"/>&nbsp;
-                  <button type="button" class="btn btn-transparent btn-sm pull-right" onclick="Tfts.reportResultUserMatch(<?= $match->getId() ?>,<?= $my_id ?>);"><?= t('Report result') ?></button>&nbsp;
-                  <button type="button" class="btn btn-transparent btn-sm pull-right" onclick="Tfts.cancelUserMatch(<?= $match->getId() ?>,<?= $my_id ?>);"><?= t('Cancel match') ?></button>
+                  <button type="button" class="btn btn-transparent btn-sm pull-right" onclick="Tfts.reportResultUserMatch(<?= $match->getId() ?>,<?= $user_id ?>);"><?= t('Report result') ?></button>&nbsp;
+                  <button type="button" class="btn btn-transparent btn-sm pull-right" onclick="Tfts.cancelUserMatch(<?= $match->getId() ?>,<?= $user_id ?>);"><?= t('Cancel match') ?></button>
                 </form>
               <?php endif; ?>
             <?php endif; ?>
