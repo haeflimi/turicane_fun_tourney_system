@@ -129,7 +129,7 @@ endif;
           <?php elseif ($is_team && $can_challenge): ?>
             <form id="resultForm" class="form-inline pull-right" method="POST">
               <div class="dropdown">
-                <button class="btn btn-transparent dropdown-toggle pull-right" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <button class="btn btn-transparent btn-sm dropdown-toggle pull-right" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                   <?= t('Select team to challenge with') ?>
                 </button>
                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
