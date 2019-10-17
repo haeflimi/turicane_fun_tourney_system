@@ -155,7 +155,7 @@ class Tfts {
    * @param int $user_id
    * @throws Exception if something went wrong.
    */
-  public function leaveUserPool(int $game_id, int $user_id): bool {
+  public function leaveUserPool(int $game_id, int $user_id) {
     $this->verifySystemIsActive();
 
     $user = User::getByUserID($user_id);
@@ -936,19 +936,18 @@ class Tfts {
    * @param Pool $pool
    * @param User $user
    * @param int $rank
-   * @return bool true if the rank has been set, false otherwise.
+   * @throws Exception if something went wrong.
    */
-  public function setPoolRank(Pool $pool, User $user, int $rank): bool {
+  public function setPoolRank(Pool $pool, User $user, int $rank) {
     // verify that user belongs to pool
     $poolUser = $pool->getPoolUser($this->userToEntity($user));
     if (is_null($poolUser)) {
-      return false;
+      throw new Exception('User does not belong to pool');
     }
 
     $poolUser->setRank($rank);
     $this->em->persist($poolUser);
     $this->em->flush();
-    return true;
   }
 
   /**
@@ -956,7 +955,6 @@ class Tfts {
    */
   private function verifySystemIsActive() {
     $active = filter_var(Config::get('tfts.systemActive'), FILTER_VALIDATE_BOOLEAN);
-    $active = true; // @TODO: fix config values
     if (!$active) {
       throw new Exception('TFTS system is not active');
     }
@@ -1092,7 +1090,7 @@ class Tfts {
    * @param int $group_id
    * @return int the group rank for the current lan.
    */
-  private function getGroupRank($match, int $group_id): int {
+  private function getGroupRank(Match $match, int $group_id): int {
     $matchGroupUsers = $this->getMatchGroupUsers($match, $group_id);
     $rank = 0;
     foreach ($matchGroupUsers as $matchGroupUser) {
@@ -1106,7 +1104,7 @@ class Tfts {
    * @param int $group_id
    * @return Collection a list of match group users.
    */
-  private function getMatchGroupUsers($match, int $group_id): Collection {
+  private function getMatchGroupUsers(Match $match, int $group_id): Collection {
     $repository = $this->em->getRepository(MatchGroupUser::class);
     return new ArrayCollection($repository->findBy(['match' => $match, 'group_id' => $group_id]));
   }
@@ -1143,29 +1141,6 @@ class Tfts {
       }
     }
     return $pools;
-  }
-
-  /**
-   * Validate a Post Request for a token
-   *
-   * @param $data
-   * @param bool $action
-   * @return bool|\Concrete\Core\Error\Error
-   */
-  public function validateRequest($data, $action = false) {
-    $errors = new \Concrete\Core\Error\Error();
-
-    // we want to use a token to validate each call in order to protect from xss and request forgery
-    $token = \Core::make("token");
-    if ($action && !$token->validate($action)) {
-      $errors->add('Invalid Request, token must be valid.');
-    }
-
-    if ($errors->has()) {
-      return $errors;
-    }
-
-    return true;
   }
 
 }
