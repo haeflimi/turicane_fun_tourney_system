@@ -61,70 +61,51 @@ class Tfts {
   }
 
   /**
+   * Searches for open user challenges.
+   * 
    * @param User $user
-   * @return Match a list of open challenges for the given user.
+   * @return array a list of open user challenges.
    */
   public function getOpenUserChallenges(User $user): Array {
-    //@todo this also needs to include the challanges to the teams the user is a member of
-    $repo = $this->em->getRepository('Tfts\Match');
+    $repo = $this->em->getRepository(Match::class);
     return $repo->findBy(['user2' => $user->getUserID(), 'match_accepted' => 0]);
   }
 
   /**
+   * Searches for open user confirmations.
+   * 
    * @param User $user
-   * @return Match a list of open challenges for the given user.
+   * @return array a list of open user matches.
    */
   public function getOpenUserConfirmations(User $user): Array {
-    //@todo this also needs to include the confirmation request to the teams the user is a member of
-    $repo = $this->em->getRepository('Tfts\Match');
+    $repo = $this->em->getRepository(Match::class);
     $challenger = $repo->findBy(['user1' => $user->getUserID(), 'match_accepted' => 1, 'match_confirmed1' => 0, 'match_confirmed2' => 1]);
     $challenged = $repo->findBy(['user2' => $user->getUserID(), 'match_accepted' => 1, 'match_confirmed1' => 1, 'match_confirmed2' => 0]);
     return array_merge($challenger, $challenged);
   }
 
   /**
-   * @param User $user
-   * @return Match a list of open matches for the given user.
-   */
-  public function getOpenUserMatches(User $user): Collection {
-    // @TODO: get open matches for user
-    return null;
-  }
-
-  /**
-   * @param User $user
-   * @return Match a list of finished matches for the given user.
-   */
-  public function getFinishedUserMatches(User $user): Collection {
-    // @TODO: get finished matches for user
-    return null;
-  }
-
-  /**
+   * Searches for open group challenges.
+   * 
    * @param Group $group
-   * @return Match a list of open challenges for the given group.
+   * @return array a list of open group challenges.
    */
-  public function getOpenGroupChallenges(Group $group): Collection {
-    // @TODO: get open challenges for user
-    return null;
+  public function getOpenGroupChallengers(Group $group): Array {
+    $repo = $this->em->getRepository(Match::class);
+    return $repo->findBy(['group2_id' => $group->getGroupId(), 'match_accepted' => 0]);
   }
 
   /**
+   * Searches for open group confirmations.
+   * 
    * @param Group $group
-   * @return Match a list of open matches for the given group.
+   * @return array a list open user matches.
    */
-  public function getOpenGroupMatches(Group $group): Collection {
-    // @TODO: get open matches for user
-    return null;
-  }
-
-  /**
-   * @param Group $group
-   * @return Match a list of finished matches for the given group.
-   */
-  public function getFinishedGroupMatches(Group $group): Collection {
-    // @TODO: get finished matches for user
-    return null;
+  public function getOpenGroupConfirmations(Group $group): Array {
+    $repo = $this->em->getRepository(Match::class);
+    $challenger = $repo->findBy(['group1_id' => $group->getGroupId(), 'match_accepted' => 1, 'match_confirmed1' => 0, 'match_confirmed2' => 1]);
+    $challenged = $repo->findBy(['group2_id' => $group->getGroupId(), 'match_accepted' => 1, 'match_confirmed1' => 1, 'match_confirmed2' => 0]);
+    return array_merge($challenger, $challenged);
   }
 
   /**
