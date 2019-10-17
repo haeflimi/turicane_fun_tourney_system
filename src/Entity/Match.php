@@ -2,6 +2,7 @@
 
 namespace Tfts;
 
+use Concrete\Core\Support\Facade\Application;
 use Concrete\Core\Entity\User\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -116,6 +117,12 @@ class Match {
     $this->matchGroupUsers = new ArrayCollection();
   }
 
+  public static function getById($match_id): ?Match {
+    $app = Application::getFacadeApplication();
+    $em = $app->make('Doctrine\ORM\EntityManager');
+    return $em->find(Match::class, $match_id);
+  }
+
   public function setUsers(User $challenger, User $challenged) {
     $this->user1 = $challenger;
     $this->user2 = $challenged;
@@ -200,13 +207,13 @@ class Match {
     return $this->group2_id;
   }
 
-  public function getGroup1(){
-      return Group::getByID($this->getGroup1Id());
+  public function getGroup1() {
+    return Group::getByID($this->getGroup1Id());
   }
 
-    public function getGroup2(){
-        return Group::getByID($this->getGroup2Id());
-    }
+  public function getGroup2() {
+    return Group::getByID($this->getGroup2Id());
+  }
 
   public function getMatchGroupUsers(): Collection {
     return $this->matchGroupUsers;
@@ -248,52 +255,52 @@ class Match {
     return $this->match_compute2;
   }
 
-  public function getWinner():  User {
-      if($this->getScore1() > $this->getScore2()){
-          if($this->getGroup1Id()){
-              return Group::getByID($this->getGroup1Id());
-          }
-          return $this->getUser1();
-      } else {
-          if($this->getGroup2Id()){
-              return Group::getByID($this->getGroup2Id());
-          }
-          return $this->getUser2();
+  //
+  // Get iformation for the registered parties, be it User or group
+  //
+
+  public function getWinnerId(): int {
+    if ($this->getScore1() > $this->getScore2()) {
+      if ($this->getGroup1Id()) {
+        return $this->getGroup1Id();
       }
+      return $this->getUser1()->getUserId();
+    } else if ($this->getScore1() == $this->getScore2()) {
+      return 0;
+    } else {
+      if ($this->getGroup2Id()) {
+        return $this->getGroup2Id();
+      }
+      return $this->getUser2()->getUserId();
+    }
   }
 
-    /**
-     * Get iformation for the registered parties, be it User or group
-     */
-    public function getOpponent1Name()
-    {
-        if($this->getGroup1Id()){
-            return Group::getByID($this->getGroup1Id())->getGroupName();
-        }
-        return $this->getUser1()->getUserName();
+  public function getChallengerName(): String {
+    if ($this->getGroup1Id()) {
+      return Group::getByID($this->getGroup1Id())->getGroupName();
     }
+    return $this->getUser1()->getUserName();
+  }
 
-    public function getOpponent1Id()
-    {
-        if($this->getGroup1Id()){
-            return $this->getGroup1Id();
-        }
-        return $this->getUser1()->getUserID();
+  public function getChallengerId(): int {
+    if ($this->getGroup1Id()) {
+      return $this->getGroup1Id();
     }
+    return $this->getUser1()->getUserID();
+  }
 
-    public function getOpponent2Name()
-    {
-        if($this->getGroup2Id()){
-            return Group::getByID($this->getGroup2Id())->getGroupName();
-        }
-        return $this->getUser2()->getUserName();
+  public function getChallengedName(): String {
+    if ($this->getGroup2Id()) {
+      return Group::getByID($this->getGroup2Id())->getGroupName();
     }
+    return $this->getUser2()->getUserName();
+  }
 
-    public function getOpponent2Id()
-    {
-        if($this->getGroup2Id()){
-            return $this->getGroup2Id();
-        }
-        return $this->getUser2()->getUserID();
+  public function getChallengedId(): int {
+    if ($this->getGroup2Id()) {
+      return $this->getGroup2Id();
     }
+    return $this->getUser2()->getUserID();
+  }
+
 }

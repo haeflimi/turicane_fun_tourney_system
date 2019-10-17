@@ -1,4 +1,5 @@
 <?php
+
 namespace Concrete\Package\TuricaneFunTourneySystem\Block\TftsPoolOverview;
 
 use Concrete\Core\Block\BlockController;
@@ -14,73 +15,74 @@ use \DateTime;
 use Tfts\Tfts;
 use Concrete\Core\User\Group\GroupList;
 
-class Controller extends BlockController
-{
-    public $collection;
-    protected $btCacheBlockRecord = true;
-    protected $btCacheBlockOutput = true;
-    protected $btCacheBlockOutputOnPost = true;
-    protected $btCacheBlockOutputForRegisteredUsers = false;
-    protected $btCacheBlockOutputLifetime = 300;
-    protected $btHandle = 'tfts_pool_overview';
+class Controller extends BlockController {
 
-    public function __construct($obj = null)
-    {
-        parent::__construct($obj);
-    }
+  public $collection;
+  protected $btCacheBlockRecord = true;
+  protected $btCacheBlockOutput = true;
+  protected $btCacheBlockOutputOnPost = true;
+  protected $btCacheBlockOutputForRegisteredUsers = false;
+  protected $btCacheBlockOutputLifetime = 300;
+  protected $btHandle = 'tfts_pool_overview';
 
-    public function getBlockTypeDescription()
-    {
-        return t("");
-    }
+  public function __construct($obj = null) {
+    parent::__construct($obj);
+  }
 
-    public function getBlockTypeName()
-    {
-        return t("TFTS Pool Overview");
-    }
+  public function getBlockTypeDescription() {
+    return t("");
+  }
 
-    public function save($args)
-    {
-        parent::save($args);
-    }
+  public function getBlockTypeName() {
+    return t("TFTS Pool Overview");
+  }
 
-    public function view()
-    {
-        $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
-        $em = $app->make('Doctrine\ORM\EntityManager');
-        $me = new User();
-        $tfts = new Tfts();
+  public function save($args) {
+    parent::save($args);
+  }
 
-        $page = Page::getCurrentPage();
-        $this->set('is_pool', $page->getAttribute('tfts_game_is_pool'));
-        $this->set('is_team', $is_team = $page->getAttribute('tfts_game_is_team'));
+  public function view() {
+    $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
+    $em = $app->make('Doctrine\ORM\EntityManager');
+    $me = new User();
+    $tfts = new Tfts();
 
-        //get the game from the page the block is inserted in
-        $game = $em->getRepository('Tfts\Game')->findOneBy(['game_page_id'=>$page->getCollectionId()]);
-        $this->set('tfts_game_id', $game->getId());
+    $page = Page::getCurrentPage();
+    $this->set('is_pool', $page->getAttribute('tfts_game_is_pool'));
+    $this->set('is_team', $is_team = $page->getAttribute('tfts_game_is_team'));
 
-        //determine if i am member of the pool
-        $myRegistration = $tfts->findRegistration($game,$me);
-        $this->set('in_pool', (is_object($myRegistration)?true:false));
-        //if its a team game we can get our team from there
-        //@todo this does not yet work bc. findRegistration doesnt find our team registration yet hardcode for now
-        $this->set('myTeam', (is_object($myRegistration)?$myRegistration->getGroup():Group::getByID(70)));
+    //get the game from the page the block is inserted in
+    $game = $em->getRepository('Tfts\Game')->findOneBy(['game_page_id' => $page->getCollectionId()]);
+    $this->set('tfts_game_id', $game->getId());
 
-        //get the current users groups to have them available for team signups
-        $gl = new GroupList();
-        $gl->filterByUserID($me->getUserID());
-        $groups = [];
-        foreach($gl->getResults() as $key => $g){
-            if(strpos($g->getGroupPath(), '/Team Manager/') !== false){
-                $groups[] = $g;
-            }
+    if ($is_team) {
+      //get the current users groups to have them available for team signups
+      $groupList = new GroupList();
+      $groupList->filterByUserID($me->getUserID());
+      $unregisteredGroups = [];
+      $registeredGroups = [];
+      //filter groups to have only those where user is team manager
+      foreach ($groupList->getResults() as $group) {
+        if (strpos($group->getGroupPath(), '/Team Manager/') !== false) {
+          if (is_object($tfts->findGroupRegistration($game, $group))) {
+            $registeredGroups[] = $group;
+          } else {
+            $unregisteredGroups[] = $group;
+          }
         }
-        $this->set('groups',$groups);
-
-        $this->set('me', $me);
-        $this->set('registrations', $tfts->getRegistrations($game));
-        $this->set('openChallenges', $tfts->getOpenGameChallenges($game));
-        $this->set('openMatches', $tfts->getOpenMatches($game));
-        $this->set('closedMatches', $tfts->getClosedMatches($game));
+      }
+      $this->set('unregisteredGroups', $unregisteredGroups);
+      $this->set('registeredGroups', $registeredGroups);
+    } else {
+      //determine if user is am member of the pool
+      $this->set('user_in_pool', is_object($tfts->findUserRegistration($game, $me)));
     }
+
+    $this->set('me', $me);
+    $this->set('registrations', $tfts->getRegistrations($game));
+    $this->set('openChallenges', $tfts->getOpenGameChallenges($game));
+    $this->set('openMatches', $tfts->getOpenMatches($game));
+    $this->set('closedMatches', $tfts->getClosedMatches($game));
+  }
+
 }

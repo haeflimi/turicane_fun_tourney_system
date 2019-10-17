@@ -67,6 +67,10 @@ class Registration {
     return $this->group_id;
   }
 
+  public function getGroup(): Group {
+    return Group::getByID($this->group_id);
+  }
+
   public function getRandomNumber(): int {
     return $this->rnd_number;
   }
@@ -75,24 +79,10 @@ class Registration {
     return $registration1->getRandomNumber() <=> $registration2->getRandomNumber();
   }
 
-  public function getGroup(){
-      return Group::getByID($this->group_id);
-  }
-
-  /**
-   * Get iformation for the registered party, be it User or group
-   */
   public function getName(){
       if($this->group_id){
           return $this->getGroup()->getGroupName();
       }
       return $this->getUser()->getUserName();
-  }
-
-  public function getParticipantId(){
-      if($this->group_id){
-          return $this->getGroup()->getGroupID();
-      }
-      return $this->getUser()->getUserID();
   }
 }

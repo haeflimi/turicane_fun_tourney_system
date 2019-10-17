@@ -63,10 +63,10 @@ class Game {
     return $game;
   }
 
-  public static function getById($id): Game {
+  public static function getById($game_id): ?Game {
     $app = Application::getFacadeApplication();
     $em = $app->make('Doctrine\ORM\EntityManager');
-    return $em->find(Game::class, $id);
+    return $em->find(Game::class, $game_id);
   }
 
   public function getId(): int {
@@ -95,7 +95,7 @@ class Game {
     $this->game_page_id = $game_page_id;
     return $this;
   }
-
+  
   public static function addGame(Lan $lan, $game_handle, $game_page_id): Game {
     $game = new Game();
     $game->setLan($lan)
