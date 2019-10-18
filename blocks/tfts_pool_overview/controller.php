@@ -41,7 +41,7 @@ class Controller extends BlockController {
 
     $page = Page::getCurrentPage();
     $this->set('is_pool', $page->getAttribute('tfts_game_is_pool'));
-    $this->set('is_team', $is_team = $page->getAttribute('tfts_game_is_team'));
+    $this->set('is_team', $is_team = $page->getAttribute('tfts_game_is_team') ? 1 : 0);
 
     //get the game from the page the block is inserted in
     $game = $em->getRepository('Tfts\Game')->findOneBy(['game_page_id' => $page->getCollectionId()]);

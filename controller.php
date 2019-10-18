@@ -4,18 +4,11 @@ namespace Concrete\Package\TuricaneFunTourneySystem;
 
 use Concrete\Core\Asset\AssetList;
 use Concrete\Core\Database\CharacterSetCollation\Exception;
-use Concrete\Core\Http\Request;
 use Concrete\Core\Http\Response;
 use Concrete\Core\Package\Package;
 use Concrete\Core\Backup\ContentImporter;
-use Concrete\Core\Database\EntityManager\Provider\ProviderAggregateInterface;
-use Concrete\Core\Database\EntityManager\Provider\StandardPackageProvider;
-use Concrete\Core\Support\Facade\Application;
 use Concrete\Core\User\User;
 use Concrete\Core\View\View;
-use Tfts\Game;
-use Tfts\Match;
-use Concrete\Core\Foundation\ClassLoader;
 use Concrete\Core\Support\Facade\Events;
 use Tfts\Tfts;
 use Core;
@@ -51,7 +44,7 @@ class Controller extends Package {
     $pkg = Package::getByHandle($this->pkgHandle);
 
     Events::addListener('tfts_on_match_finsh', function($match) {
-          //@todo: Do stuff like sending the event to pusher for UI Refreshes, trigger Popups and so on.
+      //@todo: Do stuff like sending the event to pusher for UI Refreshes, trigger Popups and so on.
     });
 
     // Register JS Assets for TFTS and c5 Backend Stuff for Notifications
@@ -65,10 +58,10 @@ class Controller extends Package {
   public function on_after_packages_start() {
     // Register Routes
     $this->registerRoutes();
-    
+
     $current_user = new User();
     $view = new View();
-    
+
     // Check for open user challenges/confirmations to display
     if ($current_user->isLoggedIn()) {
       $tfts = new Tfts();
@@ -83,7 +76,7 @@ class Controller extends Package {
         $view->addFooterItem($notification);
       }
     }
-    
+
     // @TODO: Check for open user challenges/confirmations to display
   }
 
@@ -112,68 +105,68 @@ class Controller extends Package {
         $tfts = new Tfts();
         try {
           switch ($_POST['action']) {
-            case 'joinUserPool':
-              $tfts->joinUserPool($_POST['game_id'], $_POST['user_id']);
+            case 'joinPool':
+              if ($_POST['is_team'] == 1) {
+                $tfts->joinGroupPool($_POST['game_id'], $_POST['id']);
+              } else {
+                $tfts->joinUserPool($_POST['game_id'], $_POST['id']);
+              }
               break;
 
-            case 'leaveUserPool':
-              $tfts->leaveUserPool($_POST['game_id'], $_POST['user_id']);
+            case 'leavePool':
+              if ($_POST['is_team'] == 1) {
+                $tfts->leaveGroupPool($_POST['game_id'], $_POST['id']);
+              } else {
+                $tfts->leaveUserPool($_POST['game_id'], $_POST['id']);
+              }
               break;
 
-            case 'challengeUser':
-              $tfts->challengeUser($_POST['game_id'], $_POST['challenger_id'], $_POST['challenged_id']);
+            case 'createChallenge':
+              if ($_POST['is_team'] == 1) {
+                $tfts->challengeGroup($_POST['game_id'], $_POST['challenger_id'], $_POST['challenged_id']);
+              } else {
+                $tfts->challengeUser($_POST['game_id'], $_POST['challenger_id'], $_POST['challenged_id']);
+              }
               break;
 
-            case 'withdrawUserChallenge':
-              $tfts->withdrawUserChallenge($_POST['match_id'], $_POST['challenger_id']);
+            case 'withdrawChallenge':
+              if ($_POST['is_team'] == 1) {
+                $tfts->withdrawGroupChallenge($_POST['match_id'], $_POST['challenger_id']);
+              } else {
+                $tfts->withdrawUserChallenge($_POST['match_id'], $_POST['challenger_id']);
+              }
               break;
 
-            case 'acceptUserChallenge':
-              $tfts->acceptUserChallenge($_POST['match_id'], $_POST['challenged_id']);
+            case 'acceptChallenge':
+              if ($_POST['is_team'] == 1) {
+                $tfts->acceptGroupChallenge($_POST['match_id'], $_POST['challenged_id']);
+              } else {
+                $tfts->acceptUserChallenge($_POST['match_id'], $_POST['challenged_id']);
+              }
               break;
 
-            case 'declineUserChallenge':
-              $tfts->declineUserChallenge($_POST['match_id'], $_POST['challenged_id']);
+            case 'declineChallenge':
+              if ($_POST['is_team'] == 1) {
+                $tfts->declineGroupChallenge($_POST['match_id'], $_POST['challenged_id']);
+              } else {
+                $tfts->declineUserChallenge($_POST['match_id'], $_POST['challenged_id']);
+              }
               break;
 
-            case 'reportResultUserMatch':
-              $tfts->reportResultUserMatch($_POST['match_id'], $_POST['user_id'], $_POST['score1'], $_POST['score2']);
+            case 'reportResultMatch':
+              if ($_POST['is_team'] == 1) {
+                $tfts->reportResultGroupMatch($_POST['match_id'], $_POST['id'], $_POST['score1'], $_POST['score2'], is_null($_POST['user_ids']) ? [] : $_POST['user_ids']);
+              } else {
+                $tfts->reportResultUserMatch($_POST['match_id'], $_POST['id'], $_POST['score1'], $_POST['score2']);
+              }
               break;
 
-            case 'cancelUserMatch':
-              $tfts->cancelUserMatch($_POST['match_id'], $_POST['user_id']);
-              break;
-
-            case 'joinGroupPool':
-              $tfts->joinGroupPool($_POST['game_id'], $_POST['group_id']);
-              break;
-
-            case 'leaveGroupPool':
-              $tfts->leaveGroupPool($_POST['game_id'], $_POST['group_id']);
-              break;
-
-            case 'challengeGroup':
-              $tfts->challengeGroup($_POST['game_id'], $_POST['challenger_id'], $_POST['challenged_id']);
-              break;
-
-            case 'withdrawGroupChallenge':
-              $tfts->withdrawGroupChallenge($_POST['match_id'], $_POST['challenger_id']);
-              break;
-
-            case 'acceptGroupChallenge':
-              $tfts->acceptGroupChallenge($_POST['match_id'], $_POST['challenged_id']);
-              break;
-
-            case 'declineGroupChallenge':
-              $tfts->declineGroupChallenge($_POST['match_id'], $_POST['challenged_id']);
-              break;
-
-            case 'reportResultGroupMatch':
-              $tfts->reportResultGroupMatch($_POST['match_id'], $_POST['group_id'], $_POST['score1'], $_POST['score2'], $_POST['user_ids']);
-              break;
-
-            case 'cancelGroupMatch':
-              $tfts->cancelGroupMatch($_POST['match_id'], $_POST['group_id']);
+            case 'cancelMatch':
+              if ($_POST['is_team'] == 1) {
+                $tfts->cancelGroupMatch($_POST['match_id'], $_POST['id']);
+              } else {
+                $tfts->cancelUserMatch($_POST['match_id'], $_POST['id']);
+              }
               break;
           }
           return new Response('Success');

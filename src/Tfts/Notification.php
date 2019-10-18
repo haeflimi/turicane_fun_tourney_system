@@ -26,8 +26,8 @@ class Notification {
     $text .= "<input id='acceptUserChallengeToken' type='hidden' value='" . $ccm_token_accept . "'>";
     $text .= "<input id='declineUserChallengeToken' type='hidden' value='" . $ccm_token_decline . "'>";
     $text .= '<div class="ccm-notification-inner-buttons form-inline">';
-    $text .= '<button class="btn btn-success" onClick="Tfts.acceptUserChallenge(' . $match_id . ',' . $user_id . ')">' . t('Accept') . '</button>&nbsp;';
-    $text .= '<button class="btn btn-danger" onClick="Tfts.declineUserChallenge(' . $match_id . ',' . $user_id . ')">' . t('Decline') . '</button>';
+    $text .= '<button class="btn btn-success" onClick="Tfts.acceptChallenge(' . $match_id . ',' . $user_id . ',0)">' . t('Accept') . '</button>&nbsp;';
+    $text .= '<button class="btn btn-danger" onClick="Tfts.declineChallenge(' . $match_id . ',' . $user_id . ',0)">' . t('Decline') . '</button>';
     $text .= '</div>';
     $content = '<script type="text/javascript">$(function() {
             Tfts.challenge(' . json_encode($text) . ');
@@ -60,7 +60,7 @@ class Notification {
     $text .= "<input id='confirmResultUserMatchToken' type='hidden' value='" . $ccm_token_confirm . "'>";
     $text .= "<input id='declineResultUserMatchToken' type='hidden' value='" . $ccm_token_decline . "'>";
     $text .= '<div class="ccm-notification-inner-buttons form-inline">';
-    $text .= '<button class="btn btn-success" onClick="Tfts.reportResultUserMatch(' . $match_id . ',' . $user_id . ',' . $match->getScore1() . ',' . $match->getScore2() . ')">' . t('Confirm') . '</button>&nbsp;';
+    $text .= '<button class="btn btn-success" onClick="Tfts.reportResultMatch(' . $match_id . ',' . $user_id . ',0,' . $match->getScore1() . ',' . $match->getScore2() . ')">' . t('Confirm') . '</button>&nbsp;';
     $text .= '<button class="btn btn-danger" onClick="PNotify.removeAll()">' . t('Change result') . '</button>';
     $text .= '</div>';
 

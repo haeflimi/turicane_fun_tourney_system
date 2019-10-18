@@ -68,7 +68,7 @@ class Tfts {
    * @param User $user
    * @return array a list of open user challenges.
    */
-  public function getOpenUserChallenges(User $user): Array {
+  public function getOpenUserChallenges(User $user): array {
     $repo = $this->em->getRepository(Match::class);
     return $repo->findBy(['user2' => $user->getUserID(), 'match_accepted' => 0]);
   }
@@ -79,7 +79,7 @@ class Tfts {
    * @param User $user
    * @return array a list of open user matches.
    */
-  public function getOpenUserConfirmations(User $user): Array {
+  public function getOpenUserConfirmations(User $user): array {
     $repo = $this->em->getRepository(Match::class);
     $challenger = $repo->findBy(['user1' => $user->getUserID(), 'match_accepted' => 1, 'match_confirmed1' => 0, 'match_confirmed2' => 1]);
     $challenged = $repo->findBy(['user2' => $user->getUserID(), 'match_accepted' => 1, 'match_confirmed1' => 1, 'match_confirmed2' => 0]);
@@ -92,7 +92,7 @@ class Tfts {
    * @param Group $group
    * @return array a list of open group challenges.
    */
-  public function getOpenGroupChallengers(Group $group): Array {
+  public function getOpenGroupChallengers(Group $group): array {
     $repo = $this->em->getRepository(Match::class);
     return $repo->findBy(['group2_id' => $group->getGroupId(), 'match_accepted' => 0]);
   }
@@ -103,7 +103,7 @@ class Tfts {
    * @param Group $group
    * @return array a list open user matches.
    */
-  public function getOpenGroupConfirmations(Group $group): Array {
+  public function getOpenGroupConfirmations(Group $group): array {
     $repo = $this->em->getRepository(Match::class);
     $challenger = $repo->findBy(['group1_id' => $group->getGroupId(), 'match_accepted' => 1, 'match_confirmed1' => 0, 'match_confirmed2' => 1]);
     $challenged = $repo->findBy(['group2_id' => $group->getGroupId(), 'match_accepted' => 1, 'match_confirmed1' => 1, 'match_confirmed2' => 0]);
@@ -417,10 +417,10 @@ class Tfts {
     }
     $repository = $this->em->getRepository(Match::class);
     if (!is_null($repository->findOneBy(['group1_id' => $challenger->getGroupId(), 'group2_id' => $challenged->getGroupId(), 'match_finish_date' => null]))) {
-      throw new Exception($challenger->getGroupDisplayName() . ' already challenged ' . $challenged->getGroupDisplayName());
+      throw new Exception($challenger->getGroupName() . ' already challenged ' . $challenged->getGroupName());
     }
     if (!is_null($repository->findOneBy(['group1_id' => $challenged->getGroupId(), 'group2_id' => $challenger->getGroupId(), 'match_finish_date' => null]))) {
-      throw new Exception($challenger->getGroupDisplayName() . ' is are already challenged by ' . $challenged->getGroupDisplayName());
+      throw new Exception($challenger->getGroupName() . ' is are already challenged by ' . $challenged->getGroupName());
     }
 
     $match = new Match($game);
@@ -496,20 +496,32 @@ class Tfts {
    * @param array $user_ids
    * @throws Exception if something went wrong.
    */
-  public function reportResultGroupMatch(int $match_id, int $group_id, int $score1, int $score2, Array $user_ids) {
+  public function reportResultGroupMatch(int $match_id, int $group_id, int $score1, int $score2, array $user_ids) {
     $this->verifySystemIsActive();
 
     $match = Match::getById($match_id);
     $group = Group::getByID($group_id);
-
-    if ($match->getGame()->getGroupSize() != sizeof($user_ids)) {
-      throw new Exception($match->getGame()->getName() . ' requires ' . $match->getGame()->getGroupSize() . ' users but was ' . sizeof($user_ids));
+    
+    $users = [];
+    if (sizeof($user_ids) == 0) {
+      foreach($group->getGroupMembers() as $userInfo) {
+        $users[] = User::getByUserID($userInfo->getUserId());
+      }
+    } else {
+      foreach ($user_ids as $user_id) {
+        $users[] = User::getByUserID($user_id);
+      }
+    }
+    
+    // @TODO: verify that a user cannot be in both teams
+    
+    if ($match->getGame()->getGroupSize() != sizeof($users)) {
+      throw new Exception($match->getGame()->getName() . ' requires ' . $match->getGame()->getGroupSize() . ' users but was ' . sizeof($users));
     }
 
-    foreach ($user_ids as $user_id) {
-      $user = User::getByUserID($user_id);
-      if (!$user->inGroup($group)) {
-        throw new Exception($user->getUserName() . ' is not a member of ' . $group->getGroupDisplayName());
+    foreach ($users as $user) {
+      if (!$user->isRegistered($group)) {
+        throw new Exception($user->getUserName() . ' is not a member of ' . $group->getGroupName());
       }
     }
 
@@ -522,8 +534,7 @@ class Tfts {
     $this->em->flush();
 
     // create new group match users
-    foreach ($user_ids as $user_id) {
-      $user = User::getByUserID($user_id);
+    foreach ($users as $user) {
       $this->em->persist(new MatchGroupUser($match, $this->userToEntity($user), $group->getGroupId()));
     }
     $this->em->flush();
@@ -554,7 +565,7 @@ class Tfts {
     $is_challenged = $match->getGroup2Id() == $group->getGroupId();
 
     if (!$is_challenger && !$is_challenged) {
-      throw new Exception($group->getGroupDisplayName() . ' is neither the challenger nor the challenged for this match');
+      throw new Exception($group->getGroupName() . ' is neither the challenger nor the challenged for this match');
     }
 
     $this->em->remove($match);
@@ -946,24 +957,58 @@ class Tfts {
   }
 
   /**
-   * Determines if a user can Enter Results for a specific Match
-   *
+   * Determines the active user or group id.
+   * 
    * @param User $user
-   * @param Match $match
-   * @return bool
+   * @param \Tfts\Match $match
+   * @return int the active user or group id.
+   * @throws Exception if something went wrong.
    */
-  public function canEnterResult(User $user, Match $match): bool {
+  public function getActiveId(User $user, Match $match): int {
     if ($match->getGame()->isGroup()) {
       foreach ($this->getRegisteredGroups($user, $match->getGame()) as $group) {
         if ($match->getChallengerId() == $group->getGroupId() || $match->getChallengedId() == $group->getGroupId()) {
-          $active_id = $group->getGroupId();
-          break;
+          return $group->getGroupId();
         }
       }
+      throw new Exception('User has no group relation to match');
     } else {
-      $active_id = $user->getUserID();
+      return $user->getUserID();
     }
+  }
+  
+  /**
+   * Determines whether or not a user can enter a result.
+   *
+   * @param User $user
+   * @param Match $match
+   * @return bool true if a result can be entered, false otherwise.
+   */
+  public function canEnterResult(User $user, Match $match): bool {
+    $active_id = $this->getActiveId($user, $match);
     return $match->getChallengerId() == $active_id || $match->getChallengedId() == $active_id;
+  }
+  
+  /**
+   * Determines whether or not a user can report a result.
+   * 
+   * @param User $user
+   * @param \Tfts\Match $match
+   * @return bool true if a result can be reported, false otherwise.
+   */
+  public function canReportResult(User $user, Match $match): bool {
+    $active_id = $this->getActiveId($user, $match);
+    return ($match->getChallengerId() == $active_id && !$match->isConfirmed1()) || ($match->getChallengedId() == $active_id && !$match->isConfirmed2());
+  }
+  
+  /**
+   * Determines whether or not a match can be cancelled.
+   * 
+   * @param \Tfts\Match $match
+   * @return bool true if a match can be cancelled, false otherwise.
+   */
+  public function canCancelMatch(Match $match): bool {
+    return !$match->isConfirmed1() && !$match->isConfirmed2();
   }
 
   /**

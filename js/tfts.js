@@ -6,13 +6,14 @@ $(function () {
 });
 
 var Tfts = {
-  joinUserPool: function (user_id, game_id, ccm_token) {
+  joinPool: function (game_id, id, is_team, ccm_token) {
     $.post(
             "/tfts/api/action", {
               game_id: game_id,
-              user_id: user_id,
+              id: id,
+              is_team: is_team,
               ccm_token: ccm_token,
-              action: 'joinUserPool'
+              action: 'joinPool'
             }, function () {
       Tfts.success('You are now subscribed to this TFTS Pool');
       window.location.reload();
@@ -20,14 +21,14 @@ var Tfts = {
       Tfts.error(response.responseJSON.error.message);
     });
   },
-  leaveUserPool: function (user_id, game_id, ccm_token, is_team) {
+  leavePool: function (game_id, id, is_team, ccm_token) {
     $.post(
             "/tfts/api/action", {
               game_id: game_id,
-              user_id: user_id,
-              ccm_token: ccm_token,
+              id: id,
               is_team: is_team,
-              action: 'leaveUserPool'
+              ccm_token: ccm_token,
+              action: 'leavePool'
             }, function () {
       Tfts.success('You are now unsubscribed from this TFTS Pool');
       window.location.reload();
@@ -35,14 +36,15 @@ var Tfts = {
       Tfts.error(response.responseJSON.error.message);
     });
   },
-  challengeUser: function (challenger_id, challenged_id, game_id, ccm_token, challenged_name) {
+  createChallenge: function (game_id, challenger_id, challenged_id, challenged_name, is_team, ccm_token) {
     $.post(
             "/tfts/api/action", {
+              game_id: game_id,
               challenger_id: challenger_id,
               challenged_id: challenged_id,
-              game_id: game_id,
+              is_team: is_team,
               ccm_token: ccm_token,
-              action: 'challengeUser'
+              action: 'createChallenge'
             }, function () {
       Tfts.success('Your challenge has been sent to ' + challenged_name);
       window.location.reload();
@@ -50,13 +52,14 @@ var Tfts = {
       Tfts.error(response.responseJSON.error.message);
     });
   },
-  withdrawUserChallenge: function (match_id, challenger_id, ccm_token) {
+  withdrawChallenge: function (match_id, challenger_id, is_team, ccm_token) {
     $.post(
             "/tfts/api/action", {
               match_id: match_id,
               challenger_id: challenger_id,
+              is_team: is_team,
               ccm_token: ccm_token,
-              action: 'withdrawUserChallenge'
+              action: 'withdrawChallenge'
             }, function () {
       Tfts.success('Your challenge has been withdrawn');
       window.location.reload();
@@ -64,38 +67,40 @@ var Tfts = {
       Tfts.error(response.responseJSON.error.message);
     });
   },
-  acceptUserChallenge: function (match_id, challenged_id) {
+  acceptChallenge: function (match_id, challenged_id, is_team) {
     $.post(
             "/tfts/api/action", {
               match_id: match_id,
               challenged_id: challenged_id,
-              ccm_token: $('#acceptUserChallengeToken').val(),
-              action: 'acceptUserChallenge'
+              is_team: is_team,
+              ccm_token: $('#acceptChallengeToken').val(),
+              action: 'acceptChallenge'
             }, function (data) {
       PNotify.removeAll();
-      Tfts.success('Challenge Accepted');
+      Tfts.success('Challenge accepted');
       window.location.reload();
     }).fail(function (response) {
       Tfts.error(response.responseJSON.error.message);
     });
   },
-  declineUserChallenge: function (match_id, challenged_id) {
+  declineChallenge: function (match_id, challenged_id, is_team) {
     $.post(
             "/tfts/api/action", {
               match_id: match_id,
               challenged_id: challenged_id,
-              ccm_token: $('#declineUserChallengeToken').val(),
-              action: 'declineUserChallenge'
+              is_team: is_team,
+              ccm_token: $('#declineChallengeToken').val(),
+              action: 'declineChallenge'
             }, function () {
       PNotify.removeAll();
-      Tfts.success('Challenge Declined');
+      Tfts.success('Challenge declined');
       window.location.reload();
     }).fail(function (response) {
       Tfts.error(response.responseJSON.error.message);
     });
   },
-  reportResultUserMatch: function (match_id, user_id) {
-    var data = new FormData(document.querySelector('#resultForm'));
+  reportResultMatch: function (match_id, id, is_team, score1, score2) {
+    var data = new FormData(document.querySelector('#resultForm' + match_id));
     if (data.get('score1').length == 0 || data.get('score2').length == 0) {
       Tfts.error('Score can not be empty');
       return;
@@ -103,136 +108,13 @@ var Tfts = {
     $.post(
             "/tfts/api/action", {
               match_id: match_id,
-              user_id: user_id,
+              id: id,
+              is_team: is_team,
               ccm_token: data.get('ccm_token'),
-              score1: data.get('score1'),
-              score2: data.get('score2'),
-              action: 'reportResultUserMatch'
-            }, function () {
-      PNotify.removeAll();
-      Tfts.success('Result reported');
-      window.location.reload();
-    }).fail(function (response) {
-      Tfts.error(response.responseJSON.error.message);
-    });
-  },
-  cancelUserMatch: function (match_id, user_id) {
-    $.post(
-            "/tfts/api/action", {
-              match_id: match_id,
-              user_id: user_id,
-              ccm_token: $('#cancelUserMatchToken').val(),
-              action: 'cancelUserMatch'
-            }, function () {
-      PNotify.removeAll();
-      Tfts.success('Match cancelled');
-      window.location.reload();
-    }).fail(function (response) {
-      Tfts.error(response.responseJSON.error.message);
-    });
-  },
-  joinGroupPool: function (group_id, game_id, ccm_token) {
-    $.post(
-            "/tfts/api/action", {
-              game_id: game_id,
-              group_id: group_id,
-              ccm_token: ccm_token,
-              action: 'joinGroupPool'
-            }, function () {
-      Tfts.success('Your team is now subscribed to this TFTS Pool');
-      window.location.reload();
-    }).fail(function (response) {
-      Tfts.error(response.responseJSON.error.message);
-    });
-  },
-  leaveGroupPool: function (group_id, game_id, ccm_token) {
-    $.post(
-            "/tfts/api/action", {
-              game_id: game_id,
-              group_id: group_id,
-              ccm_token: ccm_token,
-              action: 'leaveGroupPool'
-            }, function () {
-      Tfts.success('Your team is now unsubscribed from this TFTS Pool');
-      window.location.reload();
-    }).fail(function (response) {
-      Tfts.error(response.responseJSON.error.message);
-    });
-  },
-  challengeGroup: function (challenger_id, challenged_id, game_id, ccm_token, challenged_name) {
-    $.post(
-            "/tfts/api/action", {
-              challenger_id: challenger_id,
-              challenged_id: challenged_id,
-              game_id: game_id,
-              ccm_token: ccm_token,
-              action: 'challengeGroup'
-            }, function () {
-      Tfts.success('Your challenge has been sent to ' + challenged_name);
-      window.location.reload();
-    }).fail(function (response) {
-      Tfts.error(response.responseJSON.error.message);
-    });
-  },
-  withdrawGroupChallenge: function (match_id, challenger_id, ccm_token) {
-    $.post(
-            "/tfts/api/action", {
-              match_id: match_id,
-              challenger_id: challenger_id,
-              ccm_token: ccm_token,
-              action: 'withdrawGroupChallenge'
-            }, function () {
-      Tfts.success('Your challenge has been withdrawn');
-      window.location.reload();
-    }).fail(function (response) {
-      Tfts.error(response.responseJSON.error.message);
-    });
-  },
-  acceptGroupChallenge: function (match_id, challenged_id) {
-    $.post(
-            "/tfts/api/action", {
-              match_id: match_id,
-              challenged_id: challenged_id,
-              ccm_token: $('#acceptGroupChallengeToken').val(),
-              action: 'acceptGroupChallenge'
-            }, function (data) {
-      PNotify.removeAll();
-      Tfts.success('Challenge Accepted');
-      window.location.reload();
-    }).fail(function (response) {
-      Tfts.error(response.responseJSON.error.message);
-    });
-  },
-  declineGroupChallenge: function (match_id, challenged_id) {
-    $.post(
-            "/tfts/api/action", {
-              match_id: match_id,
-              challenged_id: challenged_id,
-              ccm_token: $('#declineGroupChallengeToken').val(),
-              action: 'declineGroupChallenge'
-            }, function () {
-      PNotify.removeAll();
-      Tfts.success('Challenge Declined');
-      window.location.reload();
-    }).fail(function (response) {
-      Tfts.error(response.responseJSON.error.message);
-    });
-  },
-  reportResultGroupMatch: function (match_id, group_id) {
-    var data = new FormData(document.querySelector('#resultForm'));
-    if (data.get('score1').length == 0 || data.get('score2').length == 0) {
-      Tfts.error('Score can not be empty');
-      return;
-    }
-    $.post(
-            "/tfts/api/action", {
-              match_id: match_id,
-              group_id: group_id,
+              score1: score1 ? score1 : data.get('score1'),
+              score2: score2 ? score2 : data.get('score2'),
               user_ids: data.getAll('user_ids'),
-              ccm_token: data.get('ccm_token'),
-              score1: data.get('score1'),
-              score2: data.get('score2'),
-              action: 'reportResultGroupMatch'
+              action: 'reportResultMatch'
             }, function () {
       PNotify.removeAll();
       Tfts.success('Result reported');
@@ -241,13 +123,14 @@ var Tfts = {
       Tfts.error(response.responseJSON.error.message);
     });
   },
-  cancelGroupMatch: function (match_id, group_id) {
+  cancelMatch: function (match_id, id, is_team) {
     $.post(
             "/tfts/api/action", {
               match_id: match_id,
-              group_id: group_id,
-              ccm_token: $('#cancelGroupMatchToken').val(),
-              action: 'cancelGroupMatch'
+              id: id,
+              is_team: is_team,
+              ccm_token: $('#cancelMatchToken').val(),
+              action: 'cancelMatch'
             }, function () {
       PNotify.removeAll();
       Tfts.success('Match cancelled');
