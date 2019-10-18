@@ -2,6 +2,7 @@
 
 namespace Tfts;
 
+use Concrete\Core\Entity\User\User as UserEntity;
 use Concrete\Core\Support\Facade\Application;
 use Concrete\Core\Support\Facade\Config;
 use Concrete\Core\User\Group\Group;
@@ -931,90 +932,89 @@ class Tfts {
     $this->em->flush();
   }
 
-    /**
-     * Determines if a user or team can change another user or team, based on open challenges and open matches
-     *
-     * @param $challenger_id
-     * @param Game $game
-     * @param $challanged_id
-     * @return bool
-     */
-  public function canCallenge($challenger_id, Game $game, $challanged_id):bool
-  {
-
+  /**
+   * Determines if a user or group can challenge another user or team, based on 
+   * open challenges and open matches.
+   *
+   * @param Game $game
+   * @param $challenger_id
+   * @param $challenged_id
+   * @return bool
+   */
+  public function canCallenge(Game $game, int $challenger_id, int $challenged_id): bool {
+    
   }
 
-    /**
-     * Determines if a user can Enter Results for a specific Match
-     *
-     * @param $u
-     * @param Match $
-     * @return bool
-     */
-    public function canEnterResult(User $u, Match $match):bool
-    {
-        if ($match->getGame()->isGroup()) {
-            foreach ($this->getRegisteredGroups($u,$match->getGame()) as $group) {
-                if ($match->getChallengerId() == $group->getGroupId() || $match->getChallengedId() == $group->getGroupId()) {
-                    $active_id = $group->getGroupId();
-                    break;
-                }
-            }
-        } else {
-            $active_id = $u->getUserID();
+  /**
+   * Determines if a user can Enter Results for a specific Match
+   *
+   * @param User $user
+   * @param Match $match
+   * @return bool
+   */
+  public function canEnterResult(User $user, Match $match): bool {
+    if ($match->getGame()->isGroup()) {
+      foreach ($this->getRegisteredGroups($user, $match->getGame()) as $group) {
+        if ($match->getChallengerId() == $group->getGroupId() || $match->getChallengedId() == $group->getGroupId()) {
+          $active_id = $group->getGroupId();
+          break;
         }
-        return $match->getChallengerId() == $active_id || $match->getChallengedId() == $active_id;
+      }
+    } else {
+      $active_id = $user->getUserID();
     }
+    return $match->getChallengerId() == $active_id || $match->getChallengedId() == $active_id;
+  }
 
-    /**
-     * Determines the groups this user is Registered for a certain game with
-     * @param User $u
-     * @param Game $game
-     * @return array
-     */
-    public function getRegisteredGroups(User $u, Game $game):array
-    {
-        foreach ($this->getAllUserGroups($u) as $group) {
-            if (is_object($this->findGroupRegistration($game, $group))) {
-                $registeredGroups[] = $group;
-            }
-        }
-        return $registeredGroups;
+  /**
+   * Determines the groups this user has registered for the given game.
+   * 
+   * @param User $user
+   * @param Game $game
+   * @return array an array of registered groups.
+   */
+  public function getRegisteredGroups(User $user, Game $game): array {
+    foreach ($this->getAllUserGroups($user) as $group) {
+      if (is_object($this->findGroupRegistration($game, $group))) {
+        $registeredGroups[] = $group;
+      }
     }
+    return $registeredGroups;
+  }
 
-    /**
-     * Determines the groups this user is Not Registered for a certain game with
-     * @param User $u
-     * @param Game $game
-     * @return array
-     */
-    public function getUnregisteredGroups(User $u, Game $game):array
-    {
-        foreach ($this->getAllUserGroups($u) as $group) {
-            if (!is_object($this->findGroupRegistration($game, $group))) {
-                $unregisteredGroups[] = $group;
-            }
-        }
-        return $unregisteredGroups;
+  /**
+   * Determines the groups this user has not registered for the given game.
+   * 
+   * @param User $user
+   * @param Game $game
+   * @return array an array of unregistered groups.
+   */
+  public function getUnregisteredGroups(User $user, Game $game): array {
+    foreach ($this->getAllUserGroups($user) as $group) {
+      if (!is_object($this->findGroupRegistration($game, $group))) {
+        $unregisteredGroups[] = $group;
+      }
     }
+    return $unregisteredGroups;
+  }
 
-    /**
-     * Get all Groups of a given User
-     * @param $u
-     * @return array
-     */
-    public function getAllUserGroups($u):array
-    {
-        $groups = [];
-        $groupList = new GroupList();
-        $groupList->filterByUserID($u->getUserID());
-        foreach ($groupList->getResults() as $group) {
-            if (strpos($group->getGroupPath(), '/Team Manager/') !== false) {
-                $groups[] = $group;;
-            }
-        }
-        return $groups;
+  /**
+   * Get all groups the given user is set as team manager.
+   * 
+   * @param User $user
+   * @return array an array of groups the given user manages.
+   */
+  public function getAllUserGroups(User $user): array {
+    $groups = [];
+    $groupList = new GroupList();
+    $groupList->filterByUserID($user->getUserID());
+    foreach ($groupList->getResults() as $group) {
+      if (strpos($group->getGroupPath(), '/Team Manager/') !== false) {
+        $groups[] = $group;
+      }
     }
+    return $groups;
+  }
 
   /**
    * Sets the rank for the given user if and only if they belong to the pool.
@@ -1054,22 +1054,19 @@ class Tfts {
   }
 
   /**
-   * @param \Concrete\Core\Entity\User\User $entity
+   * @param UserEntity $entity
    * @return User the user matching the given entity.
    */
-  private function entityToUser(\Concrete\Core\Entity\User\User $entity): User {
-    $user_list = new UserList();
-    $user_list->filterByUserName($entity->getUserName());
-    return $user_list->getResults()[0]->getUserObject();
+  private function entityToUser(UserEntity $entity): User {
+    return $user = User::getByUserID($entity->getUserId());
   }
 
   /**
    * @param User $user
    * @return Concrete\Core\Entity\User\User the entity matching the given user.
    */
-  private function userToEntity(User $user): \Concrete\Core\Entity\User\User {
-    $repository = $this->em->getRepository(\Concrete\Core\Entity\User\User::class);
-    return $repository->findOneBy(['uID' => $user->getUserId()]);
+  private function userToEntity(User $user): UserEntity {
+    return $this->em->find(UserEntity::class, $user->getUserId());
   }
 
   /**
@@ -1228,4 +1225,5 @@ class Tfts {
     }
     return $pools;
   }
+
 }
