@@ -974,12 +974,13 @@ class Tfts {
    * @return array an array of registered groups.
    */
   public function getRegisteredGroups(User $user, Game $game): array {
+    $groups = [];
     foreach ($this->getAllUserGroups($user) as $group) {
       if (is_object($this->findGroupRegistration($game, $group))) {
-        $registeredGroups[] = $group;
+        $groups[] = $group;
       }
     }
-    return $registeredGroups;
+    return $groups;
   }
 
   /**
@@ -990,12 +991,13 @@ class Tfts {
    * @return array an array of unregistered groups.
    */
   public function getUnregisteredGroups(User $user, Game $game): array {
+    $groups = [];
     foreach ($this->getAllUserGroups($user) as $group) {
       if (!is_object($this->findGroupRegistration($game, $group))) {
-        $unregisteredGroups[] = $group;
+        $groups[] = $group;
       }
     }
-    return $unregisteredGroups;
+    return $groups;
   }
 
   /**
