@@ -80,7 +80,6 @@ endif;
         <?php
 
         foreach ($registrations as $registration):
-            // @Todo This bunch of code does not belong in the view layer since it's executed on a per registration basis i would put it in the registration entity class.
             $name = $registration->getName();
             $my_ids = array();
             if ($is_team) {
@@ -96,14 +95,9 @@ endif;
                 $challenged_id = $registration->getUser()->getUserId();
             }
 
-            $my_registration = false;
-            foreach ($my_ids as $my_id) {
-                if ($my_id == $challenged_id) {
-                    $my_registration = true;
-                    break;
-                }
-            }
+            $my_registration = $registration->belongsTo($current_user);
 
+            // @todo: This code from here...
             $open_challenge = false;
             $open_match = false;
             $is_challenger = false;
@@ -128,6 +122,7 @@ endif;
                 }
             }
             $can_challenge = $in_pool && !$my_registration && !$open_challenge && !$open_match;
+            // @todo: .. to here should go in a separate place: $can_challenge = $tfts->canChallenge($active_id, $this->registration->getGame(), $challenged_id);
             ?>
             <tr>
                 <td><?= $name ?></td>
@@ -181,22 +176,7 @@ if (count($openMatches) > 0):
                 <tr>
                     <td><?= $match->getChallengerName() ?> vs. <?= $match->getChallengedName() ?></td>
                     <td>
-                        <?php
-                        //@todo: this also should not be here. A method within the Matches Entity would probably be the right place for it
-                        if ($is_team) {
-                            $type = 'Group';
-                            foreach ($registeredGroups as $group) {
-                                if ($match->getChallengerId() == $group->getGroupId() || $match->getChallengedId() == $group->getGroupId()) {
-                                    $active_id = $group->getGroupId();
-                                    break;
-                                }
-                            }
-                        } else {
-                            $type = 'User';
-                            $active_id = $current_user->getUserID();
-                        }
-                        if ($match->getChallengerId() == $active_id || $match->getChallengedId() == $active_id):
-                            ?>
+                        <?php if ($tfts->canEnterResult($current_user, $match)):?>
                             <?php if ($type == 'Group' && $match->getGame()->getGroupSize() < $match->getMyTeam()->getGroupMembersNum())://only display this when your current team has too many players?>
                             <div class="row">
                                 <div class="col">
@@ -229,7 +209,6 @@ if (count($openMatches) > 0):
                                     </div>
                                 </div>
                             </div>
-
                         <?php endif; ?>
                     </td>
                 </tr>

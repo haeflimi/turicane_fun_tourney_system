@@ -47,31 +47,18 @@ class Controller extends BlockController {
     //get the game from the page the block is inserted in
     $game = $em->getRepository('Tfts\Game')->findOneBy(['game_page_id' => $page->getCollectionId()]);
     $this->set('tfts_game_id', $game->getId());
+    $this->set('game', $game);
 
     if ($is_team) {
-      //get the current users groups to have them available for team signups
-      $groupList = new GroupList();
-      $groupList->filterByUserID($current_user->getUserID());
-      $unregisteredGroups = [];
-      $registeredGroups = [];
-      //filter groups to have only those where user is team manager
-      foreach ($groupList->getResults() as $group) {
-        if (strpos($group->getGroupPath(), '/Team Manager/') !== false) {
-          if (is_object($tfts->findGroupRegistration($game, $group))) {
-            $registeredGroups[] = $group;
-          } else {
-            $unregisteredGroups[] = $group;
-          }
-        }
-      }
-      $this->set('unregisteredGroups', $unregisteredGroups);
-      $this->set('registeredGroups', $registeredGroups);
+      $this->set('unregisteredGroups', $tfts->getUnregisteredGroups($current_user, $game));
+      $this->set('registeredGroups', $registeredGroups = $tfts->getRegisteredGroups($current_user, $game));
       $this->set('in_pool', sizeof($registeredGroups) > 0);
     } else {
       //determine if user is am member of the pool
       $this->set('in_pool', is_object($tfts->findUserRegistration($game, $current_user)));
     }
 
+    $this->set('tfts', $tfts);
     $this->set('current_user', $current_user);
     $this->set('registrations', $tfts->getRegistrations($game));
     $this->set('openChallenges', $tfts->getOpenGameChallenges($game));

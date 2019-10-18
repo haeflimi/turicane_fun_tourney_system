@@ -5,6 +5,7 @@ namespace Tfts;
 use Concrete\Core\Support\Facade\Application;
 use Concrete\Core\Support\Facade\Config;
 use Concrete\Core\User\Group\Group;
+use Concrete\Core\User\Group\GroupList;
 use Concrete\Core\User\User;
 use Concrete\Core\User\UserList;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -930,6 +931,91 @@ class Tfts {
     $this->em->flush();
   }
 
+    /**
+     * Determines if a user or team can change another user or team, based on open challenges and open matches
+     *
+     * @param $challenger_id
+     * @param Game $game
+     * @param $challanged_id
+     * @return bool
+     */
+  public function canCallenge($challenger_id, Game $game, $challanged_id):bool
+  {
+
+  }
+
+    /**
+     * Determines if a user can Enter Results for a specific Match
+     *
+     * @param $u
+     * @param Match $
+     * @return bool
+     */
+    public function canEnterResult(User $u, Match $match):bool
+    {
+        if ($match->getGame()->isGroup()) {
+            foreach ($this->getRegisteredGroups($u,$match->getGame()) as $group) {
+                if ($match->getChallengerId() == $group->getGroupId() || $match->getChallengedId() == $group->getGroupId()) {
+                    $active_id = $group->getGroupId();
+                    break;
+                }
+            }
+        } else {
+            $active_id = $u->getUserID();
+        }
+        return $match->getChallengerId() == $active_id || $match->getChallengedId() == $active_id;
+    }
+
+    /**
+     * Determines the groups this user is Registered for a certain game with
+     * @param User $u
+     * @param Game $game
+     * @return array
+     */
+    public function getRegisteredGroups(User $u, Game $game):array
+    {
+        foreach ($this->getAllUserGroups($u) as $group) {
+            if (is_object($this->findGroupRegistration($game, $group))) {
+                $registeredGroups[] = $group;
+            }
+        }
+        return $registeredGroups;
+    }
+
+    /**
+     * Determines the groups this user is Not Registered for a certain game with
+     * @param User $u
+     * @param Game $game
+     * @return array
+     */
+    public function getUnregisteredGroups(User $u, Game $game):array
+    {
+        foreach ($this->getAllUserGroups($u) as $group) {
+            if (!is_object($this->findGroupRegistration($game, $group))) {
+                $unregisteredGroups[] = $group;
+            }
+        }
+        return $unregisteredGroups;
+    }
+
+    /**
+     * Get all Groups of a given User
+     * @param $u
+     * @return array
+     */
+    public function getAllUserGroups($u):array
+    {
+        $groups = [];
+        $groupList = new GroupList();
+        $groupList->filterByUserID($u->getUserID());
+        foreach ($groupList->getResults() as $group) {
+            if (strpos($group->getGroupPath(), '/Team Manager/') !== false) {
+                $groups[] = $group;;
+            }
+        }
+        return $groups;
+    }
+
   /**
    * Sets the rank for the given user if and only if they belong to the pool.
    *
@@ -1142,5 +1228,4 @@ class Tfts {
     }
     return $pools;
   }
-
 }

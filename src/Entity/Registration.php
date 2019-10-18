@@ -85,4 +85,14 @@ class Registration {
       }
       return $this->getUser()->getUserName();
   }
+
+  public function belongsTo($u){
+      if(!empty($this->user) && $this->getUser()->getUserID() == $u->getUserID()){
+         return true;
+      }
+      if(!empty($this->group_id) && $u->inGroup($this->getGroup())){
+          return true;
+      }
+      return false;
+  }
 }
