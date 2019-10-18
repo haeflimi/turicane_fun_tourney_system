@@ -3,7 +3,6 @@
 namespace Concrete\Package\TuricaneFunTourneySystem\Block\TftsPoolOverview;
 
 use Concrete\Core\Block\BlockController;
-use Concrete\Core\User\Group\GroupList;
 use Concrete\Core\User\User;
 use Page;
 use Tfts\Tfts;
