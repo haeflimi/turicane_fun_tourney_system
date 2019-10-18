@@ -125,7 +125,20 @@ endif;
             // @todo: .. to here should go in a separate place: $can_challenge = $tfts->canChallenge($active_id, $this->registration->getGame(), $challenged_id);
             ?>
             <tr>
-                <td><?= $name ?></td>
+                <td>
+                    <?php if(!$is_team): ?>
+                        <a data-toggle="modal" data-target="#modal" data-source="/members/profile/<?=$registration->getUser()->getUserID()?>" class="btn btn-outline-primary btn-round btn-sm mb-1"><i class="fa fa-user"></i> <?=$registration->getUser()->getUserName()?></a>
+                    <?php else: ?>
+                        <?=$name?>
+                    <?php endif; ?>
+                </td>
+                <td>
+                    <?php if($is_team): ?>
+                        <?php  foreach($registration->getGroup()->getGroupMembers() as $teamMember):?>
+                            <a data-toggle="modal" data-target="#modal" data-source="/members/profile/<?=$teamMember->getUserID()?>" class="btn btn-outline-primary btn-round btn-sm mb-1"><i class="fa fa-user"></i> <?=$teamMember->getUserName()?></a>
+                        <?php endforeach;; ?>
+                    <?php endif; ?>
+                </td>
                 <td>
                     <?php if (!$is_team && $can_challenge): ?>
                         <button class="btn btn-transparent btn-sm pull-right"
