@@ -29,40 +29,6 @@ class Tfts {
   }
 
   /**
-   * Returns all registrations for the given game.
-   *
-   * @param \Tfts\Game $game
-   * @return Registration a list of registrations.
-   */
-  public function getRegistrations(Game $game): Collection {
-    return $game->getRegistrations();
-  }
-
-  /**
-   * @param \Tfts\Game $game
-   * @return Match a list of open matches for the given game.
-   */
-  public function getOpenGameChallenges(Game $game): Collection {
-    return $game->getOpenChallenges();
-  }
-
-  /**
-   * @param \Tfts\Game $game
-   * @return Match a list of open matches for the given game.
-   */
-  public function getOpenMatches(Game $game): Collection {
-    return $game->getOpenMatches();
-  }
-
-  /**
-   * @param \Tfts\Game $game
-   * @return Match a list of closed matches for the given game.
-   */
-  public function getClosedMatches(Game $game): Collection {
-    return $game->getClosedMatches();
-  }
-
-  /**
    * Searches for open user challenges.
    * 
    * @param User $user
