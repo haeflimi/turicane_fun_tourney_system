@@ -46,7 +46,6 @@ class Controller extends BlockController {
     //get the game from the page the block is inserted in
     $game = $em->getRepository('Tfts\Game')->findOneBy(['game_page_id' => $page->getCollectionId()]);
     $this->set('tfts_game_id', $game->getId());
-    $this->set('game', $game);
 
     if ($is_team) {
       $this->set('unregisteredGroups', $tfts->getUnregisteredGroups($current_user, $game));
@@ -59,10 +58,10 @@ class Controller extends BlockController {
 
     $this->set('tfts', $tfts);
     $this->set('current_user', $current_user);
-    $this->set('registrations', $tfts->getRegistrations($game));
-    $this->set('openChallenges', $tfts->getOpenGameChallenges($game));
-    $this->set('openMatches', $tfts->getOpenMatches($game));
-    $this->set('closedMatches', $tfts->getClosedMatches($game));
+    $this->set('registrations', $game->getRegistrations());
+    $this->set('openChallenges', $game->getOpenChallenges());
+    $this->set('openMatches', $game->getOpenMatches());
+    $this->set('closedMatches', $game->getClosedMatches());
   }
 
 }
