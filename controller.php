@@ -127,7 +127,8 @@ class Controller extends Package
     }
 
     public function registerEventListeners(){
-        Events::addListener('tfts_on_match_finsh', function ($match) {
+        Events::addListener('tfts_on_match_finsh', function ($event) {
+            $match = $event->getArgument('match');
             $options = array(
                 'cluster' => Config::get('turicane.pusher.app_cluster'),
                 'encrypted' => true
