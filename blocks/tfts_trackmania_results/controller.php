@@ -9,6 +9,7 @@ use Core;
 use Database;
 use Page;
 use Permissions;
+use Config;
 use \DateTime;
 use Tfts\Tfts;
 
@@ -48,9 +49,12 @@ class Controller extends BlockController
         $this->requireAsset('javascript', 'pusher');
         $this->requireAsset('javascript', 'slimScroll');
         $this->requireAsset('javascript', 'timeago');
-
         $tfts = new Tfts();
 
-        $this->set('tmRankingList', $tfts->getTrackmaniaRankingList());
+        $rankingLists = [];
+        foreach(Config::get('tfts.trackmaniaMaps') as $map_id => $map_name){
+            $rankingLists[$map_name] = $tfts->getTrackmaniaRankingList($map_id);
+        }
+        $this->set('tmRankingLists', $rankingLists);
     }
 }

@@ -104,8 +104,6 @@ class Controller extends Package
                 $view->addFooterItem($notification);
             }
         }
-
-        // @TODO: Check for open user challenges/confirmations to display
     }
 
     public function install()
@@ -145,7 +143,8 @@ class Controller extends Package
             $pusher->trigger('rankingList', 'update', json_encode($data));
         });
 
-        Events::addListener('tfts_on_trackmania_add', function () {
+        // if we do this it might cause exceeding of our pusher limit - so better not do it
+        /*Events::addListener('tfts_on_trackmania_add', function () {
             $options = array(
                 'cluster' => Config::get('turicane.pusher.app_cluster'),
                 'encrypted' => true
@@ -159,7 +158,7 @@ class Controller extends Package
             $data = [];
             // Trigger a update of the ranking List
             $pusher->trigger('trackmaniaRankingList', 'update', json_encode($data));
-        });
+        });*/
     }
 
     public function registerRoutes()
@@ -169,7 +168,7 @@ class Controller extends Package
         $router->post('/tfts/api/trackmania', 'Tfts\Tfts::processTrackmaniaData');
         // Register routes for getting list Data
         $router->get('/tfts/api/rankingList', 'Tfts\Tfts::getRankingList');
-        $router->get('/tfts/api/trackmaniaRankingList', 'Tfts\Tfts::getTrackmaniaRankingList');
+        // $router->get('/tfts/api/trackmaniaRankingList', 'Tfts\Tfts::getTrackmaniaRankingList');
         // Register other routes for interface actions and pass them along to the tfts
         $router->post('/tfts/api/action', function () {
             if ($this->validateRequestToken($_POST, $_POST['action'])) {

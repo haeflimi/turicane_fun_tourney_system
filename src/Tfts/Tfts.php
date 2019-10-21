@@ -687,30 +687,24 @@ class Tfts {
      *
      * @return false|string|JsonResponse
      */
-  public function getTrackmaniaRankingList()
+  public function getTrackmaniaRankingList($map_id)
   {
-      //@todo: compile a ranking list with the Trackmania results
+      //@todo: compile a ranking list with the Trackmania results for a given map
 
       $rankingList = [
           1 => [ // key entspricht dem Rang
-              'user' => 'TuBorg',
-              'user_id' => 1,
-              'rank_movement' => 3,
+              'user' => User::getByUserID(1),
+              'rank_movement' => 2,
               'lap_time' => '1:00:01',
           ],
           2 => [
-              'user' => 'Freezer',
-              'user_id' => 535,
-              'rank_movement' => 3,
+              'user' => User::getByUserID(535),
+              'rank_movement' => 1,
               'lap_time' => '1:00:01',
           ]
       ];
 
-      if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-          return new JsonResponse($rankingList);
-      } else {
-          return json_encode($rankingList);
-      }
+      return $rankingList;
   }
 
   /**
