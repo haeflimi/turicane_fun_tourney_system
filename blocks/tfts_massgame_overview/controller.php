@@ -3,9 +3,7 @@
 namespace Concrete\Package\TuricaneFunTourneySystem\Block\TftsMassgameOverview;
 
 use Concrete\Core\Block\BlockController;
-use Concrete\Core\User\Group\GroupList;
 use Concrete\Core\User\User;
-use Tfts\Game;
 use Page;
 use Tfts\Tfts;
 
@@ -28,7 +26,7 @@ class Controller extends BlockController {
   }
 
   public function getBlockTypeName() {
-    return t("TFTS Pool Overview");
+    return t("TFTS Mass Overview");
   }
 
   public function save($args) {
@@ -41,14 +39,21 @@ class Controller extends BlockController {
     $current_user = new User();
     $tfts = new Tfts();
 
-    $g = new Game();
-    $g->getOpenPools();
+    $page = Page::getCurrentPage();
+    $this->set('is_mass', $page->getAttribute('tfts_game_is_mass'));
+    $this->set('is_team', $page->getAttribute('tfts_game_is_team'));
 
+    //get the game from the page the block is inserted in
+    $game = $em->getRepository('Tfts\Game')->findOneBy(['game_page_id' => $page->getCollectionId()]);
+    $this->set('tfts_game_id', $game->getId());
+    
+    $this->set('in_pool', is_object($tfts->findUserRegistration($game, $current_user)));
+
+    $this->set('tfts', $tfts);
     $this->set('current_user', $current_user);
-    $this->set('registrations', []);
-    $this->set('openChallenges', []);
-    $this->set('openMatches', []);
-    $this->set('closedMatches', []);
+    $this->set('registrations', $game->getRegistrations());
+    $this->set('openPools', $game->getOpenPools());
+    $this->set('finalPools', $game->getFinalPools());
   }
 
 }

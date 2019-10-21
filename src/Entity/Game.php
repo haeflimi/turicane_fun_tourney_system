@@ -213,4 +213,11 @@ class Game {
                     });
   }
 
+  public function getFinalPools(): Collection {
+    return $this->pools
+                    ->filter(function(Pool $pool) {
+                      return $pool->isPlayed() && sizeof($pool->getChildren()) == 0;
+                    });
+  }
+
 }
