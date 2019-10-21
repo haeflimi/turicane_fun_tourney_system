@@ -18,18 +18,6 @@
         <pagetype name="TFTS Pool Game" handle="tfts_game" package="turicane_fun_tourney_system" is-frequently-added="1" launch-in-composer="1">
             <pagetemplates type="all" default="full"/>
             <target handle="all" package="turicane_fun_tourney_system"/>
-            <composer>
-                <formlayout>
-                    <set name="TFTS">
-                        <control type="collection_attribute" handle="tfts_game_is_pool"/>
-                        <control type="collection_attribute" handle="tfts_game_is_mass"/>
-                        <control type="collection_attribute" handle="tfts_game_is_team"/>
-                        <control type="collection_attribute" handle="tfts_game_players"/>
-                        <control type="collection_attribute" handle="tfts_game_points_win"/>
-                        <control type="collection_attribute" handle="tfts_game_points_loss"/>
-                    </set>
-                </formlayout>
-            </composer>
         </pagetype>
     </pagetypes>
     <singlepages>
