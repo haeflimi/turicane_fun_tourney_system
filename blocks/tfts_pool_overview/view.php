@@ -143,7 +143,6 @@ endif;
             <button class="btn btn-transparent btn-sm pull-right"
                     onClick="Tfts.createChallenge(<?= $tfts_game_id; ?>, <?= $active_id; ?>, <?= $challenged_id; ?>, '<?= $name ?>', <?= $is_team ?>, '<?= Core::make('token')->generate('createChallenge'); ?>');"><?= t('Challenge') ?></button>
           <?php elseif ($is_team && $can_challenge): ?>
-            <form id="resultForm" class="form-inline pull-right" autocomplete="off" method="POST">
               <div class="dropdown">
                 <button class="btn btn-transparent btn-sm dropdown-toggle pull-right" type="button"
                         id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
@@ -157,7 +156,6 @@ endif;
                      <?php endforeach; ?>
                 </div>
               </div>
-            </form>
           <?php endif; ?>
           <?php if ($open_challenge && $is_challenger): ?>
             <button class="btn btn-transparent btn-sm pull-right"
@@ -182,10 +180,11 @@ endif;
 <table class="table table-striped table-condensed">
   <tbody>
     <?php foreach ($openMatches as $match): ?>
-      <form id="resultForm<?= $match->getId(); ?>" class="" method="POST">
+
         <tr>
           <td><?= $match->getChallengerName() ?> vs. <?= $match->getChallengedName() ?></td>
           <td>
+              <form id="resultForm<?= $match->getId(); ?>" class="" method="POST">
             <?php if ($tfts->canEnterResult($current_user, $match)): ?>
               <?php if ($is_team && $match->getGame()->getGroupSize() != $match->getMyTeam()->getGroupMembersNum())://only display this when your current team has too many players  ?>
                 <div class="row">
@@ -207,6 +206,7 @@ endif;
                 <div class="col">
                   <div class="form-group form-inline pull-right">
                     <?php if ($tfts->canReportResult($current_user, $match)): ?>
+
                       <input type="hidden" name="ccm_token"
                              value="<?= Core::make('token')->generate('reportResultMatch'); ?>"/>&nbsp;
                       <input class="form-control form-control-sm" type="number"
@@ -217,20 +217,22 @@ endif;
                              value="<?= $match->getScore2() ?>"/>&nbsp;
                       <button type="button" class="btn btn-transparent btn-sm pull-right"
                               onclick="Tfts.reportResultMatch(<?= $match->getId() ?>, <?= $tfts->getActiveId($current_user, $match) ?>, <?= $is_team ?>);"><?= t('Report result') ?></button>&nbsp;
-                    <?php else: ?>
+
+                  <?php else: ?>
                       <p class="muted"><?= t('Waiting for confirmation ...') ?></p>
                     <?php endif; ?>
                     <?php if ($tfts->canCancelMatch($match)): ?>
                       <button type="button" class="btn btn-transparent btn-sm pull-right"
                               onclick="Tfts.cancelMatch(<?= $match->getId() ?>, <?= $tfts->getActiveId($current_user, $match) ?>, <?= $is_team ?>);"><?= t('Cancel match') ?></button>
                     <?php endif; ?>
+
                   </div>
                 </div>
               </div>
             <?php endif; ?>
+              </form>
           </td>
         </tr>
-      </form>
     <?php endforeach; ?>
   </tbody>
 </table>
