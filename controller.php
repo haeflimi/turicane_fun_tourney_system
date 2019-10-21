@@ -169,7 +169,7 @@ class Controller extends Package
         $router->post('/tfts/api/trackmania', 'Tfts\Tfts::processTrackmaniaData');
         // Register routes for getting list Data
         $router->get('/tfts/api/rankingList', 'Tfts\Tfts::getRankingList');
-        $router->get('/tfts/api/trackmaniaRankingList', 'Tfts\Tfts::getTrackmaianRankingList');
+        $router->get('/tfts/api/trackmaniaRankingList', 'Tfts\Tfts::getTrackmaniaRankingList');
         // Register other routes for interface actions and pass them along to the tfts
         $router->post('/tfts/api/action', function () {
             if ($this->validateRequestToken($_POST, $_POST['action'])) {
