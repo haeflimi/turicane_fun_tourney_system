@@ -2,9 +2,6 @@
 defined('C5_EXECUTE') or die('Access Denied.');
 ?>
 <section id="playerRankingList<?= $bId ?>" data-vue-array="playerRankingList.ranks">
-    <header>
-        <h2>TFTS Live Ranking</h2>
-    </header>
     <div class="widget-table-overflow">
         <div class="body slimScroll">
             <table class="table table-striped table-lg ranking-table">

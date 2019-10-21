@@ -844,6 +844,10 @@ class Tfts {
     $map->setProcessed(true);
     $this->em->persist($map);
     $this->em->flush();
+
+      // Dispatch a Event when a match is finalized
+      $event = new \Symfony\Component\EventDispatcher\GenericEvent();
+      \Events::dispatch('tfts_on_match_finsh', $event);
   }
 
   /**
@@ -934,6 +938,10 @@ class Tfts {
       }
     }
     $this->em->flush();
+
+      // Dispatch a Event when a match is finalized
+      $event = new \Symfony\Component\EventDispatcher\GenericEvent();
+      \Events::dispatch('tfts_on_match_finsh', $event);
   }
 
   /**
@@ -964,6 +972,10 @@ class Tfts {
     $finalPool->setPlayed(true);
     $this->em->persist($finalPool);
     $this->em->flush();
+
+      // Dispatch a Event when a match is finalized
+      $event = new \Symfony\Component\EventDispatcher\GenericEvent();
+      \Events::dispatch('tfts_on_match_finsh', $event);
   }
 
   /**
@@ -1236,6 +1248,11 @@ class Tfts {
       $this->addPoints($this->entityToUser($match->getUser1()), $compute1);
       $this->addPoints($this->entityToUser($match->getUser2()), $compute2);
     }
+
+        // Dispatch a Event when a match is finalized
+      $event = new \Symfony\Component\EventDispatcher\GenericEvent();
+      $event->setArgument('match', $match);
+      \Events::dispatch('tfts_on_match_finsh', $event);
   }
 
   /**
