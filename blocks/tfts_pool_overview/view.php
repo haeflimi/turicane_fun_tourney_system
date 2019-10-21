@@ -143,7 +143,7 @@ endif;
             <button class="btn btn-transparent btn-sm pull-right"
                     onClick="Tfts.createChallenge(<?= $tfts_game_id; ?>, <?= $active_id; ?>, <?= $challenged_id; ?>, '<?= $name ?>', <?= $is_team ?>, '<?= Core::make('token')->generate('createChallenge'); ?>');"><?= t('Challenge') ?></button>
           <?php elseif ($is_team && $can_challenge): ?>
-            <form id="resultForm" class="form-inline pull-right" method="POST">
+            <form id="resultForm" class="form-inline pull-right" autocomplete="off" method="POST">
               <div class="dropdown">
                 <button class="btn btn-transparent btn-sm dropdown-toggle pull-right" type="button"
                         id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"

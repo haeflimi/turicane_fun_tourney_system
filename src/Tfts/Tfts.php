@@ -4,7 +4,6 @@ namespace Tfts;
 
 use Concrete\Core\Entity\User\User as UserEntity;
 use Concrete\Core\Support\Facade\Application;
-use Concrete\Core\Support\Facade\Config;
 use Concrete\Core\User\Group\Group;
 use Concrete\Core\User\Group\GroupList;
 use Concrete\Core\User\User;
@@ -12,6 +11,7 @@ use Concrete\Core\User\UserList;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Concrete\Core\Support\Facade\Config;
 use Exception;
 
 /**

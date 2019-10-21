@@ -13,6 +13,7 @@ use Concrete\Core\Support\Facade\Events;
 use Pusher\Pusher;
 use Tfts\Tfts;
 use Core;
+use Config;
 
 class Controller extends Package
 {
