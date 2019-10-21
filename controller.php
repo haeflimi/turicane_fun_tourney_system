@@ -94,6 +94,7 @@ class Controller extends Package
         // Check for open user challenges/confirmations to display
         if ($current_user->isLoggedIn()) {
             $tfts = new Tfts();
+            $tfts->createRankingSnapshot();
             $challenges = $tfts->getOpenUserChallenges($current_user);
             foreach ($challenges as $match) {
                 $notification = Core::make('helper/tfts/ui')->showUserChallenge($match);
