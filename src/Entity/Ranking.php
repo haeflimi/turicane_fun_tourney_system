@@ -24,7 +24,7 @@ class Ranking {
   /**
    * @ORM\Column(type="integer", length=10, nullable=false, options={"default":0})
    */
-  private $ranking_points = 0;
+  public $ranking_points = 0;
 
   /**
    * @ORM\ManyToOne(targetEntity="Concrete\Core\Entity\User\User")

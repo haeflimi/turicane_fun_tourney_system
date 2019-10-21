@@ -35,6 +35,7 @@ class Lan {
 
   /**
    * @ORM\OneToMany(targetEntity="Tfts\Ranking", mappedBy="lan")
+   * @ORM\OrderBy({"ranking_points" = "DESC"})
    */
   private $rankings;
 

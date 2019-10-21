@@ -13,6 +13,7 @@ use Doctrine\Common\Collections\Collection;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Concrete\Core\Support\Facade\Config;
 use Exception;
+use Doctrine\Common\Collections\Criteria;
 
 /**
  * This Class wraps all the important Functionality of the Turicane Fun Tourney System
@@ -661,19 +662,24 @@ class Tfts {
       if(!$lan){
           $lan = $this->em->find('Tfts\Lan', Config::get('tfts.currentLanId'));
       }
+
       $rankings = $lan->getRankings();
 
       $rankingList = [];
       // Create a array that is reduced to the information we need for processing in vue
       foreach ($rankings as $k => $r){
+          $u = User::getByUserID($r->getUser()->getUserID());
           $rankingList[($k+1)] = [
-              'rank_movement' => $this->getRankMovement(User::getByUserID($r->getUser()->getUserID())),
+              'rank_movement' => $this->getRankMovement($u),
+              'real_rank' => $this->getUserRank($u),
               'score' => $r->getPoints(),
               'user' => $r->getUser()->getUserName(),
               'user_id' => $r->getUser()->getUserID(),
               'user_profile' => '/members/profile/'.$r->getUser()->getUserID(),
           ];
       }
+
+      ksort($rankingList);
 
       if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
           return new JsonResponse($rankingList);

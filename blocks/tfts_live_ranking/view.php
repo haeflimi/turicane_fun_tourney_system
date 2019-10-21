@@ -15,7 +15,7 @@ defined('C5_EXECUTE') or die('Access Denied.');
                 <tbody name="ranking-list" is="transition-group">
                 <template v-for="rank, index in ranks">
                     <tr :key="rank.user_id" class="ranking-list-item">
-                        <td>{{ index }}&nbsp;
+                        <td>{{ rank.real_rank }}&nbsp;
                             <span v-if="rank.rank_movement > 0" class="success">
                                 <i class="fa fa-arrow-up"></i> {{ rank.rank_movement }}
                             </span>
@@ -39,7 +39,6 @@ defined('C5_EXECUTE') or die('Access Denied.');
     </div>
 </section>
 
-
 <script>
     /**
      * Feeed the news Feed with initial Data
@@ -47,36 +46,7 @@ defined('C5_EXECUTE') or die('Access Denied.');
     var playerRankingList = new Vue({
         el: '#playerRankingList<?=$bId?>',
         data: {
-            ranks: {
-                "1": {
-                    "rank_movement": 0,
-                    "score": 0,
-                    "user": "Xelsor",
-                    "user_id": 536,
-                    "user_profile": "\/members\/profile\/536"
-                },
-                "2": {
-                    "rank_movement": 0,
-                    "score": 0,
-                    "user": "Buddha",
-                    "user_id": 2,
-                    "user_profile": "\/members\/profile\/2"
-                },
-                "3": {
-                    "rank_movement": 0,
-                    "score": 0,
-                    "user": "TuBorg",
-                    "user_id": 1,
-                    "user_profile": "\/members\/profile\/1"
-                },
-                "4": {
-                    "rank_movement": 0,
-                    "score": 0,
-                    "user": "Freezer",
-                    "user_id": 535,
-                    "user_profile": "\/members\/profile\/535"
-                }
-            }
+            ranks: <?=$rankingList?>
         },
         methods: {
             update: function (event) {
