@@ -28,7 +28,7 @@ class Controller extends BlockController {
   }
 
   public function getBlockTypeName() {
-    return t("TFTS Pool Overview");
+    return t("TFTS Massgame Overview");
   }
 
   public function save($args) {

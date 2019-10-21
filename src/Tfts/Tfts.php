@@ -684,6 +684,69 @@ class Tfts {
     return 0;
   }
 
+    /**
+     * Compile the current Ranking List for async use in the Frontend
+     *
+     * @param bool $lan
+     * @return false|string|JsonResponse
+     */
+  public function getRankingList($lan = false)
+  {
+      if(!$lan){
+          $lan = $this->em->find('Tfts\Lan', Config::get('tfts.currentLanId'));
+      }
+      $rankings = $lan->getRankings();
+
+      $rankingList = [];
+      // Create a array that is reduced to the information we need for processing in vue
+      foreach ($rankings as $k => $r){
+          $rankingList[($k+1)] = [
+              'rank_movement' => $this->getRankMovement(User::getByUserID($r->getUser()->getUserID())),
+              'score' => $r->getPoints(),
+              'user' => $r->getUser()->getUserName(),
+              'user_id' => $r->getUser()->getUserID(),
+              'user_profile' => '/members/profile/'.$r->getUser()->getUserID(),
+          ];
+      }
+
+      if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+          return new JsonResponse($rankingList);
+      } else {
+          return json_encode($rankingList);
+      }
+  }
+
+    /**
+     * Compile a current Ranking List for async use in the Frontend
+     *
+     * @return false|string|JsonResponse
+     */
+  public function getTrackmaniaRankingList()
+  {
+      //@todo: compile a ranking list with the Trackmania results
+
+      $rankingList = [
+          1 => [ // key entspricht dem Rang
+              'user' => 'TuBorg',
+              'user_id' => 1,
+              'rank_movement' => 3,
+              'lap_time' => '1:00:01',
+          ],
+          2 => [
+              'user' => 'Freezer',
+              'user_id' => 535,
+              'rank_movement' => 3,
+              'lap_time' => '1:00:01',
+          ]
+      ];
+
+      if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+          return new JsonResponse($rankingList);
+      } else {
+          return json_encode($rankingList);
+      }
+  }
+
   /**
    * Adds the given points to the given user.
    *

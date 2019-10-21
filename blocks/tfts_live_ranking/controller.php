@@ -1,8 +1,10 @@
 <?php
 namespace Concrete\Package\TuricaneFunTourneySystem\Block\TftsLiveRanking;
 
+use Concrete\Core\Asset\AssetList;
 use Concrete\Core\Block\BlockController;
 use Concrete\Core\Page\PageList;
+use Concrete\Core\User\User;
 use Site;
 use Group;
 use Core;
@@ -10,6 +12,9 @@ use Database;
 use Page;
 use Permissions;
 use \DateTime;
+use Tfts\Tfts;
+use Config;
+use Package;
 
 class Controller extends BlockController
 {
@@ -43,7 +48,13 @@ class Controller extends BlockController
 
     public function view()
     {
+        $this->requireAsset('javascript', 'vue');
+        $this->requireAsset('javascript', 'pusher');
+        $this->requireAsset('javascript', 'slimScroll');
+        $this->requireAsset('javascript', 'timeago');
 
+        $tfts = new Tfts();
 
+        $this->set('rankingList', $tfts->getRankingList());
     }
 }

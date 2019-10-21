@@ -10,6 +10,7 @@ use Database;
 use Page;
 use Permissions;
 use \DateTime;
+use Tfts\Tfts;
 
 class Controller extends BlockController
 {
@@ -43,7 +44,13 @@ class Controller extends BlockController
 
     public function view()
     {
+        $this->requireAsset('javascript', 'vue');
+        $this->requireAsset('javascript', 'pusher');
+        $this->requireAsset('javascript', 'slimScroll');
+        $this->requireAsset('javascript', 'timeago');
 
+        $tfts = new Tfts();
 
+        $this->set('tmRankingList', $tfts->getTrackmaniaRankingList());
     }
 }
