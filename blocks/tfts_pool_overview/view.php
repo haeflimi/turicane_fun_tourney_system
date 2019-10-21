@@ -2,11 +2,13 @@
 defined('C5_EXECUTE') or die('Access Denied.');
 $fh = Core::make('helper/form');
 if (!$is_pool):
-  ?>
+?>
   <div class="alert alert-danger">
     <?= t('Only TFTS Games configured as pool game can use the pool overview block') ?>
   </div>
-<?php elseif (!$current_user->isLoggedIn()): ?>
+<?php 
+  return;
+elseif (!$current_user->isLoggedIn()): ?>
   <div class="alert alert-danger">
     <?= t('You need to be logged in to see tournament details.') ?>
   </div>
