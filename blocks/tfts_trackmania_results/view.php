@@ -6,23 +6,24 @@ defined('C5_EXECUTE') or die('Access Denied.');
         <div class="body slimScroll">
 
             <table class="table table-striped table-lg ranking-table">
-                <?php foreach ($tmRankingLists as $name => $rl): ?>
+                <?php foreach ($tmRankingLists as $mapName => $rankingList): ?>
                     <thead>
                     <tr>
-                        <th colspan="3"><?= $name ?></th>
+                        <th colspan="3"><?= $mapName ?></th>
                     </tr>
                     </thead>
                     <tbody>
-                    <?php foreach ($rl as $rang => $r): ?>
+                    <?php foreach ($rankingList as $ranking): ?>
                         <tr>
-                            <td><?= $rang ?></td>
-                            <td><?= $r['lap_time'] ?></td>
+                            <td><?= $ranking['rank'] ?></td>
+                            <td><?= $ranking['record'] ?></td>
                             <td><a data-toggle="modal" data-target="#modal"
-                                   data-source="/members/profile/<?= $r['user']->getUserID() ?>"
+                                   data-source="<?= $ranking['user_profile'] ?>"
                                    class="btn btn-round btn-outline-primary btn-sm"><i
-                                            class="fa fa-user"></i> <?= $r['user']->getUserName() ?></a></td>
+                                            class="fa fa-user"></i> <?= $ranking['user'] ?></a></td>
+                            <td><?= $ranking['when'] ?></td>
                         </tr>
-                    <?php endforeach;; ?>
+                    <?php endforeach; ?>
                     </tbody>
                 <?php endforeach; ?>
             </table>
