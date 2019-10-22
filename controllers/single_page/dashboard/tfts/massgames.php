@@ -23,7 +23,7 @@ class Massgames extends DashboardPageController {
     $games = [];
     foreach ($repository->findAll() as $game) {
       $page = $game->getGamePage();
-      if ($page->getAttribute('tfts_game_is_pool')) {
+      if ($page->getAttribute('tfts_game_is_mass')) {
         $games[] = $game;
       }
     }
