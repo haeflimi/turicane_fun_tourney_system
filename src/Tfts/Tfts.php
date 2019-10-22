@@ -376,6 +376,7 @@ class Tfts {
     $game = Game::getById($game_id);
     $challenger = Group::getByID($challenger_id);
     $challenged = Group::getByID($challenged_id);
+    $this->checkGroupMembers($challenger, $challenged);
 
     // @TODO: check max games against another group
     if (is_null($this->findGroupRegistration($game, $challenger)) || is_null($this->findGroupRegistration($game, $challenged))) {
@@ -466,8 +467,9 @@ class Tfts {
     $this->verifySystemIsActive();
 
     $match = Match::getById($match_id);
-    $group = Group::getByID($group_id);
+    $this->checkGroupMembers($match->getGroup1(), $match->getGroup2());
 
+    $group = Group::getByID($group_id);
     $users = [];
     if (sizeof($user_ids) == 0) {
       foreach ($group->getGroupMembers() as $userInfo) {
@@ -478,8 +480,6 @@ class Tfts {
         $users[] = User::getByUserID($user_id);
       }
     }
-
-    // @TODO: verify that a user cannot be in both teams
 
     if ($match->getGame()->getGroupSize() != sizeof($users)) {
       throw new Exception($match->getGame()->getName() . ' requires ' . $match->getGame()->getGroupSize() . ' users but was ' . sizeof($users));
@@ -1160,6 +1160,23 @@ class Tfts {
    */
   private function userToEntity(User $user): UserEntity {
     return $this->em->find(UserEntity::class, $user->getUserId());
+  }
+
+  /**
+   * Checks if the given groups have a member in common.
+   *
+   * @param Group $group1
+   * @param Group $group2
+   * @throws Exception if the groups of the match have a common user.
+   */
+  private function checkGroupMembers(Group $group1, Group $group2) {
+    foreach ($group1->getGroupMembers() as $group1Member) {
+      foreach ($group2->getGroupMembers() as $group2Member) {
+        if ($group1Member->getUserId() == $group2Member->getUserId()) {
+          throw new Exception("The following user is in both teams: " . $group1Member->getUserName());
+        }
+      }
+    }
   }
 
   /**
