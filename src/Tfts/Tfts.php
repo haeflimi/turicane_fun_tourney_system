@@ -13,7 +13,6 @@ use Doctrine\Common\Collections\Collection;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Concrete\Core\Support\Facade\Config;
 use Exception;
-use Doctrine\Common\Collections\Criteria;
 
 /**
  * This Class wraps all the important Functionality of the Turicane Fun Tourney System
@@ -468,10 +467,10 @@ class Tfts {
 
     $match = Match::getById($match_id);
     $group = Group::getByID($group_id);
-    
+
     $users = [];
     if (sizeof($user_ids) == 0) {
-      foreach($group->getGroupMembers() as $userInfo) {
+      foreach ($group->getGroupMembers() as $userInfo) {
         $users[] = User::getByUserID($userInfo->getUserId());
       }
     } else {
@@ -479,9 +478,9 @@ class Tfts {
         $users[] = User::getByUserID($user_id);
       }
     }
-    
+
     // @TODO: verify that a user cannot be in both teams
-    
+
     if ($match->getGame()->getGroupSize() != sizeof($users)) {
       throw new Exception($match->getGame()->getName() . ' requires ' . $match->getGame()->getGroupSize() . ' users but was ' . sizeof($users));
     }
@@ -651,66 +650,72 @@ class Tfts {
     return 0;
   }
 
-    /**
-     * Compile the current Ranking List for async use in the Frontend
-     *
-     * @param bool $lan
-     * @return false|string|JsonResponse
-     */
-  public function getRankingList($lan = false)
-  {
-      if(!$lan){
-          $lan = $this->em->find('Tfts\Lan', Config::get('tfts.currentLanId'));
-      }
+  /**
+   * Compile the current Ranking List for async use in the Frontend
+   *
+   * @param bool $lan
+   * @return false|string|JsonResponse
+   */
+  public function getRankingList($lan = false) {
+    if (!$lan) {
+      $lan = $this->em->find('Tfts\Lan', Config::get('tfts.currentLanId'));
+    }
 
-      $rankings = $lan->getRankings();
+    $rankings = $lan->getRankings()->toArray();
+    usort($rankings, 'Tfts\Ranking::compare');
 
-      $rankingList = [];
-      // Create a array that is reduced to the information we need for processing in vue
-      foreach ($rankings as $k => $r){
-          $u = User::getByUserID($r->getUser()->getUserID());
-          $rankingList[($k+1)] = [
-              'rank_movement' => $this->getRankMovement($u),
-              'real_rank' => $this->getUserRank($u),
-              'score' => $r->getPoints(),
-              'user' => $r->getUser()->getUserName(),
-              'user_id' => $r->getUser()->getUserID(),
-              'user_profile' => '/members/profile/'.$r->getUser()->getUserID(),
-          ];
-      }
+    $rankingList = [];
+    // Create a array that is reduced to the information we need for processing in vue
+    foreach ($rankings as $key => $ranking) {
+      $user = User::getByUserID($ranking->getUser()->getUserId());
+      $rankingList[$key + 1] = [
+          'user' => $user->getUserName(),
+          'user_id' => $user->getUserId(),
+          'user_profile' => '/members/profile/' . $user->getUserId(),
+          'rank' => $this->getUserRank($user),
+          'rank_movement' => $this->getRankMovement($user),
+          'points' => $ranking->getPoints()
+      ];
+    }
 
-      ksort($rankingList);
-
-      if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
-          return new JsonResponse($rankingList);
-      } else {
-          return json_encode($rankingList);
-      }
+    if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
+      return new JsonResponse($rankingList);
+    } else {
+      return json_encode($rankingList);
+    }
   }
 
-    /**
-     * Compile a current Ranking List for async use in the Frontend
-     *
-     * @return false|string|JsonResponse
-     */
-  public function getTrackmaniaRankingList($map_id)
-  {
-      //@todo: compile a ranking list with the Trackmania results for a given map
+  /**
+   * Compile a current Ranking List for async use in the Frontend
+   *
+   * @return array
+   */
+  public function getTrackmaniaRankingList(int $map_id): array {
+    $map = $this->em->find(Map::class, $map_id);
+    $trackmanias = $map->getTrackmanias()->toArray();
+    usort($trackmanias, 'Tfts\Trackmania::compare');
 
-      $rankingList = [
-          1 => [ // key entspricht dem Rang
-              'user' => User::getByUserID(1),
-              'rank_movement' => 2,
-              'lap_time' => '1:00:01',
-          ],
-          2 => [
-              'user' => User::getByUserID(535),
-              'rank_movement' => 1,
-              'lap_time' => '1:00:01',
-          ]
+    $rankingList = [];
+    foreach ($trackmanias as $key => $trackmania) {
+      $user = User::getByUserID($trackmania->getUser()->getUserId());
+      $passedTime = mktime() - strtotime($trackmania->getDateTime());
+      if ($passedTime < 60) {
+        $when = '< 1 min';
+      } else if ($passedTime >= 60 && $passedTime < 3600) {
+        $when = '~' . floor($passedTime / 60) . ' min';
+      } else {
+        $when = '~' . floor($passedTime / 3600) . ' h';
+      }
+      $rankingList[$key + 1] = [
+          'user' => $user->getUserName(),
+          'user_id' => $user->getUserId(),
+          'user_profile' => '/members/profile/' . $user->getUserId(),
+          'rank' => $this->getTrackmaniaRank($map, $user),
+          'when' => $when,
+          'record' => date('H:i:s.v', $trackmania->getRecord())
       ];
-
-      return $rankingList;
+    }
+    return $rankingList;
   }
 
   /**
@@ -851,9 +856,9 @@ class Tfts {
     $this->em->persist($map);
     $this->em->flush();
 
-      // Dispatch a Event when a match is finalized
-      $event = new \Symfony\Component\EventDispatcher\GenericEvent();
-      \Events::dispatch('tfts_on_match_finsh', $event);
+    // Dispatch a Event when a match is finalized
+    $event = new \Symfony\Component\EventDispatcher\GenericEvent();
+    \Events::dispatch('tfts_on_match_finsh', $event);
   }
 
   /**
@@ -945,9 +950,9 @@ class Tfts {
     }
     $this->em->flush();
 
-      // Dispatch a Event when a match is finalized
-      $event = new \Symfony\Component\EventDispatcher\GenericEvent();
-      \Events::dispatch('tfts_on_match_finsh', $event);
+    // Dispatch a Event when a match is finalized
+    $event = new \Symfony\Component\EventDispatcher\GenericEvent();
+    \Events::dispatch('tfts_on_match_finsh', $event);
   }
 
   /**
@@ -979,9 +984,9 @@ class Tfts {
     $this->em->persist($finalPool);
     $this->em->flush();
 
-      // Dispatch a Event when a match is finalized
-      $event = new \Symfony\Component\EventDispatcher\GenericEvent();
-      \Events::dispatch('tfts_on_match_finsh', $event);
+    // Dispatch a Event when a match is finalized
+    $event = new \Symfony\Component\EventDispatcher\GenericEvent();
+    \Events::dispatch('tfts_on_match_finsh', $event);
   }
 
   /**
@@ -1017,7 +1022,7 @@ class Tfts {
       return $user->getUserID();
     }
   }
-  
+
   /**
    * Determines whether or not a user can enter a result.
    *
@@ -1029,7 +1034,7 @@ class Tfts {
     $active_id = $this->getActiveId($user, $match);
     return $match->getChallengerId() == $active_id || $match->getChallengedId() == $active_id;
   }
-  
+
   /**
    * Determines whether or not a user can report a result.
    * 
@@ -1041,7 +1046,7 @@ class Tfts {
     $active_id = $this->getActiveId($user, $match);
     return ($match->getChallengerId() == $active_id && !$match->isConfirmed1()) || ($match->getChallengedId() == $active_id && !$match->isConfirmed2());
   }
-  
+
   /**
    * Determines whether or not a match can be cancelled.
    * 
@@ -1255,10 +1260,10 @@ class Tfts {
       $this->addPoints($this->entityToUser($match->getUser2()), $compute2);
     }
 
-        // Dispatch a Event when a match is finalized
-      $event = new \Symfony\Component\EventDispatcher\GenericEvent();
-      $event->setArgument('match', $match);
-      \Events::dispatch('tfts_on_match_finsh', $event);
+    // Dispatch a Event when a match is finalized
+    $event = new \Symfony\Component\EventDispatcher\GenericEvent();
+    $event->setArgument('match', $match);
+    \Events::dispatch('tfts_on_match_finsh', $event);
   }
 
   /**
