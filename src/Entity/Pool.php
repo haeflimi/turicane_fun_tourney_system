@@ -117,6 +117,11 @@ class Pool {
   public function getUsers(): Collection {
     return $this->users;
   }
+  public function getSortedUsers(): array {
+    $users = $this->users->toArray();
+    usort($users, 'Tfts\PoolUser::compare');
+    return $users;
+  }
 
   public function getParents(): Collection {
     return $this->parents;

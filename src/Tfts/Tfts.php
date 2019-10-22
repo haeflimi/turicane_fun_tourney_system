@@ -1112,13 +1112,16 @@ class Tfts {
   /**
    * Sets the rank for the given user if and only if they belong to the pool.
    *
-   * @param Pool $pool
-   * @param User $user
+   * @param int $pool_id
+   * @param int $user_id
    * @param int $rank
    * @throws Exception if something went wrong.
    */
-  public function setPoolRank(Pool $pool, User $user, int $rank) {
+  public function setPoolRank(int $pool_id, int $user_id, int $rank) {
     // verify that user belongs to pool
+    $pool = $this->em->find(Pool::class, $pool_id);
+    $user = User::getByUserID($user_id);
+
     $poolUser = $pool->getPoolUser($this->userToEntity($user));
     if (is_null($poolUser)) {
       throw new Exception('User does not belong to pool');

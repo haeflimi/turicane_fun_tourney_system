@@ -52,4 +52,8 @@ class PoolUser {
     return $this->user;
   }
 
+  public static function compare(PoolUser $poolUser1, PoolUser $poolUser2): int {
+    return $poolUser1->getRank() <=> $poolUser2->getRank();
+  }
+
 }
