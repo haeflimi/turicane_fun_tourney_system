@@ -9,7 +9,7 @@ class Games extends DashboardPageController {
 
   public function __construct($obj = null) {
     parent::__construct($obj);
-    $this->db = \Database::connection('turicane_fun_tourney_system');
+    $this->db = \Database::connection();
     $this->qb = $this->db->createQueryBuilder();
     $this->em = $this->db->getEntityManager();
   }
