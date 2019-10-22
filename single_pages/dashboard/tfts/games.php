@@ -6,8 +6,8 @@
 </div>
 
 <div class="ccm-ui">
-    <?php foreach($games as $g): ?>
-        <div class="well"><?=$g->getName()?></div>
+    <?php foreach($games as $game): ?>
+        <div class="well"><?=$game->getName()?></div>
     <?php endforeach; ?>
 </div>
 

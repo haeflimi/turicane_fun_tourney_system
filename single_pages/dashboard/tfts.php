@@ -7,7 +7,6 @@
 
 <div class="ccm-ui">
     Some TFTS Settings/ Information
-
 </div>
 
 <div class="ccm-dashboard-form-actions-wrapper">
