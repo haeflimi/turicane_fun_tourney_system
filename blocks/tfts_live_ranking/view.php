@@ -8,16 +8,16 @@ defined('C5_EXECUTE') or die('Access Denied.');
                 <thead>
                 <tr>
                     <th width="75">Rank</th>
-                    <th width="50">Score</th>
-                    <th width="*">Nickname</th>
+                    <th width="50">Points</th>
+                    <th width="*">User</th>
                 </tr>
                 </thead>
                 <tbody name="ranking-list" is="transition-group">
                 <template v-for="rank, index in ranks">
                     <tr :key="rank.user_id" class="ranking-list-item">
-                        <td>{{ rank.real_rank }}&nbsp;
+                        <td>{{ rank.rank }}&nbsp;
                             <span v-if="rank.rank_movement > 0" class="success">
-                                <i class="fa fa-arrow-up"></i> {{ rank.rank_movement }}
+                                <i class="fa fa-arrow-up"></i> +{{ rank.rank_movement }}
                             </span>
                             <span v-if="rank.rank_movement < 0" class="danger">
                                 <i class="fa fa-arrow-down"></i> {{ rank.rank_movement }}
@@ -26,7 +26,7 @@ defined('C5_EXECUTE') or die('Access Denied.');
 
                             </span>
                         </td>
-                        <td>{{ rank.score }}</td>
+                        <td>{{ rank.points }}</td>
                         <td><a data-toggle="modal" data-target="#modal" :data-source="rank.user_profile"
                                class="btn btn-round btn-outline-primary btn-sm"><i class="fa fa-user"></i> {{ rank.user
                                 }}</a></td>
