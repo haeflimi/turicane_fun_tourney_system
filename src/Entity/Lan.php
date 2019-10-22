@@ -92,4 +92,21 @@ class Lan {
     return $this->trackmanias;
   }
 
+  public function getLanPage(): Page {
+    if (empty($this->page_id)) {
+      return null;
+    }
+    if (empty($this->handle)) {
+      $this->handle = Page::getById($this->page_id);
+    }
+    return $this->handle;
+  }
+
+  public function getLanPageURL() {
+    if (!is_object($lan_page = $this->getLanPage())) {
+      return null;
+    }
+    return $lan_page->getCollectionLink();
+  }
+
 }
