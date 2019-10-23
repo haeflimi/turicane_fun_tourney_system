@@ -45,8 +45,10 @@ class Massgames extends DashboardPageController {
   public function updateRanks() {
     $tfts = new Tfts();
     try {
-      foreach ($this->post('rank') as $user_id => $rank) {
-        $tfts->setPoolRank($this->post('pool_id'), $user_id, $rank);
+      foreach ($this->post('ranks') as $poolId => $userIds) {
+        foreach ($userIds as $userId => $rank) {
+          $tfts->setPoolRank($poolId, $userId, $rank);
+        }
       }
     } catch (Exception $ex) {
       // @TODO: show exception in a user-readable form
