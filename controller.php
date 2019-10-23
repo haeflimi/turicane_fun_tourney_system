@@ -92,7 +92,7 @@ class Controller extends Package
         $view = new View();
 
         // Check for open user challenges/confirmations to display
-        if ($current_user->isLoggedIn()) {
+        if ($current_user->isLoggedIn() && is_numeric(Config::get('tfts.currentLanId'))) {
             $tfts = new Tfts();
             $tfts->createRankingSnapshot();
             $challenges = $tfts->getOpenUserChallenges($current_user);

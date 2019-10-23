@@ -553,6 +553,10 @@ class Tfts {
    * @return bool true if the snapshot was created, false otherwise.
    */
   public function createRankingSnapshot(): bool {
+    if (Config::get('tfts.rankingSnapshots') != 1) {
+      return false;
+    }
+    
     $rankings = $this->getLan()->getRankings();
     // check we have a ranking first
     if (sizeof($rankings) == 0) {

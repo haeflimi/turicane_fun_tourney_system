@@ -2,6 +2,7 @@
 
 namespace Tfts;
 
+use Concrete\Core\Page\Page;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -53,6 +54,8 @@ class Lan {
    * @ORM\OneToMany(targetEntity="Tfts\Trackmania", mappedBy="lan")
    */
   private $trackmanias;
+  
+  private $page;
 
   public function __construct($lan_id, $handle, $page_id) {
     $this->lan_id = $lan_id;
@@ -96,10 +99,10 @@ class Lan {
     if (empty($this->page_id)) {
       return null;
     }
-    if (empty($this->handle)) {
-      $this->handle = Page::getById($this->page_id);
+    if (empty($this->page)) {
+      $this->page = Page::getById($this->page_id);
     }
-    return $this->handle;
+    return $this->page;
   }
 
   public function getLanPageURL() {
