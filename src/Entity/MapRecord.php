@@ -8,19 +8,19 @@ use Tfts\Map;
 
 /**
  * @ORM\Entity
- * @ORM\Table(name="tftsTrackmania")
+ * @ORM\Table(name="tftsMapRecord")
  */
-class Trackmania {
+class MapRecord {
 
   /**
    * @ORM\Column(type="datetime", nullable=false)
    */
-  private $tm_datetime;
+  private $map_datetime;
 
   /**
    * @ORM\Column(type="integer", length=10, nullable=false)
    */
-  private $tm_record;
+  private $map_record;
 
   /**
    * @ORM\Id
@@ -39,8 +39,8 @@ class Trackmania {
   public function __construct(User $user, Map $map, \DateTime $datetime, int $record) {
     $this->user = $user;
     $this->map = $map;
-    $this->tm_datetime = $datetime;
-    $this->tm_record = $record;
+    $this->map_datetime = $datetime;
+    $this->map_record = $record;
   }
 
   public function getMap(): Map {
@@ -52,23 +52,23 @@ class Trackmania {
   }
 
   public function getDateTime(): \DateTime {
-    return $this->tm_datetime;
+    return $this->map_datetime;
   }
 
   public function getRecord(): int {
-    return $this->tm_record;
+    return $this->map_record;
   }
 
   public function setDateTime(\DateTime $datetime) {
-    $this->tm_datetime = $datetime;
+    $this->map_datetime = $datetime;
   }
 
   public function setRecord(int $record) {
-    $this->tm_record = $record;
+    $this->map_record = $record;
   }
 
-  public static function compare(Trackmania $trackmania1, Trackmania $trackmania2): int {
-    return $trackmania1->getRecord() <=> $trackmania2->getRecord();
+  public static function compare(MapRecord $record1, MapRecord $record2): int {
+    return $record1->getRecord() <=> $record2->getRecord();
   }
 
 }

@@ -50,11 +50,6 @@ class Lan {
    */
   private $specials;
 
-  /**
-   * @ORM\OneToMany(targetEntity="Tfts\Trackmania", mappedBy="lan")
-   */
-  private $trackmanias;
-  
   private $page;
 
   public function __construct($lan_id, $handle, $page_id) {
@@ -89,10 +84,6 @@ class Lan {
 
   public function getSpecials(): Collection {
     return $this->specials;
-  }
-
-  public function getTrackmanias(): Collection {
-    return $this->trackmanias;
   }
 
   public function getLanPage(): Page {

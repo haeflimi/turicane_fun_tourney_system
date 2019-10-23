@@ -4,7 +4,6 @@ namespace Tfts;
 
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Tfts\Lan;
 
 /**
  * @ORM\Entity
@@ -30,18 +29,18 @@ class Map {
   private $map_is_processed = 0;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\Trackmania", mappedBy="map")
+   * @ORM\OneToMany(targetEntity="Tfts\MapRecord", mappedBy="map")
    */
-  private $trackmanias;
+  private $mapRecords;
 
   /**
-   * @ORM\ManyToOne(targetEntity="Tfts\Lan", inversedBy="trackmanias")
-   * @ORM\JoinColumn(name="lan_id", referencedColumnName="lan_id", nullable=false)
+   * @ORM\ManyToOne(targetEntity="Tfts\Game", inversedBy="mapRecords")
+   * @ORM\JoinColumn(name="game_id", referencedColumnName="game_id", nullable=false)
    */
-  private $lan;
+  private $game;
 
-  public function __construct(Lan $lan, String $map_name) {
-    $this->lan = $lan;
+  public function __construct(Game $game, String $map_name) {
+    $this->game = $game;
     $this->map_name = $map_name;
   }
 
@@ -53,8 +52,8 @@ class Map {
     return $this->map_name;
   }
 
-  public function getTrackmanias(): Collection {
-    return $this->trackmanias;
+  public function getRecords(): Collection {
+    return $this->mapRecords;
   }
 
   public function isProcessed(): bool {
@@ -65,8 +64,8 @@ class Map {
     $this->map_is_processed = $processed ? 1 : 0;
   }
 
-  public function getLan(): Lan {
-    return $this->lan;
+  public function getGame(): Game {
+    return $this->game;
   }
 
 }

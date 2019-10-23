@@ -50,6 +50,11 @@ class Game {
    * @ORM\OneToMany(targetEntity="Tfts\Pool", mappedBy="game")
    */
   private $pools;
+
+  /**
+   * @ORM\OneToMany(targetEntity="Tfts\MapRecord", mappedBy="game")
+   */
+  private $mapRecords;
   private $game_page;
 
   public function __construct($game_handle) {
@@ -95,7 +100,7 @@ class Game {
     $this->game_page_id = $game_page_id;
     return $this;
   }
-  
+
   public static function addGame(Lan $lan, $game_handle, $game_page_id): Game {
     $game = new Game();
     $game->setLan($lan)
@@ -122,42 +127,42 @@ class Game {
     if (!is_object($game_page = $this->getGamePage())) {
       return 0;
     }
-    return (int)$game_page->getAttribute('tfts_game_points_win');
+    return (int) $game_page->getAttribute('tfts_game_points_win');
   }
 
   public function getPointsLoss(): int {
     if (!is_object($game_page = $this->getGamePage())) {
       return 0;
     }
-    return (int)$game_page->getAttribute('tfts_game_points_loss');
+    return (int) $game_page->getAttribute('tfts_game_points_loss');
   }
 
   public function isPool(): bool {
     if (!is_object($game_page = $this->getGamePage())) {
       return false;
     }
-    return (bool)$game_page->getAttribute('tfts_game_is_pool');
+    return (bool) $game_page->getAttribute('tfts_game_is_pool');
   }
 
   public function isGroup(): bool {
     if (!is_object($game_page = $this->getGamePage())) {
       return false;
     }
-    return (bool)$game_page->getAttribute('tfts_game_is_team');
+    return (bool) $game_page->getAttribute('tfts_game_is_team');
   }
 
   public function isMass(): bool {
     if (!is_object($game_page = $this->getGamePage())) {
       return false;
     }
-    return (bool)$game_page->getAttribute('tfts_game_is_mass');
+    return (bool) $game_page->getAttribute('tfts_game_is_mass');
   }
 
   public function getGroupSize(): int {
     if (!is_object($game_page = $this->getGamePage())) {
       return false;
     }
-    return (int)$game_page->getAttribute('tfts_game_players');
+    return (int) $game_page->getAttribute('tfts_game_players');
   }
 
   public function getGamePage(): Page {
@@ -218,6 +223,10 @@ class Game {
                     ->filter(function(Pool $pool) {
                       return $pool->isPlayed() && sizeof($pool->getChildren()) == 0;
                     });
+  }
+
+  public function getMapRecords(): Collection {
+    return $this->mapRecords;
   }
 
 }

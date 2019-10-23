@@ -631,25 +631,25 @@ class Tfts {
    * @param User $user
    * @return int the user rank for the given map.
    */
-  public function getTrackmaniaRank(Map $map, User $user): int {
-    $trackmanias = $map->getTrackmanias()->toArray();
-    usort($trackmanias, 'Tfts\Trackmania::compare');
+  public function getMapRank(Map $map, User $user): int {
+    $records = $map->getRecords()->toArray();
+    usort($records, 'Tfts\MapRecord::compare');
 
     $rank = 0;
     $last_record = 0;
     $skipped = 0;
 
-    foreach ($trackmanias as $trackmania) {
-      if ($last_record == $trackmania->getRecord()) {
+    foreach ($records as $record) {
+      if ($last_record == $record->getRecord()) {
         $skipped++;
       } else {
         $rank = $rank + 1 + $skipped;
         $skipped = 0;
       }
-      if ($trackmania->getUser()->getUserId() == $user->getUserId()) {
+      if ($record->getUser()->getUserId() == $user->getUserId()) {
         return $rank;
       }
-      $last_record = $trackmania->getRecord();
+      $last_record = $record->getRecord();
     }
     return 0;
   }
@@ -694,15 +694,15 @@ class Tfts {
    *
    * @return array
    */
-  public function getTrackmaniaRankingList(int $map_id): array {
+  public function getMapRankingList(int $map_id): array {
     $map = $this->em->find(Map::class, $map_id);
-    $trackmanias = $map->getTrackmanias()->toArray();
-    usort($trackmanias, 'Tfts\Trackmania::compare');
+    $records = $map->getRecords()->toArray();
+    usort($records, 'Tfts\MapRecord::compare');
 
     $rankingList = [];
-    foreach ($trackmanias as $key => $trackmania) {
-      $user = User::getByUserID($trackmania->getUser()->getUserId());
-      $passedTime = mktime() - $trackmania->getDateTime()->getTimestamp();
+    foreach ($records as $key => $record) {
+      $user = User::getByUserID($record->getUser()->getUserId());
+      $passedTime = mktime() - $record->getDateTime()->getTimestamp();
       if ($passedTime < 60) {
         $when = '< 1 min';
       } else if ($passedTime >= 60 && $passedTime < 3600) {
@@ -714,9 +714,9 @@ class Tfts {
           'user' => $user->getUserName(),
           'user_id' => $user->getUserId(),
           'user_profile' => '/members/profile/' . $user->getUserId(),
-          'rank' => $this->getTrackmaniaRank($map, $user),
+          'rank' => $this->getMapRank($map, $user),
           'when' => $when,
-          'record' => date('i:s', $trackmania->getRecord() / 1000) . '.' . ($trackmania->getRecord() % 1000)
+          'record' => date('i:s', $record->getRecord() / 1000) . '.' . ($record->getRecord() % 1000)
       ];
     }
     return $rankingList;
@@ -753,6 +753,13 @@ class Tfts {
     if ($password != Config::get('tfts.trackmaniaApiPassword')) {
       return new JsonResponse('Invalid password');
     }
+    
+    // verify that game exists
+    $game_id = filter_input(INPUT_POST, 'game_id', FILTER_SANITIZE_NUMBER_INT);
+    $game = Game::getById($game_id);
+    if (!is_object($game)) {
+      return new JsonResponse('Invalid game id: ' . $game_id);
+    }
 
     // verify that user exists
     $user_name = filter_input(INPUT_POST, 'user', FILTER_SANITIZE_STRING);
@@ -766,9 +773,9 @@ class Tfts {
     // create map if necessary
     $map_name = filter_input(INPUT_POST, 'map_name', FILTER_SANITIZE_STRING);
     $map_repository = $this->em->getRepository(Map::class);
-    $map = $map_repository->findOneBy(['lan' => $this->getLan(), 'map_name' => $map_name]);
+    $map = $map_repository->findOneBy(['game' => $game, 'map_name' => $map_name]);
     if (is_null($map)) {
-      $map = new Map($this->getLan(), $map_name);
+      $map = new Map($game, $map_name);
       $this->em->persist($map);
       $this->em->flush();
     }
@@ -797,20 +804,20 @@ class Tfts {
         return new JsonResponse('Invalid record: ' . $record);
     }
 
-    $trackmania_repository = $this->em->getRepository(Trackmania::class);
-    $trackmania = $trackmania_repository->findOneBy(['map' => $map, 'user' => $user->getUserId()]);
+    $record_repository = $this->em->getRepository(MapRecord::class);
+    $current_record = $record_repository->findOneBy(['map' => $map, 'user' => $user->getUserId()]);
     // new?
-    if (is_null($trackmania)) {
-      $this->em->persist(new Trackmania($this->userToEntity($user), $map, $datetime, $milliseconds));
+    if (is_null($current_record)) {
+      $this->em->persist(new MapRecord($this->userToEntity($user), $map, $datetime, $milliseconds));
       $this->em->flush();
       return new JsonResponse('Added new record');
     }
 
     // improvement?
-    if ($milliseconds < $trackmania->getRecord()) {
-      $trackmania->setDateTime($datetime);
-      $trackmania->setRecord($milliseconds);
-      $this->em->persist($trackmania);
+    if ($milliseconds < $current_record->getRecord()) {
+      $current_record->setDateTime($datetime);
+      $current_record->setRecord($milliseconds);
+      $this->em->persist($current_record);
       $this->em->flush();
       return new JsonResponse('Record improved');
     }
@@ -843,17 +850,17 @@ class Tfts {
     }
 
     $awardedPoints = array('default' => 1, 1 => 25, 2 => 18, 3 => 15, 4 => 12, 5 => 10, 6 => 8, 7 => 6, 8 => 4, 9 => 3, 10 => 2);
-    foreach ($map->getTrackmanias() as $trackmania) {
-      $rank = $this->getTrackmaniaRank($map, $this->entityToUser($trackmania->getUser()));
+    foreach ($map->getRecords() as $record) {
+      $rank = $this->getMapRank($map, $this->entityToUser($record->getUser()));
       if ($rank == 0) {
         continue;
       }
 
       $points = array_key_exists($rank, $awardedPoints) ? $awardedPoints[$rank] : $awardedPoints['default'];
-      $description = 'Teilnahme Trackmania (#' . $rank . ', ' . $map->getName() . ')';
+      $description = 'Teilnahme ' . $map->getGame()->getName() . ' (#' . $rank . ', ' . $map->getName() . ')';
 
-      $this->em->persist(new Special($map->getLan(), $trackmania->getUser(), $description, $points));
-      $this->addPoints($this->entityToUser($trackmania->getUser()), $points);
+      $this->em->persist(new Special($map->getLan(), $record->getUser(), $description, $points));
+      $this->addPoints($this->entityToUser($record->getUser()), $points);
     }
 
     $map->setProcessed(true);

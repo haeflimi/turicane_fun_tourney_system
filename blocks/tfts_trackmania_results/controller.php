@@ -48,8 +48,8 @@ class Controller extends BlockController {
     $tfts = new Tfts();
     $rankingLists = [];
     $repository = $em->getRepository(Map::class);
-    foreach ($repository->findBy(['lan' => $game->getLan()]) as $map) {
-      $rankingLists[$map->getName()] = $tfts->getTrackmaniaRankingList($map->getId());
+    foreach ($repository->findBy(['game' => $game]) as $map) {
+      $rankingLists[$map->getName()] = $tfts->getMapRankingList($map->getId());
     }
     $this->set('tmRankingLists', $rankingLists);
   }
