@@ -702,7 +702,7 @@ class Tfts {
     $rankingList = [];
     foreach ($trackmanias as $key => $trackmania) {
       $user = User::getByUserID($trackmania->getUser()->getUserId());
-      $passedTime = mktime() - strtotime($trackmania->getDateTime());
+      $passedTime = mktime() - $trackmania->getDateTime()->getTimestamp();
       if ($passedTime < 60) {
         $when = '< 1 min';
       } else if ($passedTime >= 60 && $passedTime < 3600) {
@@ -716,7 +716,7 @@ class Tfts {
           'user_profile' => '/members/profile/' . $user->getUserId(),
           'rank' => $this->getTrackmaniaRank($map, $user),
           'when' => $when,
-          'record' => date('H:i:s.v', $trackmania->getRecord())
+          'record' => date('i:s', $trackmania->getRecord() / 1000) . '.' . ($trackmania->getRecord() % 1000)
       ];
     }
     return $rankingList;

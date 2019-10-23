@@ -33,14 +33,17 @@ class Controller extends BlockController {
   }
 
   public function view() {
+    $app = \Concrete\Core\Support\Facade\Application::getFacadeApplication();
+    $em = $app->make('Doctrine\ORM\EntityManager');
+
     $this->requireAsset('javascript', 'vue');
     $this->requireAsset('javascript', 'pusher');
     $this->requireAsset('javascript', 'slimScroll');
     $this->requireAsset('javascript', 'timeago');
-    $tfts = new Tfts();
 
+    $tfts = new Tfts();
     $rankingLists = [];
-    $repository = $this->em->getRepository(Map::class);
+    $repository = $em->getRepository(Map::class);
     foreach ($repository->findAll() as $map) {
       $rankingLists[$map->getName()] = $tfts->getTrackmaniaRankingList($map->getId());
     }
