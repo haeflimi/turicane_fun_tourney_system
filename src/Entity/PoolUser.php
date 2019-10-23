@@ -31,9 +31,14 @@ class PoolUser {
    */
   private $user;
 
-  public function __construct(Pool $pool, User $user) {
-    $this->pool = $pool;
+  /**
+   * @ORM\Column(type="integer", length=10, nullable=false)
+   */
+  private $rnd_number;
+
+  public function __construct(User $user) {
     $this->user = $user;
+    $this->rnd_number = rand(1, 1000000);
   }
 
   public function getRank(): ?int {
@@ -47,12 +52,24 @@ class PoolUser {
   public function getPool(): Pool {
     return $this->pool;
   }
+  
+  public function setPool(Pool $pool) {
+    $this->pool = $pool;
+  }
 
   public function getUser(): User {
     return $this->user;
   }
 
-  public static function compare(PoolUser $poolUser1, PoolUser $poolUser2): int {
+  public function getRandomNumber(): int {
+    return $this->rnd_number;
+  }
+
+  public static function compareRandomNumber(PoolUser $poolUser1, PoolUser $poolUser2): int {
+    return $poolUser1->getRandomNumber() <=> $poolUser2->getRandomNumber();
+  }
+
+  public static function compareRank(PoolUser $poolUser1, PoolUser $poolUser2): int {
     return $poolUser1->getRank() <=> $poolUser2->getRank();
   }
 

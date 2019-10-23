@@ -119,7 +119,7 @@ class Pool {
   }
   public function getSortedUsers(): array {
     $users = $this->users->toArray();
-    usort($users, 'Tfts\PoolUser::compare');
+    usort($users, 'Tfts\PoolUser::compareRank');
     return $users;
   }
 

@@ -39,16 +39,10 @@ class Registration {
    */
   private $group_id;
 
-  /**
-   * @ORM\Column(type="integer", length=10, nullable=false)
-   */
-  private $rnd_number;
-
   public function __construct(Game $game, User $user = null, int $group_id = null) {
     $this->game = $game;
     $this->user = $user;
     $this->group_id = $group_id;
-    $this->rnd_number = rand(1, 1000000);
   }
 
   public function getId(): int {
@@ -69,14 +63,6 @@ class Registration {
 
   public function getGroup(): Group {
     return Group::getByID($this->group_id);
-  }
-
-  public function getRandomNumber(): int {
-    return $this->rnd_number;
-  }
-
-  public static function compare(Registration $registration1, Registration $registration2): int {
-    return $registration1->getRandomNumber() <=> $registration2->getRandomNumber();
   }
 
   public function getName(){

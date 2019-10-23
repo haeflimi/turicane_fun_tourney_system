@@ -556,7 +556,7 @@ class Tfts {
     if (Config::get('tfts.rankingSnapshots') != 1) {
       return false;
     }
-    
+
     $rankings = $this->getLan()->getRankings();
     // check we have a ranking first
     if (sizeof($rankings) == 0) {
@@ -882,12 +882,9 @@ class Tfts {
       throw new Exception("Pools have already been created");
     }
 
-    // sort registrations for shuffeling reasons
-    $registrations = $game->getRegistrations()->toArray();
-    usort($registrations, 'Tfts\Registration::compare');
-
     // read users from registrations
     $users = new ArrayCollection();
+    $registrations = $game->getRegistrations()->toArray();
     foreach ($registrations as $registration) {
       $users->add($registration->getUser());
     }
@@ -1332,16 +1329,22 @@ class Tfts {
       $pools->add($pool);
     }
 
-    // fill
-    for ($idx = 0; $idx < sizeof($users); $idx++) {
-      $user = $users->get($idx);
-      $pool = $pools->get($idx % sizeof($pools));
+    // sort pool users for shuffeling reasons
+    $poolUsers = $users->map(function($user) {
+              return new PoolUser($user);
+            })->toArray();
+    usort($poolUsers, 'Tfts\PoolUser::compareRandomNumber');
 
-      $this->em->persist(new PoolUser($pool, $user));
+    // fill
+    for ($idx = 0; $idx < sizeof($poolUsers); $idx++) {
+      $poolUser = $poolUsers[$idx];
+      $pool = $pools->get($idx % sizeof($pools));
+      $poolUser->setPool($pool);
+      $this->em->persist($poolUser);
 
       // first user in pool is always host
       if (is_null($pool->getHost())) {
-        $pool->setHost($user);
+        $pool->setHost($poolUser->getUser());
         $this->em->persist($pool);
       }
     }
