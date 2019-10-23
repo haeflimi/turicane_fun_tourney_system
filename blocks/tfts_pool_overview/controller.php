@@ -53,7 +53,7 @@ class Controller extends BlockController {
       $this->set('in_pool', sizeof($registeredGroups) > 0);
     } else {
       //determine if user is am member of the pool
-      $this->set('in_pool', is_object($tfts->findUserRegistration($game, $current_user)));
+      $this->set('in_pool', $current_user->isLoggedIn() ? is_object($tfts->findUserRegistration($game, $current_user)) : false);
     }
 
     $this->set('tfts', $tfts);

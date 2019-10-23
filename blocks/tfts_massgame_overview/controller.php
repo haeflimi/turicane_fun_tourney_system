@@ -48,7 +48,7 @@ class Controller extends BlockController {
     $game = $em->getRepository('Tfts\Game')->findOneBy(['game_page_id' => $page->getCollectionId()]);
     $this->set('tfts_game_id', $game->getId());
 
-    $this->set('in_pool', is_object($tfts->findUserRegistration($game, $current_user)));
+    $this->set('in_pool', $current_user->isLoggedIn() ? is_object($tfts->findUserRegistration($game, $current_user)) : false);
 
     $this->set('tfts', $tfts);
     $this->set('current_user', $current_user);
