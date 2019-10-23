@@ -157,7 +157,7 @@ class Controller extends Package {
   public function registerRoutes() {
     $router = $this->app->make('router');
     // This Route is needed to "capture" the Data sent by the Trackmania result logger
-    $router->post('/tfts/api/trackmania', 'Tfts\Tfts::processTrackmaniaData');
+    $router->post('/tfts/api/map', 'Tfts\Tfts::processMapData');
     // Register routes for getting list Data
     $router->get('/tfts/api/rankingList', 'Tfts\Tfts::getRankingList');
     // $router->get('/tfts/api/trackmaniaRankingList', 'Tfts\Tfts::getTrackmaniaRankingList');

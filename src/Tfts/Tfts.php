@@ -710,13 +710,17 @@ class Tfts {
       } else {
         $when = '~' . floor($passedTime / 3600) . ' h';
       }
+      $millis = round($record->getRecord() % 1000 / 10, 0);
+      if ($millis < 10) {
+        $millis = '0' . $millis;
+      }
       $rankingList[$key + 1] = [
           'user' => $user->getUserName(),
           'user_id' => $user->getUserId(),
           'user_profile' => '/members/profile/' . $user->getUserId(),
           'rank' => $this->getMapRank($map, $user),
           'when' => $when,
-          'record' => date('i:s', $record->getRecord() / 1000) . '.' . ($record->getRecord() % 1000)
+          'record' => date('i:s', $record->getRecord() / 1000) . '.' . $millis
       ];
     }
     return $rankingList;
@@ -743,17 +747,18 @@ class Tfts {
   }
 
   /**
-   * Processes the data provided which is considered to be a trackmania result.
-   * In order to be processed, the password must match and the user must exist.
+   * Processes the data provided which is considered to be a map record.
+   * In order to be processed, the password must match, the game id and the 
+   * user must exist.
    *
    * @return JsonResponse result of the process.
    */
-  public function processTrackmaniaData(): JsonResponse {
+  public function processMapData(): JsonResponse {
     $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
-    if ($password != Config::get('tfts.trackmaniaApiPassword')) {
+    if ($password != Config::get('tfts.mapApiPassword')) {
       return new JsonResponse('Invalid password');
     }
-    
+
     // verify that game exists
     $game_id = filter_input(INPUT_POST, 'game_id', FILTER_SANITIZE_NUMBER_INT);
     $game = Game::getById($game_id);

@@ -26,7 +26,7 @@ class Tfts extends DashboardPageController {
     $this->set('systemActive', $config->get('tfts.systemActive'));
     $this->set('maxUserVsUser', $config->get('tfts.maxUserVsUser'));
     $this->set('maxTeamVsTeam', $config->get('tfts.maxTeamVsTeam'));
-    $this->set('trackmaniaApiPassword', $config->get('tfts.trackmaniaApiPassword'));
+    $this->set('mapApiPassword', $config->get('tfts.mapApiPassword'));
 
     $repository = $this->em->getRepository(Lan::class);
     $this->set('lans', $repository->findAll());
@@ -39,7 +39,7 @@ class Tfts extends DashboardPageController {
     $config->save('tfts.systemActive', $this->post('systemActive') == 1 ? 1 : 0);
     $config->save('tfts.maxUserVsUser', $this->post('maxUserVsUser'));
     $config->save('tfts.maxTeamVsTeam', $this->post('maxTeamVsTeam'));
-    $config->save('tfts.trackmaniaApiPassword', $this->post('trackmaniaApiPassword'));
+    $config->save('tfts.mapApiPassword', $this->post('mapApiPassword'));
 
     $page = \Page::getCurrentPage();
     $this->redirect($page->getCollectionPath());

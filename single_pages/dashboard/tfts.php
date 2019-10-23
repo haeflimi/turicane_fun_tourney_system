@@ -34,8 +34,8 @@
         <td><input type="text" name="maxTeamVsTeam" value="<?= $maxTeamVsTeam ?>"/></td>
       </tr>
       <tr>
-        <th>Trackmania API password:</th>
-        <td><input type="text" name="trackmaniaApiPassword" value="<?= $trackmaniaApiPassword ?>"/></td>
+        <th>Map API password:</th>
+        <td><input type="text" name="mapApiPassword" value="<?= $mapApiPassword ?>"/></td>
       </tr>
     </tbody>
   </table>
