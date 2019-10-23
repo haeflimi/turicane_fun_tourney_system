@@ -787,36 +787,20 @@ class Tfts {
 
     // split record to milliseconds
     $record = filter_input(INPUT_POST, 'record', FILTER_SANITIZE_STRING);
-    $split = explode(".", $record);
-    $milliseconds = intval($split[1]);
-    $hms = explode(":", $split[0]);
-    switch (sizeof($hms)) {
-      case 1:
-        $milliseconds += intval($hms[0]) * 1000;
-        break;
-      case 2:
-        $milliseconds += (intval($hms[0]) * 60 + intval($hms[1])) * 1000;
-        break;
-      case 3:
-        $milliseconds += (intval($hms[0]) * 3600 + intval($hms[1]) * 60 + intval($hms[3])) * 1000;
-        break;
-      default:
-        return new JsonResponse('Invalid record: ' . $record);
-    }
 
     $record_repository = $this->em->getRepository(MapRecord::class);
     $current_record = $record_repository->findOneBy(['map' => $map, 'user' => $user->getUserId()]);
     // new?
     if (is_null($current_record)) {
-      $this->em->persist(new MapRecord($this->userToEntity($user), $map, $datetime, $milliseconds));
+      $this->em->persist(new MapRecord($this->userToEntity($user), $map, $datetime, $record));
       $this->em->flush();
       return new JsonResponse('Added new record');
     }
 
     // improvement?
-    if ($milliseconds < $current_record->getRecord()) {
+    if ($record < $current_record->getRecord()) {
       $current_record->setDateTime($datetime);
-      $current_record->setRecord($milliseconds);
+      $current_record->setRecord($record);
       $this->em->persist($current_record);
       $this->em->flush();
       return new JsonResponse('Record improved');
