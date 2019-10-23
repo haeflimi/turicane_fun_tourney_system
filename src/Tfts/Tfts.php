@@ -1324,7 +1324,7 @@ class Tfts {
 
     // create
     for ($idx = 1; $idx <= $count; $idx++) {
-      $pool = new Pool($game, 'Pool ' . $idx);
+      $pool = new Pool($game, $count > 1 ? 'Pool ' . $idx : 'Final');
       $this->em->persist($pool);
       $pools->add($pool);
     }

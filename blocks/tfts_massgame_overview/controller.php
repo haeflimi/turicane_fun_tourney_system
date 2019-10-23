@@ -41,7 +41,6 @@ class Controller extends BlockController {
 
     $page = Page::getCurrentPage();
     $this->set('is_mass', $page->getAttribute('tfts_game_is_mass'));
-    $this->set('is_pool', $page->getAttribute('tfts_game_is_pool'));
     $this->set('is_team', $page->getAttribute('tfts_game_is_team'));
 
     //get the game from the page the block is inserted in
