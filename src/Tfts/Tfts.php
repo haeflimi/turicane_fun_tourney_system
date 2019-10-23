@@ -710,17 +710,13 @@ class Tfts {
       } else {
         $when = '~' . floor($passedTime / 3600) . ' h';
       }
-      $millis = round($record->getRecord() % 1000 / 10, 0);
-      if ($millis < 10) {
-        $millis = '0' . $millis;
-      }
       $rankingList[$key + 1] = [
           'user' => $user->getUserName(),
           'user_id' => $user->getUserId(),
           'user_profile' => '/members/profile/' . $user->getUserId(),
           'rank' => $this->getMapRank($map, $user),
           'when' => $when,
-          'record' => date('i:s', $record->getRecord() / 1000) . '.' . $millis
+          'record' => $record->getRecord()
       ];
     }
     return $rankingList;

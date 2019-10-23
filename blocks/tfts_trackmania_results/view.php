@@ -15,7 +15,15 @@ defined('C5_EXECUTE') or die('Access Denied.');
             <?php foreach ($rankingList as $ranking): ?>
               <tr>
                 <td><?= $ranking['rank'] ?></td>
-                <td><?= $ranking['record'] ?></td>
+                <td>
+                  <?php
+                  $centis = $ranking['record'] % 100;
+                  if ($centis < 10) {
+                    $centis = '0' . $centis;
+                  }
+                  echo date('i:s', $ranking['record'] / 100) . '.' . $centis;
+                  ?>
+                </td>
                 <td><a data-toggle="modal" data-target="#modal"
                        data-source="<?= $ranking['user_profile'] ?>"
                        class="btn btn-round btn-outline-primary btn-sm"><i
