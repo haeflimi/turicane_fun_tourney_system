@@ -3,6 +3,7 @@
 namespace Concrete\Package\TuricaneFunTourneySystem\Block\TftsTrackmaniaResults;
 
 use Concrete\Core\Block\BlockController;
+use Page;
 use Tfts\Tfts;
 use Tfts\Map;
 
@@ -41,10 +42,13 @@ class Controller extends BlockController {
     $this->requireAsset('javascript', 'slimScroll');
     $this->requireAsset('javascript', 'timeago');
 
+    $page = Page::getCurrentPage();
+    $game = $em->getRepository('Tfts\Game')->findOneBy(['game_page_id' => $page->getCollectionId()]);
+
     $tfts = new Tfts();
     $rankingLists = [];
     $repository = $em->getRepository(Map::class);
-    foreach ($repository->findAll() as $map) {
+    foreach ($repository->findBy(['lan' => $game->getLan()]) as $map) {
       $rankingLists[$map->getName()] = $tfts->getTrackmaniaRankingList($map->getId());
     }
     $this->set('tmRankingLists', $rankingLists);
