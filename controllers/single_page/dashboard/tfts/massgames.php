@@ -3,6 +3,7 @@
 namespace Concrete\Package\TuricaneFunTourneySystem\Controller\SinglePage\Dashboard\Tfts;
 
 use Concrete\Core\Page\Controller\DashboardPageController;
+use Concrete\Core\Support\Facade\Config;
 use Tfts\Game;
 use Tfts\Tfts;
 
@@ -22,7 +23,7 @@ class Massgames extends DashboardPageController {
   public function view() {
     $repository = $this->em->getRepository(Game::class);
     $games = [];
-    foreach ($repository->findAll() as $game) {
+    foreach ($repository->findBy(['lan' => Config::get('tfts.currentLanId')]) as $game) {
       $page = $game->getGamePage();
       if ($page->getAttribute('tfts_game_is_mass')) {
         $games[] = $game;
