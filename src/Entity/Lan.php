@@ -62,7 +62,7 @@ class Lan {
     return $this->lan_id;
   }
 
-  public function getHandle(): String {
+  public function getHandle(): string {
     return $this->handle;
   }
 

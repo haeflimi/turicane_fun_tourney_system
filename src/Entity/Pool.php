@@ -64,7 +64,7 @@ class Pool {
    */
   private $children;
 
-  public function __construct(Game $game, String $name) {
+  public function __construct(Game $game, string $name) {
     $this->game = $game;
     $this->pool_name = $name;
 
@@ -77,7 +77,7 @@ class Pool {
     return $this->pool_id;
   }
 
-  public function getName(): String {
+  public function getName(): string {
     return $this->pool_name;
   }
 

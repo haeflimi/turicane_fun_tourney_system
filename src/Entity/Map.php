@@ -39,7 +39,7 @@ class Map {
    */
   private $game;
 
-  public function __construct(Game $game, String $map_name) {
+  public function __construct(Game $game, string $map_name) {
     $this->game = $game;
     $this->map_name = $map_name;
   }
@@ -48,7 +48,7 @@ class Map {
     return $this->map_id;
   }
 
-  public function getName(): String {
+  public function getName(): string {
     return $this->map_name;
   }
 

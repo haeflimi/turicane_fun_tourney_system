@@ -276,7 +276,7 @@ class Match {
     }
   }
 
-  public function getChallengerName(): String {
+  public function getChallengerName(): string {
     if ($this->getGroup1Id()) {
       return Group::getByID($this->getGroup1Id())->getGroupName();
     }
@@ -290,7 +290,7 @@ class Match {
     return $this->getUser1()->getUserID();
   }
 
-  public function getChallengedName(): String {
+  public function getChallengedName(): string {
     if ($this->getGroup2Id()) {
       return Group::getByID($this->getGroup2Id())->getGroupName();
     }

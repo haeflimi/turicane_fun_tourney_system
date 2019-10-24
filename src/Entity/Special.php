@@ -41,7 +41,7 @@ class Special {
    */
   private $lan;
 
-  public function __construct(Lan $lan, User $user, String $description, int $points) {
+  public function __construct(Lan $lan, User $user, string $description, int $points) {
     $this->lan = $lan;
     $this->user = $user;
     $this->special_description = $description;
@@ -60,7 +60,7 @@ class Special {
     return $this->user;
   }
 
-  public function getDescription(): String {
+  public function getDescription(): string {
     return $this->special_description;
   }
 

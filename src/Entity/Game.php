@@ -116,7 +116,7 @@ class Game {
   /**
    * The Following Getter Methods make use of c5 specific Features to store Game Information in Pages
    */
-  public function getName(): String {
+  public function getName(): string {
     if (!is_object($game_page = $this->getGamePage())) {
       return $this->game_handle;
     }
