@@ -2,6 +2,7 @@
 
 namespace Concrete\Package\TuricaneFunTourneySystem\Controller\SinglePage\Dashboard\Tfts;
 
+use Concrete\Core\User\UserList;
 use Concrete\Core\Page\Controller\DashboardPageController;
 use Concrete\Core\Support\Facade\Config;
 use Tfts\Special;
@@ -23,7 +24,21 @@ class Specials extends DashboardPageController {
   public function view() {
     $repository = $this->em->getRepository(Special::class);
 
+    $userList = new UserList();
+    $userList->sortByUserName();
+    $this->set('users', $userList->getResults());
     $this->set('specials', $repository->findBy(['lan' => Config::get('tfts.currentLanId')]));
+  }
+
+  public function addSpecial() {
+    $tfts = new Tfts();
+    try {
+      $tfts->addSpecial($this->post('user_id'), $this->post('description'), $this->post('points'));
+    } catch (Exception $ex) {
+      // @TODO: show exception in a user-readable form
+      throw $ex;
+    }
+    $this->reloadPage();
   }
 
   public function deleteSpecial() {

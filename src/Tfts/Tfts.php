@@ -1091,6 +1091,27 @@ class Tfts {
     $this->em->persist($poolUser);
     $this->em->flush();
   }
+  
+  /**
+   * Adds the special to the given user.
+   * 
+   * @param int $user_id
+   * @param string $description
+   * @param int $points
+   */
+  public function addSpecial(int $user_id, string $description, int $points) {
+    $user = $this->userToEntity(User::getByUserID($user_id));
+    if (strlen($description) == 0) {
+      throw new Exception("No description set");
+    }
+    if ($points == 0) {
+      throw new Exception("No points set");
+    }
+    $special = new Special($this->getLan(), $user, $description, $points);
+    $this->updatePoints($special->getUser(), $special->getPoints());
+    $this->em->persist($special);
+    $this->em->flush();
+  }
 
   /**
    * Deletes the given specials and removes the points from the user.
