@@ -21,8 +21,8 @@
           <?php endforeach; ?>
         </select>
       </td>
-      <td><input type="text" name="description" /></td>
-      <td><input type="text" name="points" value="0" /></td>
+      <td><input type="text" name="description" placeholder="Description"/></td>
+      <td><input type="text" name="points" placeholder="Points"/></td>
       <td><input type="submit" value="Add" /></td>
     </tr>
   </form>

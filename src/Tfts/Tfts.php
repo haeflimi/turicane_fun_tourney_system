@@ -1104,7 +1104,7 @@ class Tfts {
     if (strlen($description) == 0) {
       throw new Exception("No description set");
     }
-    if ($points == 0) {
+    if (intval($points) == 0) {
       throw new Exception("No points set");
     }
     $special = new Special($this->getLan(), $user, $description, $points);
