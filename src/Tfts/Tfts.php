@@ -723,26 +723,6 @@ class Tfts {
   }
 
   /**
-   * Adds the given points to the given user.
-   *
-   * @param User $user
-   * @param int $points
-   * @return bool true if the points have been added, false otherwise.
-   */
-  public function addPoints(User $user, int $points): bool {
-    $repository = $this->em->getRepository(Ranking::class);
-    $ranking = $repository->findOneBy(['lan' => $this->getLan(), 'user' => $user->getUserId()]);
-    if (is_null($ranking)) {
-      $ranking = new Ranking($this->getLan(), $this->userToEntity($user));
-    }
-
-    $ranking->setPoints($ranking->getPoints() + $points);
-    $this->em->persist($ranking);
-    $this->em->flush();
-    return true;
-  }
-
-  /**
    * Processes the data provided which is considered to be a map record.
    * In order to be processed, the password must match, the game id and the 
    * user must exist.
@@ -845,7 +825,7 @@ class Tfts {
       $description = 'Teilnahme ' . $map->getGame()->getName() . ' (#' . $rank . ', ' . $map->getName() . ')';
 
       $this->em->persist(new Special($map->getLan(), $record->getUser(), $description, $points));
-      $this->addPoints($this->entityToUser($record->getUser()), $points);
+      $this->updatePoints($record->getUser(), $points);
     }
 
     $map->setProcessed(true);
@@ -924,7 +904,7 @@ class Tfts {
           $usersToAdvance->add($poolUser->getUser());
         } else {
           $this->em->persist(new Special($this->getLan(), $poolUser->getUser(), 'Teilnahme ' . $game->getName(), 3));
-          $this->addPoints($this->entityToUser($poolUser->getUser()), 3);
+          $this->updatePoints($poolUser->getUser(), 3);
         }
       }
     }
@@ -971,7 +951,7 @@ class Tfts {
     foreach ($finalPool->getUsers() as $poolUser) {
       $points = array_key_exists($poolUser->getRank(), $awardedPoints) ? $awardedPoints[$poolUser->getRank()] : $awardedPoints['default'];
       $this->em->persist(new Special($this->getLan(), $poolUser->getUser(), 'Finale ' . $game->getName() . ' (#' . $poolUser->getRank() . ')', $points));
-      $this->addPoints($this->entityToUser($poolUser->getUser()), $points);
+      $this->updatePoints($poolUser->getUser(), $points);
     }
     $finalPool->setPlayed(true);
     $this->em->persist($finalPool);
@@ -980,19 +960,6 @@ class Tfts {
     // Dispatch a Event when a match is finalized
     $event = new \Symfony\Component\EventDispatcher\GenericEvent();
     \Events::dispatch('tfts_on_match_finsh', $event);
-  }
-
-  /**
-   * Determines if a user or group can challenge another user or team, based on 
-   * open challenges and open matches.
-   *
-   * @param Game $game
-   * @param $challenger_id
-   * @param $challenged_id
-   * @return bool
-   */
-  public function canCallenge(Game $game, int $challenger_id, int $challenged_id): bool {
-    
   }
 
   /**
@@ -1122,6 +1089,18 @@ class Tfts {
 
     $poolUser->setRank($rank);
     $this->em->persist($poolUser);
+    $this->em->flush();
+  }
+
+  /**
+   * Deletes the given specials and removes the points from the user.
+   * 
+   * @param int $special_id
+   */
+  public function deleteSpecial(int $special_id) {
+    $special = $this->em->find(Special::class, $special_id);
+    $this->updatePoints($special->getUser(), -$special->getPoints());
+    $this->em->remove($special);
     $this->em->flush();
   }
 
@@ -1263,14 +1242,14 @@ class Tfts {
 
     if ($match->getGame()->isGroup()) {
       foreach ($this->getMatchGroupUsers($match, $match->getGroup1Id()) as $matchGroupUser) {
-        $this->addPoints($this->entityToUser($matchGroupUser->getUser()), $compute1);
+        $this->updatePoints($matchGroupUser->getUser(), $compute1);
       }
       foreach ($this->getMatchGroupUsers($match, $match->getGroup2Id()) as $matchGroupUser) {
-        $this->addPoints($this->entityToUser($matchGroupUser->getUser()), $compute2);
+        $this->updatePoints($matchGroupUser->getUser(), $compute2);
       }
     } else {
-      $this->addPoints($this->entityToUser($match->getUser1()), $compute1);
-      $this->addPoints($this->entityToUser($match->getUser2()), $compute2);
+      $this->updatePoints($match->getUser1(), $compute1);
+      $this->updatePoints($match->getUser2(), $compute2);
     }
 
     // Dispatch a Event when a match is finalized
@@ -1341,6 +1320,24 @@ class Tfts {
       }
     }
     return $pools;
+  }
+
+  /**
+   * Adds the given points to the given user. Negative points are subtracted.
+   *
+   * @param UserEntity $user
+   * @param int $points
+   */
+  private function updatePoints(UserEntity $user, int $points) {
+    $repository = $this->em->getRepository(Ranking::class);
+    $ranking = $repository->findOneBy(['lan' => $this->getLan(), 'user' => $user->getUserId()]);
+    if (is_null($ranking)) {
+      $ranking = new Ranking($this->getLan(), $this->userToEntity($user));
+    }
+
+    $ranking->setPoints($ranking->getPoints() + $points);
+    $this->em->persist($ranking);
+    $this->em->flush();
   }
 
 }

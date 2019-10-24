@@ -1,18 +1,28 @@
 <?php defined('C5_EXECUTE') or die("Access Denied.");
 ?>
 
-<div class="ccm-dashboard-header-buttons btn-group">
-    <button class="btn btn-default" type="submit" name="action" value="add"><?=t('Add Game')?></button>
-</div>
-
-<div class="ccm-ui">
-    <?php foreach($games as $g): ?>
-        <div class="well"><?=$g->getName()?></div>
+<table class="table table-striped table-condensed">
+  <thead>
+    <tr>
+      <th>Player</th>
+      <th>Description</th>
+      <th>Points</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+  <tbody>
+    <?php foreach ($specials as $special): ?>
+      <tr>
+        <td><?= $special->getUser()->getUserName() ?></td>
+        <td><?= $special->getDescription() ?></td>
+        <td><?= $special->getPoints() ?></td>
+        <td>
+          <form method="post" name="specialForm<?= $special->getUser()->getUserId() ?>" action="<?php echo $this->action('deleteSpecial') ?>">
+            <input type="hidden" name="special_id" value="<?= $special->getId() ?>" /> 
+            <input type="submit" value="Delete" />
+          </form>
+        </td>
+      </tr>
     <?php endforeach; ?>
-</div>
-
-<div class="ccm-dashboard-form-actions-wrapper">
-    <div class="ccm-dashboard-form-actions">
-        <button class="pull-right btn btn-success" type="submit" ><?=t('Save')?></button>
-    </div>
-</div>
+  </tbody>
+</table>

@@ -3,7 +3,9 @@
 namespace Concrete\Package\TuricaneFunTourneySystem\Controller\SinglePage\Dashboard\Tfts;
 
 use Concrete\Core\Page\Controller\DashboardPageController;
-use Tfts\Game;
+use Concrete\Core\Support\Facade\Config;
+use Tfts\Special;
+use Tfts\Tfts;
 
 class Specials extends DashboardPageController {
 
@@ -19,9 +21,25 @@ class Specials extends DashboardPageController {
   }
 
   public function view() {
-    $repository = $this->em->getRepository(Game::class);
+    $repository = $this->em->getRepository(Special::class);
 
-    $this->set('games', $repository->findAll());
+    $this->set('specials', $repository->findBy(['lan' => Config::get('tfts.currentLanId')]));
+  }
+
+  public function deleteSpecial() {
+    $tfts = new Tfts();
+    try {
+      $tfts->deleteSpecial($this->post('special_id'));
+    } catch (Exception $ex) {
+      // @TODO: show exception in a user-readable form
+      throw $ex;
+    }
+    $this->reloadPage();
+  }
+
+  private function reloadPage() {
+    $page = \Page::getCurrentPage();
+    $this->redirect($page->getCollectionPath());
   }
 
 }
