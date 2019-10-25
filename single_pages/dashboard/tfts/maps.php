@@ -21,7 +21,19 @@
           <?php endforeach; ?>
         </select>
       </td>
-      <td><input type="text" name="map_name" placeholder="Name"/></td>
+      <td>
+        <input type="text" name="map_name" placeholder="Name"/>&nbsp;
+        Resolution:&nbsp;
+        <select name="map_data_resolution">
+          <option value="0">None</option>
+          <option value="-2">Centi</option>
+        </select>&nbsp;
+        Unit:&nbsp;
+        <select name="map_data_unit">
+          <option value="0">None</option>
+          <option value="1">Seconds</option>
+        </select>
+      </td>
       <td>&nbsp;</td>
       <td><input type="submit" value="Add" /></td>
     </tr>

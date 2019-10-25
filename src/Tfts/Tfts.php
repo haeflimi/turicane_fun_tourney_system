@@ -464,7 +464,7 @@ class Tfts {
    */
   public function reportResultGroupMatch(int $match_id, int $group_id, int $score1, int $score2, array $user_ids) {
     $this->verifySystemIsActive();
-    
+
     $match = Match::getById($match_id);
     $this->checkGroupMembers($match->getGroup1(), $match->getGroup2());
 
@@ -704,13 +704,27 @@ class Tfts {
       } else {
         $when = '~' . floor($passedTime / 3600) . ' h';
       }
+      $result = $record->getRecord() * pow(10, $map->getDataResolution());
+      switch ($map->getDataUnit()) {
+        case 0: // None
+          break;
+        case 1: // Seconds
+          $resolutionFactor = pow(10, abs($map->getDataResolution()));
+          $subseconds = '' . $record->getRecord() % $resolutionFactor + $resolutionFactor;
+          $subseconds = substr($subseconds, 1, strlen($subseconds));
+          $recordAsString = date('i:s', $result) . '.' . $subseconds;
+          break;
+        default:
+          throw new Exception('Unknown data unit');
+      }
+
       $rankingList[$key + 1] = [
           'user' => $user->getUserName(),
           'user_id' => $user->getUserId(),
           'user_profile' => '/members/profile/' . $user->getUserId(),
           'rank' => $this->getMapRank($map, $user),
           'when' => $when,
-          'record' => $record->getRecord()
+          'record' => $recordAsString
       ];
     }
     return $rankingList;
@@ -752,7 +766,7 @@ class Tfts {
     if (is_null($map)) {
       return new JsonResponse('Invalid map: ' . $map_name);
     }
-    
+
     // verify that map is not processed
     if ($map->isProcessed()) {
       return new JsonResponse('Map has already been processed: ' . $map_name);

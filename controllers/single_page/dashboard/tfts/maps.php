@@ -39,7 +39,6 @@ class Maps extends DashboardPageController {
     $userList->sortByUserName();
     $this->set('users', $userList->getResults());
 
-
     $this->set('tfts', new Tfts());
     $this->set('games', $games);
     $this->set('mapGames', $mapGames);
@@ -48,7 +47,7 @@ class Maps extends DashboardPageController {
   public function addMap() {
     try {
       $game = Game::getById($this->post('game_id'));
-      $this->em->persist(new Map($game, $this->post('map_name')));
+      $this->em->persist(new Map($game, $this->post('map_name'), $this->post('map_data_resolution'), $this->post('map_data_unit')));
       $this->em->flush();
     } catch (Exception $ex) {
       // @TODO: show exception in a user-readable form
