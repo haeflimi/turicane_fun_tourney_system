@@ -58,7 +58,7 @@ class Tfts {
    * @param Group $group
    * @return array a list of open group challenges.
    */
-  public function getOpenGroupChallengers(Group $group): array {
+  public function getOpenGroupChallenges(Group $group): array {
     $repo = $this->em->getRepository(Match::class);
     return $repo->findBy(['group2_id' => $group->getGroupId(), 'match_accepted' => 0]);
   }
@@ -464,7 +464,7 @@ class Tfts {
    */
   public function reportResultGroupMatch(int $match_id, int $group_id, int $score1, int $score2, array $user_ids) {
     $this->verifySystemIsActive();
-
+    
     $match = Match::getById($match_id);
     $this->checkGroupMembers($match->getGroup1(), $match->getGroup2());
 
@@ -1350,7 +1350,7 @@ class Tfts {
     $repository = $this->em->getRepository(Ranking::class);
     $ranking = $repository->findOneBy(['lan' => $this->getLan(), 'user' => $user->getUserId()]);
     if (is_null($ranking)) {
-      $ranking = new Ranking($this->getLan(), $this->userToEntity($user));
+      $ranking = new Ranking($this->getLan(), $user);
     }
 
     $ranking->setPoints($ranking->getPoints() + $points);
