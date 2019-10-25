@@ -196,7 +196,6 @@ class Tfts {
 
     $this->em->remove($match);
     $this->em->flush();
-    return true;
   }
 
   /**
@@ -657,15 +656,10 @@ class Tfts {
   /**
    * Compile the current Ranking List for async use in the Frontend
    *
-   * @param bool $lan
-   * @return false|string|JsonResponse
+   * @return string|JsonResponse
    */
-  public function getRankingList($lan = false) {
-    if (!$lan) {
-      $lan = $this->em->find('Tfts\Lan', Config::get('tfts.currentLanId'));
-    }
-
-    $rankings = $lan->getRankings()->toArray();
+  public function getRankingList() {
+    $rankings = $this->getLan()->getRankings()->toArray();
     usort($rankings, 'Tfts\Ranking::compare');
 
     $rankingList = [];
