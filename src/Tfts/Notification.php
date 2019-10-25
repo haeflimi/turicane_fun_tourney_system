@@ -46,15 +46,15 @@ class Notification {
 
     $winner_id = $match->getWinnerId();
     if ($winner_id == 0) {
-      $result = t('Draw!');
+      $result = t('draw');
     } else if ($winner_id == $id) {
-      $result = t('You won!');
+      $result = t('win');
     } else {
-      $result = t('You lost!');
+      $result = t('loss');
     }
 
     $score = '<strong>' . $match->getScore1() . ' : ' . $match->getScore2();
-    $text = t('<strong>%s</strong> has entered the following result for your <strong>%s</strong> match: %s <br/>%s', $opponent_name, $game_name, $score, $result);
+    $text = t('<strong>%s</strong> has entered the following result for your <strong>%s</strong> match: <br/>%s [%s]', $opponent_name, $game_name, $score, $result);
     $text .= "<input id='confirmResultUserMatchToken' type='hidden' value='" . $ccm_token_confirm . "'>";
     $text .= "<input id='declineResultUserMatchToken' type='hidden' value='" . $ccm_token_decline . "'>";
     $text .= '<div class="ccm-notification-inner-buttons form-inline">';
