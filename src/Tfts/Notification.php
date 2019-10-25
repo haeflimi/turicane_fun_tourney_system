@@ -42,19 +42,19 @@ class Notification {
     $match_id = $match->getId();
     $game_name = $match->getGame()->getName();
     $is_team = $match->getGame()->isGroup() ? 1 : 0;
-    $opponent_name = $match->getChallengerId() == $id ? $match->getChallengerName() : $match->getChallengedName();
+    $opponent_name = $match->getChallengerId() == $id ? $match->getChallengedName() : $match->getChallengerName();
 
+    $score = ' <strong>' . $match->getScore1() . ':' . $match->getScore2() . '</strong>.';
     $winner_id = $match->getWinnerId();
     if ($winner_id == 0) {
-      $result = t('draw');
+      $result = t('It was a draw - ') . $score;
     } else if ($winner_id == $id) {
-      $result = t('win');
+      $result = t('You won ') . $score;
     } else {
-      $result = t('loss');
+      $result = t('You lost ') . $score;
     }
 
-    $score = '<strong>' . $match->getScore1() . ' : ' . $match->getScore2();
-    $text = t('<strong>%s</strong> has entered the following result for your <strong>%s</strong> match: <br/>%s [%s]', $opponent_name, $game_name, $score, $result);
+    $text = t('<strong>%s</strong> has entered the following result for your <strong>%s</strong> match: <br/>%s', $opponent_name, $game_name, $result);
     $text .= "<input id='confirmResultUserMatchToken' type='hidden' value='" . $ccm_token_confirm . "'>";
     $text .= "<input id='declineResultUserMatchToken' type='hidden' value='" . $ccm_token_decline . "'>";
     $text .= '<div class="ccm-notification-inner-buttons form-inline">';
