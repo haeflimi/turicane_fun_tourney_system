@@ -1,6 +1,6 @@
 <?php
 
-namespace Concrete\Package\TuricaneFunTourneySystem\Block\TftsTrackmaniaResults;
+namespace Concrete\Package\TuricaneFunTourneySystem\Block\TftsMapResults;
 
 use Concrete\Core\Block\BlockController;
 use Page;
@@ -15,7 +15,7 @@ class Controller extends BlockController {
   protected $btCacheBlockOutputOnPost = true;
   protected $btCacheBlockOutputForRegisteredUsers = false;
   protected $btCacheBlockOutputLifetime = 300;
-  protected $btHandle = 'tfts_trackmania_results';
+  protected $btHandle = 'tfts_map_results';
 
   public function __construct($obj = null) {
     parent::__construct($obj);
@@ -26,7 +26,7 @@ class Controller extends BlockController {
   }
 
   public function getBlockTypeName() {
-    return t("TFTS Trackmania Results");
+    return t("TFTS Map Results");
   }
 
   public function save($args) {

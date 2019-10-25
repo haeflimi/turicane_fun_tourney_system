@@ -4,14 +4,14 @@
         <blocktype handle="tfts_live_ranking" package="turicane_fun_tourney_system"/>
         <blocktype handle="tfts_pool_overview" package="turicane_fun_tourney_system"/>
         <blocktype handle="tfts_massgame_overview" package="turicane_fun_tourney_system"/>
-        <blocktype handle="tfts_trackmania_results" package="turicane_fun_tourney_system"/>
+        <blocktype handle="tfts_map_results" package="turicane_fun_tourney_system"/>
     </blocktypes>
     <blocktypesets>
         <blocktypeset handle="tfts" name="Turicane TFTS" package="turicane_fun_tourney_system">
             <blocktype handle="tfts_live_ranking"/>
             <blocktype handle="tfts_pool_overview"/>
             <blocktype handle="tfts_massgame_overview"/>
-            <blocktype handle="tfts_trackmania_results"/>
+            <blocktype handle="tfts_map_results"/>
         </blocktypeset>
     </blocktypesets>
     <pagetypes>
