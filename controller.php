@@ -83,22 +83,30 @@ class Controller extends Package {
     // Register Event Listeners
     $this->registerEventListeners();
 
-    $current_user = new User();
+    $user = new User();
     $view = new View();
 
     // Check for open user challenges/confirmations to display
-    if ($current_user->isLoggedIn() && is_numeric(Config::get('tfts.currentLanId'))) {
+    if ($user->isLoggedIn() && is_numeric(Config::get('tfts.currentLanId'))) {
       $tfts = new Tfts();
       $tfts->createRankingSnapshot();
-      $challenges = $tfts->getOpenUserChallenges($current_user);
-      foreach ($challenges as $match) {
-        $notification = Core::make('helper/tfts/ui')->showUserChallenge($match);
+      foreach ($tfts->getOpenUserChallenges($user) as $match) {
+        $notification = Core::make('helper/tfts/ui')->showChallenge($match);
         $view->addFooterItem($notification);
       }
-      $confirmations = $tfts->getOpenUserConfirmations($current_user);
-      foreach ($confirmations as $match) {
-        $notification = Core::make('helper/tfts/ui')->confirmUserResult($match);
+      foreach ($tfts->getOpenUserConfirmations($user) as $match) {
+        $notification = Core::make('helper/tfts/ui')->confirmResult($match, $user->getUserId());
         $view->addFooterItem($notification);
+      }
+      foreach ($tfts->getAllUserGroups($user) as $group) {
+        foreach ($tfts->getOpenGroupChallenges($group) as $match) {
+          $notification = Core::make('helper/tfts/ui')->showChallenge($match);
+          $view->addFooterItem($notification);
+        }
+        foreach ($tfts->getOpenGroupConfirmations($group) as $match) {
+          $notification = Core::make('helper/tfts/ui')->confirmResult($match, $group->getGroupId());
+          $view->addFooterItem($notification);
+        }
       }
     }
   }
