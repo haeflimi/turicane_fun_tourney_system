@@ -15,7 +15,7 @@ var Tfts = {
               ccm_token: ccm_token,
               action: 'joinPool'
             }, function () {
-      Tfts.success('You are now subscribed to this TFTS Pool');
+      Tfts.success('You have joined this TFTS Pool!');
       window.location.reload();
     }).fail(function (response) {
       Tfts.error(response.responseJSON.error.message);
@@ -30,7 +30,7 @@ var Tfts = {
               ccm_token: ccm_token,
               action: 'leavePool'
             }, function () {
-      Tfts.success('You are now unsubscribed from this TFTS Pool');
+      Tfts.success('You have left this TFTS Pool!');
       window.location.reload();
     }).fail(function (response) {
       Tfts.error(response.responseJSON.error.message);
@@ -46,7 +46,7 @@ var Tfts = {
               ccm_token: ccm_token,
               action: 'createChallenge'
             }, function () {
-      Tfts.success('Your challenge has been sent to ' + challenged_name);
+      Tfts.success('Your challenge has been sent to ' + challenged_name + '!');
       window.location.reload();
     }).fail(function (response) {
       Tfts.error(response.responseJSON.error.message);
@@ -61,7 +61,7 @@ var Tfts = {
               ccm_token: ccm_token,
               action: 'withdrawChallenge'
             }, function () {
-      Tfts.success('Your challenge has been withdrawn');
+      Tfts.success('Your challenge has been withdrawn!');
       window.location.reload();
     }).fail(function (response) {
       Tfts.error(response.responseJSON.error.message);
@@ -77,7 +77,7 @@ var Tfts = {
               action: 'acceptChallenge'
             }, function (data) {
       PNotify.removeAll();
-      Tfts.success('Challenge accepted');
+      Tfts.success('You accepted the challenge!');
       window.location.reload();
     }).fail(function (response) {
       Tfts.error(response.responseJSON.error.message);
@@ -93,7 +93,7 @@ var Tfts = {
               action: 'declineChallenge'
             }, function () {
       PNotify.removeAll();
-      Tfts.success('Challenge declined');
+      Tfts.success('You declined the challenge!');
       window.location.reload();
     }).fail(function (response) {
       Tfts.error(response.responseJSON.error.message);
@@ -117,7 +117,7 @@ var Tfts = {
               action: 'reportResultMatch'
             }, function () {
       PNotify.removeAll();
-      Tfts.success('Result reported');
+      Tfts.success('You reported the result for the match!');
       window.location.reload();
     }).fail(function (response) {
       Tfts.error(response.responseJSON.error.message);
@@ -133,7 +133,7 @@ var Tfts = {
               action: 'cancelMatch'
             }, function () {
       PNotify.removeAll();
-      Tfts.success('Match cancelled');
+      Tfts.success('You cancelled the match!');
       window.location.reload();
     }).fail(function (response) {
       Tfts.error(response.responseJSON.error.message);
