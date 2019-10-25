@@ -751,14 +751,17 @@ class Tfts {
     }
     $user = $userList->getResults()[0]->getUserObject();
 
-    // create map if necessary
+    // verify that map exists
     $map_name = filter_input(INPUT_POST, 'map_name', FILTER_SANITIZE_STRING);
     $map_repository = $this->em->getRepository(Map::class);
     $map = $map_repository->findOneBy(['game' => $game, 'map_name' => $map_name]);
     if (is_null($map)) {
-      $map = new Map($game, $map_name);
-      $this->em->persist($map);
-      $this->em->flush();
+      return new JsonResponse('Invalid map: ' . $map_name);
+    }
+    
+    // verify that map is not processed
+    if ($map->isProcessed()) {
+      return new JsonResponse('Map has already been processed: ' . $map_name);
     }
 
     // prepare datetime object
@@ -824,7 +827,7 @@ class Tfts {
       $points = array_key_exists($rank, $awardedPoints) ? $awardedPoints[$rank] : $awardedPoints['default'];
       $description = 'Teilnahme ' . $map->getGame()->getName() . ' (#' . $rank . ', ' . $map->getName() . ')';
 
-      $this->em->persist(new Special($map->getLan(), $record->getUser(), $description, $points));
+      $this->em->persist(new Special($map->getGame()->getLan(), $record->getUser(), $description, $points));
       $this->updatePoints($record->getUser(), $points);
     }
 
@@ -1091,7 +1094,7 @@ class Tfts {
     $this->em->persist($poolUser);
     $this->em->flush();
   }
-  
+
   /**
    * Adds the special to the given user.
    * 

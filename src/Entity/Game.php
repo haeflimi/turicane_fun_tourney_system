@@ -52,9 +52,9 @@ class Game {
   private $pools;
 
   /**
-   * @ORM\OneToMany(targetEntity="Tfts\MapRecord", mappedBy="game")
+   * @ORM\OneToMany(targetEntity="Tfts\Map", mappedBy="game")
    */
-  private $mapRecords;
+  private $maps;
   private $game_page;
 
   public function __construct($game_handle) {
@@ -225,8 +225,8 @@ class Game {
                     });
   }
 
-  public function getMapRecords(): Collection {
-    return $this->mapRecords;
+  public function getMaps(): Collection {
+    return $this->maps;
   }
 
 }

@@ -34,7 +34,7 @@ class Map {
   private $mapRecords;
 
   /**
-   * @ORM\ManyToOne(targetEntity="Tfts\Game", inversedBy="mapRecords")
+   * @ORM\ManyToOne(targetEntity="Tfts\Game", inversedBy="maps")
    * @ORM\JoinColumn(name="game_id", referencedColumnName="game_id", nullable=false)
    */
   private $game;
