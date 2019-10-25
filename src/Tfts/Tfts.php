@@ -688,7 +688,7 @@ class Tfts {
    *
    * @return array
    */
-  public function getMapRankingList(int $map_id): array {
+  public function getMapRankingList(int $map_id, bool $absoluteRecord = false): array {
     $map = $this->em->find(Map::class, $map_id);
     $records = $map->getRecords()->toArray();
     usort($records, 'Tfts\MapRecord::compare');
@@ -704,18 +704,23 @@ class Tfts {
       } else {
         $when = '~' . floor($passedTime / 3600) . ' h';
       }
-      $result = $record->getRecord() * pow(10, $map->getDataResolution());
-      switch ($map->getDataUnit()) {
-        case 0: // None
-          break;
-        case 1: // Seconds
-          $resolutionFactor = pow(10, abs($map->getDataResolution()));
-          $subseconds = '' . $record->getRecord() % $resolutionFactor + $resolutionFactor;
-          $subseconds = substr($subseconds, 1, strlen($subseconds));
-          $recordAsString = date('i:s', $result) . '.' . $subseconds;
-          break;
-        default:
-          throw new Exception('Unknown data unit');
+      if ($absoluteRecord) {
+        $recordAsString = $record->getRecord();
+      } else {
+        $result = $record->getRecord() * pow(10, $map->getDataResolution());
+        switch ($map->getDataUnit()) {
+          case 0: // None
+            $recordAsString = $result;
+            break;
+          case 1: // Seconds
+            $resolutionFactor = pow(10, abs($map->getDataResolution()));
+            $subseconds = '' . $record->getRecord() % $resolutionFactor + $resolutionFactor;
+            $subseconds = substr($subseconds, 1, strlen($subseconds));
+            $recordAsString = date('i:s', $result) . '.' . $subseconds;
+            break;
+          default:
+            throw new Exception('Unknown data unit');
+        }
       }
 
       $rankingList[$key + 1] = [

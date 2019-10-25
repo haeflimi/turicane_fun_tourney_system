@@ -101,7 +101,8 @@ class Maps extends DashboardPageController {
         $record->setRecord($this->post('record'));
         $this->em->persist($record);
       } else {
-        throw new Exception('Invalid action');
+        $this->reloadPage();
+        return;
       }
       $this->em->flush();
     } catch (Exception $ex) {

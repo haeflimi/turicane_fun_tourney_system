@@ -48,7 +48,7 @@
         <td><?= $map->getName() ?></td>
         <td>
           <ol>
-            <?php foreach ($tfts->getMapRankingList($map->getId()) as $record): ?>
+            <?php foreach ($tfts->getMapRankingList($map->getId(), true) as $record): ?>
               <form method="post" name="recordForm<?= $map->getId() ?>" action="<?php echo $this->action('modifyRecord') ?>">
                 <input type="hidden" name="map_id" value="<?= $map->getId() ?>" /> 
                 <input type="hidden" name="user_id" value="<?= $record['user_id'] ?>" />
