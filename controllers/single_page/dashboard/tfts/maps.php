@@ -11,7 +11,7 @@ use Tfts\Game;
 use Tfts\Map;
 use Tfts\MapRecord;
 
-class Trackmania extends DashboardPageController {
+class Maps extends DashboardPageController {
 
   public function __construct($obj = null) {
     parent::__construct($obj);
@@ -21,7 +21,7 @@ class Trackmania extends DashboardPageController {
   }
 
   public function getCollectionDescription() {
-    return t("Manage the trackmania maps within the Turicane Fun Turney System");
+    return t("Manage the maps within the Turicane Fun Turney System");
   }
 
   public function view() {

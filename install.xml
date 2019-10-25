@@ -27,7 +27,7 @@
         </page>
         <page name="Specials" path="/dashboard/tfts/specials" filename="/dashboard/tfts/specials.php" package="turicane_fun_tourney_system">
         </page>
-        <page name="Trackmania" path="/dashboard/tfts/trackmania" filename="/dashboard/tfts/trackmania.php" package="turicane_fun_tourney_system">
+        <page name="Maps" path="/dashboard/tfts/maps" filename="/dashboard/tfts/maps.php" package="turicane_fun_tourney_system">
         </page>
         <page name="TFTS" path="/dashboard/tfts" filename="/dashboard/tfts.php" package="turicane_fun_tourney_system">
         </page>
