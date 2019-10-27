@@ -993,7 +993,7 @@ class Tfts {
           return $group->getGroupId();
         }
       }
-      throw new Exception('User has no group relation to match');
+      return 0;
     } else {
       return $user->getUserID();
     }
