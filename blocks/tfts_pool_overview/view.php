@@ -212,10 +212,12 @@ endif;
                                value="<?= Core::make('token')->generate('reportResultMatch'); ?>"/>&nbsp;
                         <input class="form-control form-control-sm" type="number"
                                placeholder="<?= $match->getChallengerName() ?>" name="score1"
-                               value="<?= $match->getScore1() ?>"/>&nbsp;
+                               value="<?= $match->getScore1() ?>"
+                               autocomplete="off"/>&nbsp;
                         <input class="form-control form-control-sm" type="number"
                                placeholder="<?= $match->getChallengedName() ?>" name="score2"
-                               value="<?= $match->getScore2() ?>"/>&nbsp;
+                               value="<?= $match->getScore2() ?>"
+                               autocomplete="off"/>&nbsp;
                         <button type="button" class="btn btn-transparent btn-sm pull-right"
                                 onclick="Tfts.reportResultMatch(<?= $match->getId() ?>, <?= $tfts->getActiveId($current_user, $match) ?>, <?= $is_team ?>);"><?= t('Report result') ?></button>&nbsp;
 
