@@ -21,8 +21,6 @@
         </pagetype>
     </pagetypes>
     <singlepages>
-        <page name="Games" path="/dashboard/tfts/games" filename="/dashboard/tfts/games.php" package="turicane_fun_tourney_system">
-        </page>
         <page name="Massgames" path="/dashboard/tfts/massgames" filename="/dashboard/tfts/massgames.php" package="turicane_fun_tourney_system">
         </page>
         <page name="Specials" path="/dashboard/tfts/specials" filename="/dashboard/tfts/specials.php" package="turicane_fun_tourney_system">
