@@ -100,20 +100,25 @@ var Tfts = {
     });
   },
   reportResultMatch: function (match_id, id, is_team, score1, score2) {
-    var data = new FormData(document.querySelector('#resultForm' + match_id));
-    if (data.get('score1').length == 0 || data.get('score2').length == 0) {
-      Tfts.error('Score can not be empty');
-      return;
+    var query = document.querySelector('#resultForm' + match_id);
+    var ccm_token = null;
+    var user_ids = null;
+    if (query !== null) {
+      var data = new FormData(query);
+      score1 = data.get('score1');
+      score2 = data.get('score2');
+      ccm_token = data.get('ccm_token');
+      user_ids = data.getAll('user_ids');
     }
     $.post(
             "/tfts/api/action", {
               match_id: match_id,
               id: id,
               is_team: is_team,
-              ccm_token: data.get('ccm_token'),
-              score1: score1 ? score1 : data.get('score1'),
-              score2: score2 ? score2 : data.get('score2'),
-              user_ids: data.getAll('user_ids'),
+              ccm_token: ccm_token,
+              score1: score1,
+              score2: score2,
+              user_ids: user_ids,
               action: 'reportResultMatch'
             }, function () {
       PNotify.removeAll();
