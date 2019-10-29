@@ -4,6 +4,7 @@
 <table class="table table-striped table-condensed">
   <thead>
     <tr>
+      <th>Date</th>
       <th>Player</th>
       <th>Description</th>
       <th>Points</th>
@@ -13,6 +14,7 @@
   <tbody>
   <form method="post" name="addSpecialForm" class="form-inline" action="<?php echo $this->action('addSpecial') ?>">
     <tr>
+      <td></td>
       <td>
         <select name="user_id" class="form-control">
           <option value="0">Select user</option>
@@ -28,6 +30,7 @@
   </form>
   <?php foreach ($specials as $special): ?>
     <tr>
+      <td><?= $special->getDate()->format('d.m.Y H:i:s') ?></td>
       <td><?= $special->getUser()->getUserName() ?></td>
       <td><?= $special->getDescription() ?></td>
       <td><?= $special->getPoints() ?></td>

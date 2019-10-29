@@ -16,7 +16,7 @@ class Tfts extends DashboardPageController {
   }
 
   public function getCollectionDescription() {
-    return t("Manage the configuration of the Turicane Fun Turney System");
+    return t("Manage the configuration of the Turicane Fun Tourney System");
   }
 
   public function view() {

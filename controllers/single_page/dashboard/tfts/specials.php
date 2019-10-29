@@ -18,7 +18,7 @@ class Specials extends DashboardPageController {
   }
 
   public function getCollectionDescription() {
-    return t("Manage the specials within the Turicane Fun Turney System");
+    return t("Manage the specials within the Turicane Fun Tourney System");
   }
 
   public function view() {

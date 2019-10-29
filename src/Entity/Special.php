@@ -30,6 +30,11 @@ class Special {
   private $special_description;
 
   /**
+   * @ORM\Column(type="datetime", nullable=true)
+   */
+  private $special_date;
+
+  /**
    * @ORM\ManyToOne(targetEntity="Concrete\Core\Entity\User\User")
    * @ORM\JoinColumn(name="user_id", referencedColumnName="uID")
    */
@@ -46,6 +51,7 @@ class Special {
     $this->user = $user;
     $this->special_description = $description;
     $this->special_points = $points;
+    $this->special_date = new \DateTime("now");
   }
 
   public function getId(): int {
@@ -62,6 +68,10 @@ class Special {
 
   public function getDescription(): string {
     return $this->special_description;
+  }
+
+  public function getDate(): \DateTime {
+    return $this->special_date;
   }
 
   public function getPoints(): int {
