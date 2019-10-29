@@ -2,12 +2,15 @@
 
 namespace Concrete\Package\TuricaneFunTourneySystem;
 
+//use Concrete\Core\Page\Single as SinglePage;
+//use Concrete\Core\Block\BlockType\BlockType;
 use Concrete\Core\Asset\AssetList;
 use Concrete\Core\Database\CharacterSetCollation\Exception;
 use Concrete\Core\Http\Response;
 use Concrete\Core\Package\Package;
 use Concrete\Core\Backup\ContentImporter;
 use Concrete\Core\User\User;
+use Concrete\Core\User\Group\Group;
 use Concrete\Core\View\View;
 use Concrete\Core\Support\Facade\Events;
 use Pusher\Pusher;
@@ -19,7 +22,7 @@ class Controller extends Package {
 
   protected $pkgHandle = 'turicane_fun_tourney_system';
   protected $appVersionRequired = '8.4';
-  protected $pkgVersion = '0.120.53';
+  protected $pkgVersion = '0.120.55';
   protected $em;
   protected $pkgAutoloaderRegistries = array(
       'src/Tfts' => '\Tfts',
@@ -27,7 +30,7 @@ class Controller extends Package {
   );
 
   public function getPackageName() {
-    return t('Turicane Fun Tourney System Package');
+    return t('Turicane Fun Tourney System');
   }
 
   public function getPackageDescription() {
@@ -116,10 +119,24 @@ class Controller extends Package {
     $ci = new ContentImporter();
     $ci->importContentFile($pkg->getPackagePath() . '/install.xml');
     $this->installDatabase();
+
+    $packageName = $this->getPackageName();
+    $group = Group::getByName($packageName);
+    if (!is_object($group)) {
+      $group = Group::add($packageName, t('Default group for TFTS groups'), $pkg);
+    }
   }
 
   public function upgrade() {
     parent::upgrade();
+//    $blocktype = BlockType::getByHandle('tfts_team_manager');
+//    if (!is_object($blocktype)) {
+//      BlockType::installBlockTypeFromPackage('tfts_team_manager', $this);
+//    }
+//    $page = Page::getByPath('/dashboard/tfts/matches');
+//    if ($page->isError() || (!is_object($page))) {
+//      SinglePage::add('/dashboard/tfts/matches', $this);
+//    }
   }
 
   public function uninstall() {
