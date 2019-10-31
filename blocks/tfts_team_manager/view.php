@@ -12,7 +12,7 @@ endif;
 ?>
 
 <div class="team-manager-block">
-  <h3><?= t('My groups') ?></h3>
+  <h3><?= t('Group manager - manage and create your groups!') ?></h3>
   <div class="team-manager-team-list">
     <?php foreach ($userGroups as $key => $group): ?>
       <div class="list-group team-list-item" data-gID="<?= $key ?>">
