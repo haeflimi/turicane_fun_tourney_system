@@ -144,6 +144,69 @@ var Tfts = {
       Tfts.error(response.responseJSON.error.message);
     });
   },
+  createGroup: function (user_id, ccm_token) {
+    var data = new FormData(document.querySelector('#createGroup'));
+    var name = data.get('group_name');
+    $.post(
+            "/tfts/api/action", {
+              name: name,
+              user_id: user_id,
+              ccm_token: ccm_token,
+              action: 'createGroup'
+            }, function () {
+      PNotify.removeAll();
+      Tfts.success('Group ' + name + ' has been created!');
+      window.location.reload();
+    }).fail(function (response) {
+      Tfts.error(response.responseJSON.error.message);
+    });
+  },
+  inviteToGroup: function (group_id, ccm_token) {
+    var data = new FormData(document.querySelector('#inviteToGroup' + group_id));
+    $.post(
+            "/tfts/api/action", {
+              group_id: group_id,
+              user_id: data.get('user_id'),
+              ccm_token: ccm_token,
+              action: 'joinGroup'
+            }, function () {
+      PNotify.removeAll();
+      Tfts.success('Group invite successful!');
+      window.location.reload();
+    }).fail(function (response) {
+      Tfts.error(response.responseJSON.error.message);
+    });
+  },
+  joinGroup: function (group_id, user_id, ccm_token) {
+    $.post(
+            "/tfts/api/action", {
+              group_id: group_id,
+              user_id: user_id,
+              ccm_token: ccm_token,
+              action: 'joinGroup'
+            }, function () {
+      PNotify.removeAll();
+      Tfts.success('Group join successful!');
+      window.location.reload();
+    }).fail(function (response) {
+      Tfts.error(response.responseJSON.error.message);
+    });
+  },
+  leaveGroup: function (group_id, user_id, ccm_token) {
+    $.post(
+            "/tfts/api/action", {
+              group_id: group_id,
+              user_id: user_id,
+              ccm_token: ccm_token,
+              action: 'leaveGroup'
+            }, function () {
+      PNotify.removeAll();
+      Tfts.success('You have left the group!');
+      window.location.reload();
+    }).fail(function (response) {
+      Tfts.error(response.responseJSON.error.message);
+    });
+  },
   /*
    Helper Methods
    */

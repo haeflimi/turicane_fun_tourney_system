@@ -4,6 +4,7 @@ namespace Concrete\Package\TuricaneFunTourneySystem\Block\TftsTeamManager;
 
 use Concrete\Core\Block\BlockController;
 use Concrete\Core\User\User;
+use Concrete\Core\Support\Facade\Config;
 use Core;
 use Tfts\Tfts;
 
@@ -39,28 +40,7 @@ class Controller extends BlockController {
     $this->set('current_user', $current_user);
     $this->set('groups', $tfts->getAllGroups());
     $this->set('userGroups', $tfts->getAllUserGroups($current_user));
-  }
-
-  public function createGroup() {
-    $textHelper = Core::make('helper/text');
-    $name = $textHelper->sanitize($this->post('name'));
-    $tfts = new Tfts();
-    $tfts->createGroup($name, $this->post('user_id'));
-  }
-
-  public function joinGroup() {
-    $tfts = new Tfts();
-    $tfts->joinGroup($this->post('group_id'), $this->post('user_id'));
-  }
-
-  public function inviteToGroup() {
-    $tfts = new Tfts();
-    $tfts->joinGroup($this->post('group_id'), $this->post('user_id'));
-  }
-
-  public function leaveGroup() {
-    $tfts = new Tfts();
-    $tfts->leaveGroup($this->post('group_id'), $this->post('user_id'));
+    $this->set('allowGroupCreation', Config::get('tfts.systemActive'));
   }
 
 }

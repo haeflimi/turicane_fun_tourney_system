@@ -255,6 +255,18 @@ class Controller extends Package {
                 $tfts->cancelUserMatch($_POST['match_id'], $_POST['id']);
               }
               break;
+
+            case 'createGroup':
+              $tfts->createGroup($_POST['name'], $_POST['user_id']);
+              break;
+
+            case 'joinGroup':
+              $tfts->joinGroup($_POST['group_id'], $_POST['user_id']);
+              break;
+
+            case 'leaveGroup':
+              $tfts->leaveGroup($_POST['group_id'], $_POST['user_id']);
+              break;
           }
           return new Response('Success');
         } catch (Exception $e) {
