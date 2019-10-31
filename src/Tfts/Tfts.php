@@ -383,10 +383,10 @@ class Tfts {
       throw new Exception('Both groups must be registered for ' . $game->getName());
     }
     $repository = $this->em->getRepository(Match::class);
-    if (!is_null($repository->findOneBy(['group1_id' => $challenger->getGroupId(), 'group2_id' => $challenged->getGroupId(), 'match_finish_date' => null]))) {
+    if (!is_null($repository->findOneBy(['game' => $game, 'group1_id' => $challenger->getGroupId(), 'group2_id' => $challenged->getGroupId(), 'match_finish_date' => null]))) {
       throw new Exception($challenger->getGroupName() . ' already challenged ' . $challenged->getGroupName());
     }
-    if (!is_null($repository->findOneBy(['group1_id' => $challenged->getGroupId(), 'group2_id' => $challenger->getGroupId(), 'match_finish_date' => null]))) {
+    if (!is_null($repository->findOneBy(['game' => $game, 'group1_id' => $challenged->getGroupId(), 'group2_id' => $challenger->getGroupId(), 'match_finish_date' => null]))) {
       throw new Exception($challenger->getGroupName() . ' is are already challenged by ' . $challenged->getGroupName());
     }
 
