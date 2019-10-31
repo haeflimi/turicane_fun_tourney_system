@@ -120,10 +120,10 @@ class Controller extends Package {
     $ci->importContentFile($pkg->getPackagePath() . '/install.xml');
     $this->installDatabase();
 
-    $packageName = $this->getPackageName();
+    $packageName = $pkg->getPackageName();
     $group = Group::getByName($packageName);
     if (!is_object($group)) {
-      $group = Group::add($packageName, t('Default group for TFTS groups'), $pkg);
+      $group = Group::add($packageName, t('Default group for TFTS groups'), false, $pkg);
     }
   }
 
@@ -141,6 +141,11 @@ class Controller extends Package {
 
   public function uninstall() {
     parent::uninstall();
+
+    $group = Group::getByName($this->getPackageName());
+    if (is_object($group)) {
+      $group->delete();
+    }
   }
 
   public function registerEventListeners() {
