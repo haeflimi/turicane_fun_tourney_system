@@ -8,13 +8,6 @@ if (!$is_mass):
   </div>
   <?php
   return;
-elseif ($is_team):
-  ?>
-  <div class="alert alert-danger">
-    <?= t('Only TFTS Games configured as non team game can use the mass overview block') ?>
-  </div>
-  <?php
-  return;
 elseif (!$current_user->isLoggedIn()):
   ?>
   <div class="alert alert-danger">
