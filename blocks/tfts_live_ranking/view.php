@@ -34,7 +34,7 @@ defined('C5_EXECUTE') or die('Access Denied.');
                 </template>
                 </tbody>
             </table>
-            <button class="btn btn-transparent" v-on:click="update">Update</button>
+<!--            <button class="btn btn-transparent" v-on:click="update">Update</button>-->
         </div>
     </div>
 </section>
