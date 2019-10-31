@@ -68,7 +68,11 @@ class MapRecord {
   }
 
   public static function compare(MapRecord $record1, MapRecord $record2): int {
-    return $record1->getRecord() <=> $record2->getRecord();
+    if ($record1->map->getDataUnit() == 1) { // seconds
+      return $record1->getRecord() <=> $record2->getRecord();
+    } else {
+      return $record2->getRecord() <=> $record1->getRecord();
+    }
   }
 
 }
