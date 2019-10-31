@@ -92,10 +92,16 @@
                 <button class="btn btn-danger" type="submit" value="Delete"><i class="fa fa-remove"></i></button>
               </form>
             <?php elseif (!$map->isProcessed()): ?>
-              <form method="post" name="mapForm<?= $map->getId() ?>" action="<?php echo $this->action('processMap') ?>">
-                <input type="hidden" name="map_id" value="<?= $map->getId() ?>" />
-                <button class="btn btn-success" type="submit" value="Process">Process</button
-              </form>
+              <?php if (!$systemActive): ?>
+                <form method="post" name="mapForm<?= $map->getId() ?>" action="<?php echo $this->action('processMap') ?>">
+                  <input type="hidden" name="map_id" value="<?= $map->getId() ?>" />
+                  <button class="btn btn-success" type="submit" value="Process">Process</button
+                </form>
+              <?php else: ?>
+              <button class="btn btn-success btn-disabled" disabled>
+                <i class="fa fa-times"></i> Processing not possible
+              </button>
+              <?php endif; ?>
             <?php else: ?>
               <button class="btn btn-success btn-disabled" disabled>
                 <i class="fa fa-check"></i> Processed

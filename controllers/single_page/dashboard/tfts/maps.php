@@ -42,6 +42,7 @@ class Maps extends DashboardPageController {
     $this->set('tfts', new Tfts());
     $this->set('games', $games);
     $this->set('mapGames', $mapGames);
+    $this->set('systemActive', Config::get('tfts.systemActive') == 1 ? true : false);
   }
 
   public function addMap() {
