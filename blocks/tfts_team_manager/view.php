@@ -14,7 +14,7 @@ endif;
 <div class="team-manager-block">
   <h3><?= t('My groups') ?></h3>
   <div class="team-manager-team-list">
-    <?php foreach ($groups as $key => $group): ?>
+    <?php foreach ($userGroups as $key => $group): ?>
       <div class="list-group team-list-item" data-gID="<?= $key ?>">
         <a class="list-group-heading d-flex justify-content-between align-items-center"  data-toggle="collapse" href="#team-collapse-<?= $group->getGroupID(); ?>">
           <span class="h4" title="<?= t('Show team members') ?>"><?= $group->getGroupName(); ?> </span>&nbsp;
