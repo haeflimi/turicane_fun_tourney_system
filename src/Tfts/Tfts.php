@@ -744,67 +744,77 @@ class Tfts {
    * @return JsonResponse result of the process.
    */
   public function processMapData(): JsonResponse {
-    $password = filter_input(INPUT_POST, 'password', FILTER_SANITIZE_STRING);
-    if ($password != Config::get('tfts.mapApiPassword')) {
+    $filter = array(
+        'password' => FILTER_SANITIZE_STRING,
+        'game_id' => FILTER_SANITIZE_NUMBER_INT,
+        'map_name' => FILTER_SANITIZE_STRING,
+        'record' => array(
+            'filter' => FILTER_DEFAULT,
+            'flags' => FILTER_REQUIRE_ARRAY,
+        )
+    );
+    $data = filter_input_array(INPUT_POST, $filter);
+
+    // verify that api password is correct
+    if ($data['password'] != Config::get('tfts.mapApiPassword')) {
       return new JsonResponse('Invalid password');
     }
 
     // verify that game exists
-    $game_id = filter_input(INPUT_POST, 'game_id', FILTER_SANITIZE_NUMBER_INT);
-    $game = Game::getById($game_id);
+    $game = Game::getById($data['game_id']);
     if (!is_object($game)) {
-      return new JsonResponse('Invalid game id: ' . $game_id);
+      return new JsonResponse('Invalid game id: ' . $data['game_id']);
     }
-
-    // verify that user exists
-    $user_name = filter_input(INPUT_POST, 'user', FILTER_SANITIZE_STRING);
-    $userList = new UserList();
-    $userList->filterByUserName($user_name);
-    if (sizeof($userList->getResults()) != 1) {
-      return new JsonResponse('Invalid user: ' . $user_name);
-    }
-    $user = $userList->getResults()[0]->getUserObject();
 
     // verify that map exists
-    $map_name = filter_input(INPUT_POST, 'map_name', FILTER_SANITIZE_STRING);
     $map_repository = $this->em->getRepository(Map::class);
-    $map = $map_repository->findOneBy(['game' => $game, 'map_name' => $map_name]);
+    $map = $map_repository->findOneBy(['game' => $game, 'map_name' => $data['map_name']]);
     if (is_null($map)) {
-      return new JsonResponse('Invalid map: ' . $map_name);
+      return new JsonResponse('Invalid map: ' . $data['map_name']);
     }
 
     // verify that map is not processed
     if ($map->isProcessed()) {
-      return new JsonResponse('Map has already been processed: ' . $map_name);
+      return new JsonResponse('Map has already been processed: ' . $data['map_name']);
     }
 
-    // prepare datetime object
-    $date = filter_input(INPUT_POST, 'date', FILTER_SANITIZE_STRING);
-    $time = filter_input(INPUT_POST, 'time', FILTER_SANITIZE_STRING);
-    $datetime = new \DateTime($date . ' ' . $time);
+    $response = [];
+    foreach ($data['record'] as $record) {
+      // verify that user exists
+      $userList = new UserList();
+      $userList->filterByUserName($record['user']);
+      if (sizeof($userList->getResults()) != 1) {
+        $response[$record['user']] = 'Invalid user';
+        continue;
+      }
+      $user = $userList->getResults()[0]->getUserObject();
 
-    // split record to milliseconds
-    $record = filter_input(INPUT_POST, 'record', FILTER_SANITIZE_STRING);
+      // prepare datetime object
+      $datetime = new \DateTime($record['date'] . ' ' . $record['time']);
 
-    $record_repository = $this->em->getRepository(MapRecord::class);
-    $current_record = $record_repository->findOneBy(['map' => $map, 'user' => $user->getUserId()]);
-    // new?
-    if (is_null($current_record)) {
-      $this->em->persist(new MapRecord($this->userToEntity($user), $map, $datetime, $record));
-      $this->em->flush();
-      return new JsonResponse('Added new record');
+      $mapTime = intval($record['mapTime']);
+      $record_repository = $this->em->getRepository(MapRecord::class);
+      $current_record = $record_repository->findOneBy(['map' => $map, 'user' => $user->getUserId()]);
+      // new?
+      if (is_null($current_record)) {
+        $this->em->persist(new MapRecord($this->userToEntity($user), $map, $datetime, $mapTime));
+        $this->em->flush();
+        $response[$record['user']] = 'Added new record';
+        continue;
+      }
+
+      // improvement?
+      if ($mapTime < $current_record->getRecord()) {
+        $current_record->setDateTime($datetime);
+        $current_record->setRecord($mapTime);
+        $this->em->persist($current_record);
+        $this->em->flush();
+        $response[$record['user']] = 'Record improved';
+      } else {
+        $response[$record['user']] = 'No improvement';
+      }
     }
-
-    // improvement?
-    if ($record < $current_record->getRecord()) {
-      $current_record->setDateTime($datetime);
-      $current_record->setRecord($record);
-      $this->em->persist($current_record);
-      $this->em->flush();
-      return new JsonResponse('Record improved');
-    }
-
-    return new JsonResponse('No improvement');
+    return new JsonResponse($response);
   }
 
   /**
