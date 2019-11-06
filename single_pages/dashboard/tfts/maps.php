@@ -87,15 +87,15 @@
           </td>
           <td>
             <?php if (sizeof($map->getRecords()) == 0): ?>
-              <form method="post" name="mapForm<?= $map->getId() ?>" action="<?php echo $this->action('deleteMap') ?>">
+              <form method="post" name="deleteMapForm<?= $map->getId() ?>" action="<?php echo $this->action('deleteMap') ?>">
                 <input type="hidden" name="map_id" value="<?= $map->getId() ?>" />
                 <button class="btn btn-danger" type="submit" value="Delete"><i class="fa fa-remove"></i></button>
               </form>
             <?php elseif (!$map->isProcessed()): ?>
               <?php if (!$systemActive): ?>
-                <form method="post" name="mapForm<?= $map->getId() ?>" action="<?php echo $this->action('processMap') ?>">
+                <form method="post" name="processMapForm<?= $map->getId() ?>" action="<?php echo $this->action('processMap') ?>">
                   <input type="hidden" name="map_id" value="<?= $map->getId() ?>" />
-                  <button class="btn btn-success" type="submit" value="Process">Process</button
+                  <button class="btn btn-success" type="submit" value="Process">Process</button>
                 </form>
               <?php else: ?>
               <button class="btn btn-success btn-disabled" disabled>
